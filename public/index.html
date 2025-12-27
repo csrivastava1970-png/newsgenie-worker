@@ -646,7 +646,7 @@ function initBytesUI() {
 
 <script>
 /* === Editorial Extraction : Suggestions Panel + Transcript Auto-Ingest (Clean V3) === */
-(function () {
+
   "use strict";
 
   // ---------------- utils ----------------
@@ -1350,251 +1350,18 @@ return best;
   window.initEditorialExtraction = initEditorialExtraction;
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
-  } else {
-    initEditorialExtraction();
-  }
-
-
+  document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
+} else {
+  initEditorialExtraction();
+}
 
 
 </script>
 
 <script>
-/* ============================
-   NewsGenie EE Patch Override
-   - ensureByteRows()
-   - fillSlot() returns true/false
-   - pushToBytes(): auto-add rows, dedup, safe uncheck
-   ============================ */
+/* Patch Override ... */
 
-function ensureByteRows(minCount) {
-  const need = Math.max(0, Number(minCount) || 0);
 
-  const getWrap = () =>
-    document.getElementById("bytesWrap") ||
-    document.getElementById("bytes-wrap") ||
-    document.querySelector("#bytesWrap, #bytes-wrap");
-
-  const getAddBtn = () =>
-    document.getElementById("addByteBtn") ||
-    document.getElementById("add-byte") ||
-    document.getElementById("addByte");
-
-  const countRows = () => {
-    const wrap = getWrap();
-    if (!wrap) return 0;
-    return wrap.querySelectorAll(
-      'input[name="byte_speaker[]"], input[name^="byte_speaker"], input[data-byte-field="speaker"]'
-    ).length;
-  };
-
-  let safety = 50;
-  while (countRows() < need && safety-- > 0) {
-    if (typeof window.NG_addByteRow === "function") {
-      window.NG_addByteRow();
-      continue;
-    }
-    const btn = getAddBtn();
-    if (btn) {
-      btn.click();
-      continue;
-    }
-    break;
-  }
-  return countRows();
-}
-
-function fillSlot(slotIndex, item) {
-  const wrap =
-    document.getElementById("bytesWrap") ||
-    document.getElementById("bytes-wrap") ||
-    document.querySelector("#bytesWrap, #bytes-wrap");
-
-  if (!wrap || !item) return false;
-
-  const idx = Number(slotIndex);
-  if (!Number.isFinite(idx) || idx < 0) return false;
-
-  ensureByteRows(idx + 1);
-
-  const speakerInputs = wrap.querySelectorAll(
-    'input[name="byte_speaker[]"], input[name^="byte_speaker"], input[data-byte-field="speaker"]'
-  );
-  if (speakerInputs.length <= idx) return false;
-
-  const sp = speakerInputs[idx];
-  if (!sp) return false;
-
-  const row =
-    sp.closest('[data-byte-row], .byte-row, .ng-byte-row, .row') ||
-    sp.parentElement;
-
-  const ds =
-    row?.querySelector(
-      'input[name="byte_designation[]"], input[name^="byte_designation"], input[data-byte-field="designation"]'
-    ) || null;
-
-  const tx =
-    row?.querySelector(
-      'input[name="byte_text[]"], textarea[name="byte_text[]"], input[name^="byte_text"], textarea[name^="byte_text"], [data-byte-field="text"]'
-    ) || null;
-
-  const speaker = (item.speaker || "").toString().trim();
-  const designation = (item.designation || "").toString().trim();
-  const text = (item.text || "").toString().trim();
-
-  // Slot occupied? don't overwrite
-  if (sp.value && sp.value.trim()) return false;
-
-  sp.value = speaker;
-  if (ds) ds.value = designation;
-  if (tx && text) tx.value = text;
-
-  [sp, ds, tx].forEach((el) => {
-    if (!el) return;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-
-  return true;
-}
-
-function pushToBytes() {
-  const eeList = document.getElementById("ee-list");
-  if (!eeList) return;
-
-  const bytesWrap =
-    document.getElementById("bytesWrap") ||
-    document.getElementById("bytes-wrap") ||
-    document.querySelector("#bytesWrap, #bytes-wrap");
-
-  if (!bytesWrap) {
-    console.warn("[EE] Bytes wrap not found.");
-    return;
-  }
-
-  const norm = (v) => (v == null ? "" : String(v)).replace(/\s+/g, " ").trim().toLowerCase();
-  const keyOf = (o) => `${norm(o.speaker)}|${norm(o.designation)}|${norm(o.text)}`;
-
-  const getExistingKeys = () => {
-    const sp = Array.from(
-      bytesWrap.querySelectorAll('input[name="byte_speaker[]"], input[name^="byte_speaker"], input[data-byte-field="speaker"]')
-    );
-    const keys = new Set();
-    for (let i = 0; i < sp.length; i++) {
-      const row = sp[i].closest('[data-byte-row], .byte-row, .ng-byte-row, .row') || sp[i].parentElement;
-      const ds = row?.querySelector('input[name="byte_designation[]"], input[name^="byte_designation"], input[data-byte-field="designation"]');
-      const tx = row?.querySelector('input[name="byte_text[]"], textarea[name="byte_text[]"], input[name^="byte_text"], textarea[name^="byte_text"], [data-byte-field="text"]');
-      const k = keyOf({ speaker: sp[i].value || "", designation: ds?.value || "", text: tx?.value || "" });
-      if (k !== "||") keys.add(k);
-    }
-    return keys;
-  };
-
-  const existing = getExistingKeys();
-
-  const checked = Array.from(eeList.querySelectorAll('input[type="checkbox"]:checked'));
-  if (!checked.length) return;
-
-  const extract = (cb) => {
-    const card =
-      cb.closest("[data-ee-item], .ee-item, .ee-card, li, .card") ||
-      cb.parentElement;
-
-    const speaker =
-      cb.dataset?.speaker ||
-      card?.dataset?.speaker ||
-      card?.querySelector("[data-ee-speaker]")?.textContent ||
-      card?.querySelector(".ee-speaker")?.textContent ||
-      "";
-
-    const designation =
-      cb.dataset?.designation ||
-      card?.dataset?.designation ||
-      card?.querySelector("[data-ee-designation]")?.textContent ||
-      card?.querySelector(".ee-designation")?.textContent ||
-      "";
-
-    const text =
-      cb.dataset?.text ||
-      card?.dataset?.text ||
-      card?.querySelector("[data-ee-text]")?.textContent ||
-      card?.querySelector(".ee-text")?.textContent ||
-      card?.querySelector("p")?.textContent ||
-      "";
-
-    const obj = { speaker: String(speaker).trim(), designation: String(designation).trim(), text: String(text).trim() };
-    if (!obj.speaker && !obj.designation && !obj.text) return null;
-    return obj;
-  };
-
-  const findEmptySlot = () => {
-    const sp = Array.from(
-      bytesWrap.querySelectorAll('input[name="byte_speaker[]"], input[name^="byte_speaker"], input[data-byte-field="speaker"]')
-    );
-    for (let i = 0; i < sp.length; i++) {
-      if (!sp[i].value || !sp[i].value.trim()) return i;
-    }
-    return -1;
-  };
-
-  const seen = new Set();
-  let pushed = 0;
-
-  for (const cb of checked) {
-    const obj = extract(cb);
-    if (!obj) continue;
-
-    const k = keyOf(obj);
-    if (existing.has(k) || seen.has(k)) continue;
-    seen.add(k);
-
-    let slot = findEmptySlot();
-    if (slot === -1) {
-      const currentCount = ensureByteRows(
-        bytesWrap.querySelectorAll('input[name="byte_speaker[]"], input[name^="byte_speaker"], input[data-byte-field="speaker"]').length + 1
-      );
-      slot = currentCount - 1;
-    }
-
-    if (slot < 0) continue;
-
-    const ok = fillSlot(slot, obj);
-
-    // ✅ uncheck + count ONLY if fill succeeded
-    if (ok) {
-      pushed++;
-      existing.add(k);
-      cb.checked = false;
-    }
-  }
-
-  console.log("[EE] Pushed to Bytes:", pushed);
-}
-
-/* Force the EE push button to use THIS pushToBytes (stop old handler) */
-(function bindEePushPatched(){
-  function bind(){
-    const btn = document.getElementById("ee-push");
-    if (!btn || btn.__NG_EE_PATCH_BOUND) return;
-    btn.__NG_EE_PATCH_BOUND = true;
-
-    // capture phase so we can stop other click handlers
-    btn.addEventListener("click", function(e){
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      try { pushToBytes(); } catch(err){ console.warn("[EE] pushToBytes failed", err); }
-    }, true);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bind, { once: true });
-  } else {
-    bind();
-  }
-})();
-</script>
 
 </body>
 </html>
