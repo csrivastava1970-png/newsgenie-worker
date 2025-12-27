@@ -1349,14 +1349,15 @@ return best;
   // ---------------- export global + auto init ----------------
   window.initEditorialExtraction = initEditorialExtraction;
 
-  if (document.readyState === "loading") {
+ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
 } else {
   initEditorialExtraction();
 }
 
-
+}  // ✅ added: missing closing brace for script #2
 </script>
+
 
 <script>
 /* Patch Override ... */
