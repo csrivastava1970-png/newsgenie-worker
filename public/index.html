@@ -789,7 +789,7 @@ function initBytesUI() {
 
 <script>
 /* === Editorial Extraction : Suggestions Panel + Transcript Auto-Ingest (Clean V3) === */
-(function () {
+
   "use strict";
 
   // ---------------- utils ----------------
@@ -1492,17 +1492,12 @@ return best;
   // ---------------- export global + auto init ----------------
   window.initEditorialExtraction = initEditorialExtraction;
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
-  } else {
-    initEditorialExtraction();
-  }
+ if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
+} else {
+  initEditorialExtraction();
+}
 
-})();
-
-
-<<<<<<< Updated upstream
-=======
 }  // âœ… added: missing closing brace for script #2
 </script>
 <script src="/ng_transcript_hook_patch.js"></script>
@@ -1665,7 +1660,6 @@ if (typeof ensureDigiPackUI === "function") window.ensureDigiPackUI = ensureDigi
     boot();
   }
 })();
->>>>>>> Stashed changes
 </script>
 
 <script>
@@ -2080,8 +2074,6 @@ setCurrentId(drafts[i].id || drafts[i].uid || "");
 })();
 </script>
 
-<<<<<<< Updated upstream
-=======
 <script>
 (function(){
   function esc(s){
@@ -6469,8 +6461,32 @@ function store(raw){
 })();
 </script>
 <!-- NG_ENSURE_DRAFT_HAS_DIGIPACK_V4_END -->
+<!-- NG_WEBARTICLE_CLEAN_V1_START -->
+<script>
+(function(){
+  if (!window.ensureDraftHasDigipack) {
+    console.warn("[NG_WEBARTICLE_CLEAN_V1] ensureDraftHasDigipack not found");
+    return;
+  }
+  var prev = window.ensureDraftHasDigipack;
+  window.ensureDraftHasDigipack = function(){
+    var dp = prev.apply(this, arguments);
+    try{
+      var g = dp && dp.blocks && dp.blocks.generated;
+      if (g && g.web_article){
+        g.web_article = String(g.web_article)
+          .replace(/^\s*#{1,6}\s*WEB[_\s-]*ARTICLE\s*\n+/i, "")
+          .replace(/^\s*WEB[_\s-]*ARTICLE\s*:\s*\n+/i, "")
+          .trim();
+      }
+    }catch(e){}
+    return dp;
+  };
+  console.log("[NG_WEBARTICLE_CLEAN_V1] installed ✓");
+})();
+</script>
+<!-- NG_WEBARTICLE_CLEAN_V1_END -->
 
->>>>>>> Stashed changes
 </body>
 </html>
 
