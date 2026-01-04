@@ -7693,8 +7693,68 @@ return; // DISABLED: was causing auto-download on clicks
   setTimeout(function(){ apply("boot_250"); }, 250);
   console.log("[NG_STORYVIEW_PRETTY_RENDER_V1] installed ✓");
 })();
+
+/* NG_TRANSCRIPT_AUTOPULL_V1 */
+(function(){
+  if (window.NG_TRANSCRIPT_AUTOPULL_V1) return;
+  window.NG_TRANSCRIPT_AUTOPULL_V1 = true;
+
+  function pickText(payload){
+    if (!payload) return "";
+    // Reverie/other formats
+    return String(
+      payload.display_text ||
+      payload.text ||
+      payload.transcript ||
+      payload.raw ||
+      ""
+    );
+  }
+
+  window.NG_fetchLatestTranscript = async function(){
+    try{
+      const r = await fetch("/api/transcript/latest", { cache: "no-store" });
+      const j = await r.json();
+
+      if (!j || !j.ok) {
+        console.error("[NG_AUTOPULL] No transcript yet", j);
+        return j;
+      }
+
+      const payload = j.payload || {};
+      const txt = pickText(payload) || JSON.stringify(payload);
+
+      // persist for safety
+      try {
+        localStorage.setItem("NG_TRANSCRIPT_LAST", txt);
+        localStorage.setItem("NG_TRANSCRIPT_LAST_TS", j.ts || new Date().toISOString());
+      } catch(e){}
+
+      // ingest into your pipeline
+      if (typeof window.NG_ingestTranscript === "function") {
+        window.NG_ingestTranscript(txt);
+        console.error("[NG_AUTOPULL] Ingested via NG_ingestTranscript", { ts: j.ts, len: txt.length });
+      } else if (typeof window.NG_setEditorialSuggestions === "function") {
+        // fallback: if you only have suggestion setter
+        window.NG_setEditorialSuggestions(txt);
+        console.error("[NG_AUTOPULL] Sent to NG_setEditorialSuggestions", { ts: j.ts, len: txt.length });
+      } else {
+        console.error("[NG_AUTOPULL] No ingest hook found. Saved to localStorage only.", { ts: j.ts, len: txt.length });
+      }
+
+      return { ok:true, ts: j.ts, len: txt.length };
+    } catch(err){
+      console.error("[NG_AUTOPULL] Error", err);
+      return { ok:false, error: String(err && err.message || err) };
+    }
+  };
+})();
+
 </script>
 <!-- NG_STORYVIEW_PRETTY_RENDER_V1_END -->
+<script src="/ng_transcript_autopull_v1.js"></script>
+<script src="/ng_console_silencer_v1.js"></script>
+<script src="/ng_transcript_fetch_button_v1.js"></script>
 
 </body>
 </html>
