@@ -4138,6 +4138,9 @@ if (key === "NG_DRAFTS") key = "NG_DIGIPACK_DRAFTS_V1";
         try{ e.preventDefault(); }catch(_){}
         try{ e.stopPropagation(); }catch(_){}
         try{ e.stopImmediatePropagation(); }catch(_){}
+        try{ localStorage.setItem("NG_SV_OPEN","1"); }catch(e){}
+        openModal(); refresh(); return;
+
         openModal(); refresh(); return;
       }
       el=el.parentElement;
