@@ -1,4 +1,4 @@
-﻿// src/index.js  (BOOT v3: echo + openai mode)
+// src/index.js  (BOOT v3: echo + openai mode)
 // Uses OpenAI Responses API + Structured Outputs (json_schema)
 
 const ENTRY_MARKER = "BOOTv3-src-indexjs-openai-V3V9";
@@ -27,7 +27,7 @@ function corsHeaders(req) {
 async function readJson(req) {
   const txt = await req.text();
   if (!txt) return {};
-  const clean = txt.replace(/^\uFEFF/, ""); // âœ… strip UTF-8 BOM
+  const clean = txt.replace(/^\uFEFF/, ""); // ✅ strip UTF-8 BOM
   try { return JSON.parse(clean); } catch { return { _raw: txt }; }
 }
 
@@ -74,8 +74,71 @@ async function withTimeout(promise, ms, label) {
 
 export default {
   async fetch(request, env, ctx) {
-// ✅ guard: favicon should never break the worker
+// ? guard: favicon should never break the worker
 const url = new URL(request.url);
+/* NG_TRANSCRIPT_INBOX_V1_START */
+
+// CORS headers (local dev safe)
+var NG_CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Max-Age": "86400"
+};
+
+function NG_json(obj, status) {
+  return new Response(JSON.stringify(obj), {
+    status: status || 200,
+    headers: Object.assign({ "content-type": "application/json; charset=utf-8" }, NG_CORS_HEADERS)
+  });
+}
+
+// In-memory latest transcript (dev)
+globalThis.__NG_TRANSCRIPT_LATEST = globalThis.__NG_TRANSCRIPT_LATEST || null;
+
+// CORS preflight for transcript endpoints
+if (url.pathname.indexOf("/api/transcript") === 0 && request.method === "OPTIONS") {
+  return new Response(null, { status: 204, headers: NG_CORS_HEADERS });
+}
+
+// POST /api/transcript  (accept JSON or plain text)
+if (url.pathname === "/api/transcript" && request.method === "POST") {
+  var ct = (request.headers.get("content-type") || "").toLowerCase();
+  var raw = await request.text();
+
+  if (!raw || raw.length < 2) return NG_json({ ok: false, error: "Empty body" }, 400);
+  if (raw.length > 2000000) return NG_json({ ok: false, error: "Too large (max ~2MB)" }, 413);
+
+  var payload = null;
+
+  // If JSON or looks like JSON -> parse, else store as text
+  if (ct.indexOf("application/json") >= 0 || raw.trim().charAt(0) === "{" || raw.trim().charAt(0) === "[") {
+    try { payload = JSON.parse(raw); }
+    catch (e) { return NG_json({ ok: false, error: "Invalid JSON" }, 400); }
+  } else {
+    payload = { text: String(raw) };
+  }
+
+  globalThis.__NG_TRANSCRIPT_LATEST = {
+    ts: new Date().toISOString(),
+    bytes: raw.length,
+    content_type: ct || "unknown",
+    payload: payload
+  };
+
+  return NG_json({ ok: true, ts: globalThis.__NG_TRANSCRIPT_LATEST.ts, bytes: raw.length }, 200);
+}
+
+// GET /api/transcript/latest
+if (url.pathname === "/api/transcript/latest" && request.method === "GET") {
+  if (!globalThis.__NG_TRANSCRIPT_LATEST) {
+    return NG_json({ ok: false, error: "No transcript yet" }, 404);
+  }
+  return NG_json(Object.assign({ ok: true }, globalThis.__NG_TRANSCRIPT_LATEST), 200);
+}
+
+/* NG_TRANSCRIPT_INBOX_V1_END */
+
 if (url.pathname === "/favicon.ico") {
   return new Response(null, { status: 204, headers: { "cache-control": "public, max-age=86400" } });
 }
@@ -105,12 +168,12 @@ if (__p === "/.well-known/appspecific/com.chrome.devtools.json" || __p.startsWit
     { status, headers: { ...__cors, "content-type": "application/json; charset=utf-8" } }
   );
 
-  // ✅ PING (proves code is LIVE)
+  // ? PING (proves code is LIVE)
   if (__p === "/api/ping") {
     return __json({ ok: true, tag: "V3V9", ts: new Date().toISOString(), entry_marker: ENTRY_MARKER }, 200);
   }
 
-  // ✅ DigiPack V3 route (kills 404)
+  // ? DigiPack V3 route (kills 404)
   if (__p === "/api/digi-pack" && request.method === "OPTIONS") {
     return new Response("", { status: 204, headers: __cors });
   }
@@ -132,35 +195,55 @@ STRICT OUTPUT RULES:
 - Output PLAIN TEXT only. NO JSON. NO Markdown. No code fences.
 - Headings MUST start at column 1 (no leading spaces).
 - Use EXACT headings (each on its own line, ALL CAPS):
+### HEADLINE
+### DEK
+### KEY_POINTS
 ### WEB_ARTICLE
 ### VIDEO
 ### YOUTUBE
 ### SOCIAL
 
 HARD CONSTRAINTS (must pass):
+### HEADLINE
+- One line Hindi headline, max 12 words.
+- No quotes, no source names, no emojis.
+
+### DEK
+- One line Hindi dek (supporting line), max 18 words.
+
+### KEY_POINTS
+- EXACTLY 5 bullets.
+- Each bullet <= 12 words.
+- No speculation. If unverified, write: "??? ?????? ???? ??".
+
 ### WEB_ARTICLE
-- Hindi web article: 500–600 words (stay within range).
-- 4–7 short paragraphs. Publish-ready. No bullet lists.
+- Hindi web article: 500�600 words (stay within range).
+- 4�7 short paragraphs. Publish-ready. No bullet lists.
 - Do NOT print word count.
 
 ### VIDEO
 - Line 1: HOOK: <one crisp hook line>
 - Line 2: LINES:
-- Then EXACTLY 8–12 numbered VO lines using 1) 2) 3) ...
+- Then EXACTLY 8�12 numbered VO lines using 1) 2) 3) ...
 - Each VO line <= 16 words. Hindi.
 
 ### YOUTUBE
 TITLE: (one line)
-DESCRIPTION: 120–180 words Hindi (no bullets).
-TAGS: 12–18 comma-separated
-HASHTAGS: 3–5
+DESCRIPTION: 120�180 words Hindi (no bullets).
+TAGS: 12�18 comma-separated
+HASHTAGS: 3�5
 
 ### SOCIAL
 X: <= 280 characters (max 2 hashtags)
-INSTAGRAM: caption + 8–12 hashtags
-FACEBOOK: 2–3 short paragraphs
-WHATSAPP: 3–5 short lines
-END after WHATSAPP.`;
+INSTAGRAM: caption + 8�12 hashtags
+FACEBOOK: 2�3 short paragraphs
+WHATSAPP: 3�5 short lines
+END after WHATSAPP.
+
+FACT GUARD (non-negotiable):
+- Never invent names, quotes, numbers, dates, places.
+- If any critical detail is not in inputs, write "??? ?????? ???? ??" and keep it general.
+- Do not put source names inside sections; rely on the user's Sources/References field only.`;
 
       const prompt = V3_PREFIX + "\n\nINPUT_JSON:\n" + raw + "\n";
 
@@ -260,10 +343,10 @@ Return PLAIN TEXT only with the SAME 4 headings at column 1.
 Do NOT add explanations.
 
 Must pass:
-- WEB_ARTICLE: 500–600 Hindi words (4–7 paragraphs, no bullets)
-- VIDEO: HOOK + EXACT 8–12 numbered lines using 1) 2) ... (<=16 words each)
-- YOUTUBE DESCRIPTION: 120–180 words
-- SOCIAL: X <=280 chars (max 2 hashtags); Instagram 8–12 hashtags
+- WEB_ARTICLE: 500�600 Hindi words (4�7 paragraphs, no bullets)
+- VIDEO: HOOK + EXACT 8�12 numbered lines using 1) 2) ... (<=16 words each)
+- YOUTUBE DESCRIPTION: 120�180 words
+- SOCIAL: X <=280 chars (max 2 hashtags); Instagram 8�12 hashtags
 
 INPUT_JSON:
 ${raw}
@@ -284,6 +367,28 @@ if (resp2.ok && text2) { text = text2; __didRepair = true; __repairPasses = 1; }
 
 }
 
+function __replaceSection(fullText, sectionName, newBody){
+  fullText = String(fullText || "");
+  newBody = String(newBody || "").trim();
+
+  const hdrRe = new RegExp("^###\\s+" + sectionName + "\\s*$", "m");
+  const m = fullText.match(hdrRe);
+
+  if (!m){
+    return (fullText.trimEnd() + "\n\n### " + sectionName + "\n" + newBody + "\n").trimEnd() + "\n";
+  }
+
+  const hdrLine = m[0];
+  const startIdx = fullText.indexOf(hdrLine);
+  const afterHdr = fullText.slice(startIdx + hdrLine.length);
+
+  const nextIdx = afterHdr.search(/^###\s+[A-Z0-9_]+\s*$/m);
+  const tail = (nextIdx === -1) ? "" : afterHdr.slice(nextIdx);
+  const head = fullText.slice(0, startIdx);
+
+  return (head + hdrLine + "\n" + newBody + "\n\n" + tail.replace(/^\n+/, "")).trimEnd() + "\n";
+}
+
 // --- SECOND PASS: force WEB_ARTICLE length by regenerating only the web article ---
 let __webOnlyWords = 0;
 let __webOnlyTries = 0;
@@ -300,15 +405,15 @@ if (__stillBadWeb) {
 
     const note = (attempt === 1)
       ? ""
-      : `Previous attempt was ${__webOnlyWords} words. Rewrite to 560–590 words exactly. Keep exactly 6 paragraphs.`;
+      : `Previous attempt was ${__webOnlyWords} words. Rewrite to 560�590 words exactly. Keep exactly 6 paragraphs.`;
 
     const WEB_ONLY_PROMPT =
-`Write ONLY the Hindi web article for this story.
+`You are fixing ONLY the WEB_ARTICLE section of a V3 publish pack. Write ONLY the Hindi WEB_ARTICLE BODY (NO headings, NO bullets). Target 560�590 words, EXACTLY 6 short paragraphs.
 
 HARD RULES:
-- Total length: 560–590 words (must be within range).
+- Total length: 560�590 words (must be within range).
 - Exactly 6 paragraphs separated by a blank line.
-- Each paragraph roughly 90–100 words.
+- Each paragraph roughly 90�100 words.
 - Publish-ready Hindi, no bullet lists.
 - Do NOT include headings.
 - Do NOT include word count.
@@ -336,7 +441,7 @@ ${raw}`;
   // fallback: expand/trim using previous attempt
   if (web3 && (__webOnlyWords < 500 || __webOnlyWords > 600)) {
     const EXPAND_PROMPT =
-`Rewrite the following Hindi article to 560–590 words.
+`Rewrite the following Hindi article to 560�590 words.
 Keep exactly 6 paragraphs separated by a blank line.
 No bullets. No headings. No word count.
 
@@ -461,19 +566,19 @@ STRICT OUTPUT RULES:
 
 REQUIREMENTS:
 ### WEB_ARTICLE
-- Hindi web article: 500â€“600 words (stay within range).
-- 3â€“6 short paragraphs. Publish-ready. No bullets.
+- Hindi web article: 500–600 words (stay within range).
+- 3–6 short paragraphs. Publish-ready. No bullets.
 
 ### VIDEO
 - HOOK: (one line)
 - LINES:
-- Then 8â€“12 numbered lines (1) ... (2) ... short VO lines.
+- Then 8–12 numbered lines (1) ... (2) ... short VO lines.
 
 ### YOUTUBE
 TITLE:
 DESCRIPTION:
-TAGS: (12â€“18 comma-separated)
-HASHTAGS: (3â€“5)
+TAGS: (12–18 comma-separated)
+HASHTAGS: (3–5)
 
 ### SOCIAL
 X:
