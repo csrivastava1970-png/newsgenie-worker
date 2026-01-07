@@ -6684,6 +6684,817 @@ function store(raw){
 })();
 </script>
 <!-- NG_PATCH_END: AUTORUN_KILL_V1 -->
+<!-- NG_PATCH_START: NG_LIBRARY_DRAFT_PICKER_V1 -->
+<script>
+(function NG_LIBRARY_DRAFT_PICKER_V1(){
+  if (window.__NG_LIBRARY_DRAFT_PICKER_V1__) return;
+  window.__NG_LIBRARY_DRAFT_PICKER_V1__ = true;
+
+  const LS = {
+    drafts: "NG_DRAFTS",
+    selIdx: "NG_DIGIPACK_SELECTED_IDX",
+    curId:  "NG_DIGIPACK_CURRENT_ID"
+  };
+
+  const t = (el)=>((el && el.textContent)?el.textContent:"").trim();
+
+  function readDrafts(){
+    try {
+      const s = localStorage.getItem(LS.drafts);
+      const j = s ? JSON.parse(s) : [];
+      return Array.isArray(j) ? j : [];
+    } catch { return []; }
+  }
+
+  function setLS(k,v){ try{ localStorage.setItem(k, String(v)); }catch{} }
+
+  function applyFormFallback(form){
+    if (!form || typeof form !== "object") return false;
+    const els = Array.from(document.querySelectorAll("input,textarea,select"));
+    const byKey = new Map();
+    for (const el of els){
+      const key = el.name || el.id;
+      if (!key) continue;
+      if (!byKey.has(key)) byKey.set(key, []);
+      byKey.get(key).push(el);
+    }
+    for (const key of Object.keys(form)){
+      const val = form[key];
+      const targets = byKey.get(key);
+      if (!targets) continue;
+      for (const el of targets){
+        const type = (el.type || "").toLowerCase();
+        try{
+          if (type === "checkbox") el.checked = !!val;
+          else if (type === "radio") el.checked = (String(el.value) === String(val));
+          else el.value = Array.isArray(val) ? (val[0] ?? "") : String(val ?? "");
+          el.dispatchEvent(new Event("input", {bubbles:true}));
+          el.dispatchEvent(new Event("change",{bubbles:true}));
+        }catch{}
+      }
+    }
+    return true;
+  }
+
+  function applyForm(form){
+    try {
+      if (window.__NG_DASH__ && typeof window.__NG_DASH__.applyForm === "function") {
+        return window.__NG_DASH__.applyForm(form);
+      }
+    } catch {}
+    return applyFormFallback(form);
+  }
+
+  function loadByIdx(idx){
+    const drafts = readDrafts();
+    const i = Number(idx);
+    if (!Number.isFinite(i) || i < 0 || i >= drafts.length) return false;
+    const d = drafts[i] || {};
+    const ok = applyForm(d.form || {});
+    if (d.id) setLS(LS.curId, d.id);
+    setLS(LS.selIdx, i);
+    console.log("✅ DASH: Loaded draft", { idx:i, id:d.id, title:d.title, status:d.status, formApplied: !!ok });
+    return true;
+  }
+
+  function findLibraryBar(){
+    // find a container that has Download TXT and Download JSON buttons
+    const btns = Array.from(document.querySelectorAll("button"));
+    const bTxt = btns.find(b => /download\s*txt/i.test(t(b)));
+    if (!bTxt) return null;
+
+    let p = bTxt;
+    for (let k=0; k<10 && p; k++){
+      if (p.querySelectorAll){
+        const inside = Array.from(p.querySelectorAll("button")).map(x => t(x));
+        const hasTxt  = inside.some(s => /download\s*txt/i.test(s));
+        const hasJson = inside.some(s => /download\s*json/i.test(s));
+        if (hasTxt && hasJson) return p;
+      }
+      p = p.parentElement;
+    }
+    return bTxt.parentElement;
+  }
+
+  function ensureUI(){
+    const bar = findLibraryBar();
+    if (!bar) return;
+
+    if (bar.querySelector("#ngDraftPickerV1")) return;
+
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;";
+
+    const label = document.createElement("div");
+    label.textContent = "Draft:";
+    label.style.cssText = "font-size:12px; opacity:0.85;";
+
+    const sel = document.createElement("select");
+    sel.id = "ngDraftPickerV1";
+    sel.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#0b0d0f; color:#e8eaed;";
+
+    const btnLoad = document.createElement("button");
+    btnLoad.type = "button";
+    btnLoad.textContent = "Load";
+    btnLoad.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#171a1d; color:#e8eaed; cursor:pointer;";
+
+    const btnRef = document.createElement("button");
+    btnRef.type = "button";
+    btnRef.textContent = "Refresh List";
+    btnRef.style.cssText = btnLoad.style.cssText;
+
+    function fill(){
+      const drafts = readDrafts();
+      let cur = "";
+      try { cur = localStorage.getItem(LS.selIdx) || ""; } catch {}
+      sel.innerHTML = "";
+      drafts.forEach((d, i) => {
+        const opt = document.createElement("option");
+        const title = (d && d.title) ? String(d.title) : "Untitled";
+        const st = (d && d.status) ? String(d.status) : "draft";
+        opt.value = String(i);
+        opt.textContent = `${i}: ${title} [${st}]`;
+        if (String(i) === String(cur)) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      if (!drafts.length) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "(No drafts found)";
+        sel.appendChild(opt);
+      }
+    }
+
+    btnLoad.addEventListener("click", () => loadByIdx(sel.value), false);
+    sel.addEventListener("change", () => loadByIdx(sel.value), false);
+    btnRef.addEventListener("click", fill, false);
+
+    wrap.appendChild(label);
+    wrap.appendChild(sel);
+    wrap.appendChild(btnLoad);
+    wrap.appendChild(btnRef);
+
+    bar.appendChild(wrap);
+    fill();
+  }
+
+  ensureUI();
+  new MutationObserver(ensureUI).observe(document.documentElement, { childList:true, subtree:true });
+
+  console.log("[NG_LIBRARY_DRAFT_PICKER_V1] installed");
+})();
+</script>
+<!-- NG_PATCH_END: NG_LIBRARY_DRAFT_PICKER_V1 -->
+<!-- NG_PATCH_START: NG_STANDARD_UI_TOGGLE_V1 -->
+<style id="ng-std-ui-style-v1">
+  .ng-std-hidden { display: none !important; }
+  #ng-std-ui-toggle-root {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 2147483000;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    user-select: none;
+  }
+  #ng-std-ui-toggle-root .ngpill {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 8px;
+    border-radius: 999px;
+    background: rgba(20,20,20,0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+  #ng-std-ui-toggle-root .nglbl {
+    font-size: 12px;
+    color: rgba(255,255,255,0.82);
+    padding: 0 6px;
+  }
+  #ng-std-ui-toggle-root button {
+    border: 0;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.92);
+  }
+  #ng-std-ui-toggle-root button:hover { background: rgba(255,255,255,0.20); }
+  #ng-std-ui-toggle-root button.active {
+    background: rgba(255,255,255,0.92);
+    color: rgba(0,0,0,0.85);
+  }
+</style>
+
+<script id="ng-std-ui-toggle-v1">
+(function () {
+  const TAG = "NG_STANDARD_UI_TOGGLE_V1";
+  if (window.__NG_STANDARD_UI_TOGGLE_V1) {
+    console.log(`[${TAG}] already installed`);
+    return;
+  }
+
+  const KEY = "NG_STD_UI_MODE_V1";
+  const DEFAULT_MODE = "simple"; // change to "advanced" if you ever want default advanced
+  const HIDE_CLASS = "ng-std-hidden";
+  const ROOT_ID = "ng-std-ui-toggle-root";
+
+  const RX = {
+    transcript: /(load\s*transcript|transcript\s*json|reverie)/i,
+    bytes: /(copy\s*bytes\s*json|\bbytes\b|quotes\s*\/\s*sot|\bsot\b)/i,
+    visuals: /(\bvisuals\b|b-?roll|\bshot\b|\bsrt\b|web\s*,\s*video)/i,
+    logs: /(\blogs\b|debug\s*log|console\s*log)/i,
+    storyview: /(story\s*view)/i,
+  };
+
+  function log(...a){ console.log(`[${TAG}]`, ...a); }
+  function warn(...a){ console.warn(`[${TAG}]`, ...a); }
+
+  function getMode(){
+    const v = (localStorage.getItem(KEY) || "").toLowerCase();
+    return (v === "advanced" || v === "simple") ? v : DEFAULT_MODE;
+  }
+
+  function setMode(mode){
+    mode = String(mode || "").toLowerCase();
+    if (mode !== "simple" && mode !== "advanced") mode = DEFAULT_MODE;
+    localStorage.setItem(KEY, mode);
+    applyMode();
+  }
+
+  function safeText(el){
+    try {
+      return (el && el.textContent ? el.textContent : "").replace(/\s+/g, " ").trim();
+    } catch { return ""; }
+  }
+
+  function qsa(sel){
+    try { return Array.from(document.querySelectorAll(sel)); }
+    catch { return []; }
+  }
+
+  function pickBlock(el){
+    // choose a reasonably local container to hide
+    let cur = el;
+    for (let i = 0; i < 10 && cur && cur !== document.body; i++) {
+      if (cur.id === ROOT_ID) return null;
+      if (cur.closest && cur.closest("#" + ROOT_ID)) return null;
+
+      if (cur.matches && cur.matches("fieldset,section,details,article")) return cur;
+
+      // common “group” containers
+      if (cur.matches && cur.matches(".card,.panel,.box,.block,.group,.wrap,.container")) return cur;
+
+      // div with some identity and form controls inside
+      if (cur.tagName === "DIV" && (cur.id || cur.className)) {
+        const n = cur.querySelectorAll ? cur.querySelectorAll("input,textarea,select,button").length : 0;
+        if (n >= 1) return cur;
+      }
+      cur = cur.parentElement;
+    }
+    return el && el.parentElement ? el.parentElement : el;
+  }
+
+  function hideEl(el, reason){
+    if (!el) return;
+    if (el.id === ROOT_ID) return;
+    if (el.closest && el.closest("#" + ROOT_ID)) return;
+    if (el === document.body || el === document.documentElement) return;
+
+    el.classList.add(HIDE_CLASS);
+    el.setAttribute("data-ng-std-hidden", "1");
+    if (reason) el.setAttribute("data-ng-std-reason", reason);
+  }
+
+  function showEl(el){
+    if (!el) return;
+    el.classList.remove(HIDE_CLASS);
+    el.removeAttribute("data-ng-std-hidden");
+    el.removeAttribute("data-ng-std-reason");
+  }
+
+  function findHeaderHits(regex){
+    const sel = "h1,h2,h3,h4,h5,h6,legend,label,summary,button,p,small,strong";
+    return qsa(sel).filter(el => {
+      if (el.id === ROOT_ID) return false;
+      if (el.closest && el.closest("#" + ROOT_ID)) return false;
+      const t = safeText(el);
+      if (!t) return false;
+      // avoid matching huge blocks
+      if (t.length > 220) return false;
+      return regex.test(t);
+    });
+  }
+
+  function collectSimpleTargets(){
+    const targets = new Set();
+
+    function addBlockFrom(el, reason){
+      const b = pickBlock(el);
+      if (!b) return;
+      if (b === document.body || b === document.documentElement) return;
+      if (b.closest && b.closest("#" + ROOT_ID)) return;
+      b.__ngStdReason = reason;
+      targets.add(b);
+    }
+
+    // Transcript targets: headings + common ids/names
+    findHeaderHits(RX.transcript).forEach(el => addBlockFrom(el, "transcript"));
+    qsa('textarea[id*="reverie" i],textarea[name*="reverie" i],textarea[id*="transcript" i],textarea[name*="transcript" i]')
+      .forEach(el => addBlockFrom(el, "transcript"));
+
+    // Bytes targets: known field names + headings/buttons
+    qsa('input[name="byte_speaker[]"],input[name="byte_designation[]"],textarea[name="byte_text[]"],textarea[name="byte_text"],input[name="byte_time[]"],input[name="byte_time"]')
+      .forEach(el => addBlockFrom(el, "bytes"));
+    findHeaderHits(RX.bytes).forEach(el => addBlockFrom(el, "bytes"));
+
+    // Visuals targets: headings + name/id hints
+    findHeaderHits(RX.visuals).forEach(el => addBlockFrom(el, "visuals"));
+    qsa('textarea[id*="visual" i],textarea[name*="visual" i],input[id*="visual" i],input[name*="visual" i],textarea[id*="srt" i],textarea[name*="srt" i],textarea[id*="shot" i],textarea[name*="shot" i],textarea[id*="broll" i],textarea[name*="broll" i]')
+      .forEach(el => addBlockFrom(el, "visuals"));
+
+    // Logs targets: headings + id/class contains log/debug (pre/textarea/div)
+    findHeaderHits(RX.logs).forEach(el => addBlockFrom(el, "logs"));
+    qsa('pre[id*="log" i],pre[class*="log" i],textarea[id*="log" i],textarea[class*="log" i],div[id*="debug" i],div[class*="debug" i],div[id*="log" i],div[class*="log" i]')
+      .forEach(el => addBlockFrom(el, "logs"));
+
+    // Story View (Debug): hide buttons/links + any open panel-like node
+    qsa("button,a").filter(el => RX.storyview.test(safeText(el))).forEach(el => {
+      // hide the control itself (not the whole page)
+      targets.add(el);
+      el.__ngStdReason = "storyview_btn";
+    });
+
+    // attempt to catch the floating Story View panel when open
+    // heuristic: contains "Story View" + "Updated @" + "Close"
+    qsa('div,section,details').forEach(el => {
+      if (el.id === ROOT_ID) return;
+      if (el.closest && el.closest("#" + ROOT_ID)) return;
+      const t = safeText(el);
+      if (!t || t.length < 30 || t.length > 2500) return;
+      if (RX.storyview.test(t) && /updated\s*@/i.test(t) && /\bclose\b/i.test(t)) {
+        addBlockFrom(el, "storyview_panel");
+      }
+    });
+
+    return Array.from(targets);
+  }
+
+  function ensureToggleUI(){
+    if (document.getElementById(ROOT_ID)) return;
+
+    const root = document.createElement("div");
+    root.id = ROOT_ID;
+
+    root.innerHTML = `
+      <div class="ngpill">
+        <span class="nglbl">UI</span>
+        <button type="button" data-ng-mode="simple">Simple</button>
+        <button type="button" data-ng-mode="advanced">Advanced</button>
+      </div>
+    `;
+
+    root.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("button[data-ng-mode]") : null;
+      if (!btn) return;
+      setMode(btn.getAttribute("data-ng-mode"));
+    });
+
+    (document.body || document.documentElement).appendChild(root);
+  }
+
+  function paintActive(mode){
+    const root = document.getElementById(ROOT_ID);
+    if (!root) return;
+    qsa(`#${ROOT_ID} button[data-ng-mode]`).forEach(b => {
+      const m = b.getAttribute("data-ng-mode");
+      if (m === mode) b.classList.add("active");
+      else b.classList.remove("active");
+    });
+  }
+
+  function showAllPreviouslyHidden(){
+    qsa('[data-ng-std-hidden="1"]').forEach(showEl);
+  }
+
+  let pending = false;
+  function scheduleApply(){
+    if (pending) return;
+    pending = true;
+    setTimeout(() => { pending = false; applyMode(); }, 120);
+  }
+
+  function applyMode(){
+    ensureToggleUI();
+
+    const mode = getMode();
+    document.documentElement.setAttribute("data-ng-std-ui", mode);
+    paintActive(mode);
+
+    // First: restore everything we hid
+    showAllPreviouslyHidden();
+
+    if (mode === "simple") {
+      const t = collectSimpleTargets();
+      t.forEach(el => hideEl(el, el.__ngStdReason || ""));
+      log("mode=simple", "hiddenCount=", t.length);
+    } else {
+      log("mode=advanced", "simple targets visible");
+    }
+  }
+
+  // public helpers for console
+  window.__NG_STANDARD_UI_TOGGLE_V1 = {
+    tag: TAG,
+    key: KEY,
+    getMode,
+    setMode,
+    applyMode,
+    rescan: applyMode,
+    debugScan: () => {
+      const t = collectSimpleTargets();
+      log("debugScan targets:", t.map(x => ({
+        tag: x.tagName,
+        id: x.id || "",
+        cls: (x.className && String(x.className).slice(0, 120)) || "",
+        reason: x.__ngStdReason || ""
+      })));
+      return t;
+    }
+  };
+
+  // run now
+  function boot(){
+    try { applyMode(); }
+    catch (e) { warn("boot error", e); }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+
+  // keep it working for dynamically injected panels (Story View etc.)
+  try {
+    const mo = new MutationObserver(() => {
+      if (getMode() === "simple") scheduleApply();
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {
+    warn("MutationObserver failed", e);
+  }
+
+  log("installed ✓", { default: DEFAULT_MODE, key: KEY });
+})();
+</script>
+<!-- NG_PATCH_END: NG_STANDARD_UI_TOGGLE_V1 -->
+<!-- NG_PATCH_START: NG_STD_SIMPLE_HIDE_BV_V2 -->
+<style>
+  /* safety: if earlier style missing */
+  .ng-std-hidden { display:none !important; }
+</style>
+<script>
+(function(){
+  const TAG = "NG_STD_SIMPLE_HIDE_BV_V2";
+  if (window.__NG_STD_SIMPLE_HIDE_BV_V2) return;
+
+  const MODE_KEY = "NG_STD_UI_MODE_V1";
+  const HIDE_CLS = "ng-std-hidden";
+  const MARK = "data-ng-std-bv2";
+
+  const rxAddByte   = /add\s*byte/i;
+  const rxAddVisual = /add\s*visual/i;
+
+  function mode(){
+    const v = (localStorage.getItem(MODE_KEY) || "").toLowerCase();
+    return (v === "simple" || v === "advanced") ? v : "simple";
+  }
+  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
+
+  function qsa(sel){
+    try { return Array.from(document.querySelectorAll(sel)); }
+    catch { return []; }
+  }
+
+  function showAll(){
+    qsa("[" + MARK + "='1']").forEach(el => {
+      el.classList.remove(HIDE_CLS);
+      el.removeAttribute(MARK);
+    });
+  }
+
+  function hide(el, why){
+    if (!el || el === document.body || el === document.documentElement) return;
+    el.classList.add(HIDE_CLS);
+    el.setAttribute(MARK, "1");
+    if (why) el.setAttribute("data-ng-std-bv2-why", why);
+  }
+
+  // Find the nearest "section card" by walking up until we see a container that looks like a card
+  function pickSectionFrom(btn){
+    let cur = btn;
+    for (let i=0; i<18 && cur && cur !== document.body; i++){
+      const t = norm(cur.textContent);
+
+      // sanity: don't hide the whole form
+      if (cur.tagName === "FORM") break;
+
+      // heuristics: a section container usually contains the Add button + its own title text,
+      // and is not the entire page (avoid matching big container that includes What Happened etc.)
+      const hasAddByte = rxAddByte.test(t);
+      const hasAddVis  = rxAddVisual.test(t);
+
+      const tooBig =
+        /what happened/i.test(t) ||
+        /sources\s*\/\s*references/i.test(t) ||
+        /background/i.test(t) ||
+        /generate\s*digi_pack/i.test(t);
+
+      // prefer the first reasonable ancestor that isn't too big
+      if (!tooBig && (hasAddByte || hasAddVis)) {
+        // must have some “card-ish” structure: at least 1 button and some text
+        const btnCount = cur.querySelectorAll ? cur.querySelectorAll("button").length : 0;
+        if (btnCount >= 1) return cur;
+      }
+
+      cur = cur.parentElement;
+    }
+    // fallback: hide immediate parent container
+    return btn && btn.parentElement ? btn.parentElement : null;
+  }
+
+  function apply(){
+    showAll();
+    if (mode() !== "simple") return;
+
+    const candidates = qsa("button, [role='button'], a").filter(el => {
+      const t = norm(el.textContent);
+      return t && (rxAddByte.test(t) || rxAddVisual.test(t));
+    });
+
+    let hid = 0;
+    candidates.forEach(btn => {
+      const t = norm(btn.textContent);
+      const sec = pickSectionFrom(btn);
+      if (sec) {
+        hide(sec, rxAddByte.test(t) ? "bytes" : "visuals");
+        hid++;
+      }
+    });
+
+    console.log("[" + TAG + "] apply", { mode: mode(), buttons: candidates.length, sections_hidden: hid });
+  }
+
+  function boot(){
+    apply();
+
+    // re-apply when UI mode toggles
+    document.addEventListener("click", (e) => {
+      const el = e.target;
+      if (el && el.closest && el.closest("#ng-std-ui-toggle-root")) {
+        setTimeout(apply, 80);
+      }
+    }, true);
+
+    // re-apply on DOM changes (when sections expand/collapse)
+    try {
+      new MutationObserver(() => {
+        if (mode() === "simple") apply();
+      }).observe(document.documentElement, { childList:true, subtree:true });
+    } catch(e){}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once:true });
+  } else {
+    boot();
+  }
+
+  window.__NG_STD_SIMPLE_HIDE_BV_V2 = { tag: TAG, apply };
+  console.log("[" + TAG + "] installed ✓");
+})();
+</script>
+<!-- NG_PATCH_END: NG_STD_SIMPLE_HIDE_BV_V2 -->
+
+<!-- NG_PATCH_START: NG_STD_SIMPLE_HIDE_BYTES_VISUALS_V1 -->
+<script>
+(function(){
+  const TAG = "NG_STD_SIMPLE_HIDE_BYTES_VISUALS_V1";
+  if (window.__NG_STD_SIMPLE_HIDE_BYTES_VISUALS_V1) return;
+
+  const KEY = "NG_STD_UI_MODE_V1";
+  const CLS = "ng-std-hidden";
+  const MARK = "data-ng-std-bv-hidden";
+
+  const RX_BYTES_TITLE  = /^bytes\s*\(\s*speaker/i;
+  const RX_VISUALS_TITLE= /^visuals\b/i;
+
+  function mode(){
+    const v = (localStorage.getItem(KEY) || "").toLowerCase();
+    return (v === "simple" || v === "advanced") ? v : "simple";
+  }
+  function norm(s){
+    return String(s||"").replace(/\s+/g," ").trim();
+  }
+
+  function all(sel){
+    try { return Array.from(document.querySelectorAll(sel)); }
+    catch { return []; }
+  }
+
+  function findTitle(rx){
+    // titles in your UI are likely DIVs, not H-tags
+    const nodes = all("div,span,strong,b,h1,h2,h3,h4,h5,h6,p,label");
+    for (const el of nodes){
+      const t = norm(el.textContent);
+      if (!t || t.length > 80) continue;
+      if (rx.test(t)) return el;
+    }
+    return null;
+  }
+
+  function findCardFromTitle(titleEl, rxNeedButton){
+    if (!titleEl) return null;
+    let cur = titleEl;
+    for (let i=0; i<16 && cur && cur !== document.body; i++){
+      if (cur.querySelector){
+        const btns = Array.from(cur.querySelectorAll("button,[role='button'],a,div"));
+        const hasNeedBtn = btns.some(b => rxNeedButton.test(norm(b.textContent)));
+        const hasControls = cur.querySelectorAll("input,textarea,select,button").length > 0;
+        if (hasNeedBtn && hasControls) return cur;
+      }
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
+  function hide(el){
+    if (!el) return;
+    el.classList.add(CLS);
+    el.setAttribute(MARK, "1");
+  }
+  function show(el){
+    if (!el) return;
+    el.classList.remove(CLS);
+    el.removeAttribute(MARK);
+  }
+
+  function apply(){
+    // restore anything hidden by this patch
+    all("[" + MARK + "='1']").forEach(show);
+
+    if (mode() !== "simple") return;
+
+    // Bytes card
+    const bytesTitle = findTitle(RX_BYTES_TITLE);
+    const bytesCard  = findCardFromTitle(bytesTitle, /add\s*byte/i);
+    hide(bytesCard);
+
+    // Visuals card
+    const visTitle = findTitle(RX_VISUALS_TITLE);
+    const visCard  = findCardFromTitle(visTitle, /add\s*visual/i);
+    hide(visCard);
+  }
+
+  function boot(){
+    apply();
+
+    // Re-apply when DOM changes (Add/Remove rows etc.)
+    try{
+      new MutationObserver(() => {
+        if (mode() === "simple") apply();
+      }).observe(document.documentElement, {childList:true, subtree:true});
+    }catch(e){}
+
+    // Re-apply when you click the UI pill
+    document.addEventListener("click", (e) => {
+      const t = e.target;
+      if (!t) return;
+      if (t.closest && t.closest("#ng-std-ui-toggle-root")) setTimeout(apply, 80);
+    }, true);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, {once:true});
+  } else {
+    boot();
+  }
+
+  window.__NG_STD_SIMPLE_HIDE_BYTES_VISUALS_V1 = { tag: TAG, apply };
+  console.log("[" + TAG + "] installed ✓");
+})();
+</script>
+<!-- NG_PATCH_END: NG_STD_SIMPLE_HIDE_BYTES_VISUALS_V1 -->
+
+<!-- NG_PATCH_START: NG_STANDARD_UI_TOGGLE_FIX_V1 -->
+<script id="ng-std-ui-toggle-fix-v1">
+(function () {
+  const TAG = "NG_STANDARD_UI_TOGGLE_FIX_V1";
+  if (window.__NG_STANDARD_UI_TOGGLE_FIX_V1) return;
+
+  const HIDE_CLASS = "ng-std-hidden";
+  const ROOT_ID = "ng-std-ui-toggle-root";
+
+  function safeText(el){
+    try { return (el && el.textContent ? el.textContent : "").replace(/\s+/g," ").trim(); }
+    catch { return ""; }
+  }
+
+  function pickBlock(el){
+    let cur = el;
+    for (let i = 0; i < 12 && cur && cur !== document.body; i++){
+      if (!cur) break;
+      if (cur.id === ROOT_ID) return null;
+      if (cur.closest && cur.closest("#" + ROOT_ID)) return null;
+
+      if (cur.matches && cur.matches("fieldset,section,details,article")) return cur;
+      if (cur.matches && cur.matches(".card,.panel,.box,.block,.group,.wrap,.container")) return cur;
+
+      if (cur.tagName === "DIV" && (cur.id || cur.className)) {
+        const n = cur.querySelectorAll ? cur.querySelectorAll("input,textarea,select,button").length : 0;
+        if (n >= 1) return cur;
+      }
+      cur = cur.parentElement;
+    }
+    return el && el.parentElement ? el.parentElement : el;
+  }
+
+  function hideEl(el, reason){
+    if (!el) return;
+    if (el.id === ROOT_ID) return;
+    if (el.closest && el.closest("#" + ROOT_ID)) return;
+    if (el === document.body || el === document.documentElement) return;
+
+    el.classList.add(HIDE_CLASS);
+    el.setAttribute("data-ng-std-hidden", "1");
+    if (reason) el.setAttribute("data-ng-std-reason", reason);
+  }
+
+  function hideByButton(rx, reason){
+    Array.from(document.querySelectorAll("button")).forEach(btn => {
+      const t = safeText(btn);
+      if (!t || t.length > 80) return;
+      if (rx.test(t)) {
+        hideEl(pickBlock(btn), reason);
+      }
+    });
+  }
+
+  function hideByTitle(rx, reason){
+    Array.from(document.querySelectorAll("div,span,h1,h2,h3,h4,h5,h6,p,strong,small,label")).forEach(el => {
+      const t = safeText(el);
+      if (!t || t.length > 80) return;
+      if (rx.test(t)) {
+        hideEl(pickBlock(el), reason);
+      }
+    });
+  }
+
+  function install(){
+    const api = window.__NG_STANDARD_UI_TOGGLE_V1;
+    if (!api || !api.applyMode || !api.getMode) return false;
+    if (api.__fixWrappedV1) return true;
+
+    const orig = api.applyMode.bind(api);
+
+    api.applyMode = function(){
+      orig();
+      try {
+        if (api.getMode() !== "simple") return;
+
+        // Bytes / Visuals blocks (Simple view has only the Add buttons)
+        hideByButton(/add\s*byte/i, "bytes");
+        hideByButton(/add\s*visual/i, "visuals");
+
+        // Titles fallback (if buttons text changes later)
+        hideByTitle(/^bytes\b/i, "bytes_title");
+        hideByTitle(/^visuals\b/i, "visuals_title");
+      } catch (e) {
+        console.warn("[" + TAG + "]", e);
+      }
+    };
+
+    api.__fixWrappedV1 = true;
+    api.applyMode();
+    console.log("[" + TAG + "] installed ✓");
+    return true;
+  }
+
+  let tries = 0;
+  const timer = setInterval(() => {
+    tries++;
+    if (install() || tries > 60) clearInterval(timer);
+  }, 150);
+
+  window.__NG_STANDARD_UI_TOGGLE_FIX_V1 = { tag: TAG };
+})();
+</script>
+<!-- NG_PATCH_END: NG_STANDARD_UI_TOGGLE_FIX_V1 -->
+
+
 <!-- NG_PATCH_START: LIBBAR_NO_OVERLAY_V2 -->
 <script>
 (function LIBBAR_NO_OVERLAY_V2(){
