@@ -111,11 +111,14 @@ body *{ grid-column: 1 / -1; }
 /* NG_STD_UI_TOOLBAR_FIXED_V1_START — robust, DOM-depth independent */
 :root{
   --ng_tb_edge: 12px;
-  --ng_tb_pad_top: 78px;     /* body push-down */
-  --ng_tb_toggle_reserve: 230px;  /* right space for toggle */
+  --ng_tb_pad_top: 78px;           /* body push-down */
+  --ng_tb_toggle_reserve: 230px;   /* right space for toggle */
 }
 
-body{ padding-top: var(--ng_tb_pad_top) !important; }
+/* Push content down so fixed toolbar doesn't overlap */
+body{
+  padding-top: var(--ng_tb_pad_top) !important;
+}
 
 /* Actions bar (left) */
 #ng-dp-actions{
@@ -140,6 +143,7 @@ body{ padding-top: var(--ng_tb_pad_top) !important; }
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Toggle (right) */
@@ -157,6 +161,9 @@ body{ padding-top: var(--ng_tb_pad_top) !important; }
   backdrop-filter: blur(6px);
 
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 /* Hide scrollbar (still scrolls) */
@@ -169,13 +176,15 @@ body{ padding-top: var(--ng_tb_pad_top) !important; }
     --ng_tb_toggle_reserve: 0px;
     --ng_tb_pad_top: 126px;
   }
-  #ng-dp-actions{ right: var(--ng_tb_edge) !important; }
-  #ng-std-ui-toggle-root{ top: calc(var(--ng_tb_edge) + 56px) !important; }
+  #ng-dp-actions{
+    right: var(--ng_tb_edge) !important;
+  }
+  #ng-std-ui-toggle-root{
+    top: calc(var(--ng_tb_edge) + 56px) !important;
+  }
 }
 /* NG_STD_UI_TOOLBAR_FIXED_V1_END */
 
-</style>
-<!-- NG_STD_UI_TOOLBAR_ROW_V2_END -->
 
 
   <style>
@@ -192,6 +201,7 @@ body{ padding-top: var(--ng_tb_pad_top) !important; }
     .status { font-size: 13px; }
     .muted { font-size:12px; opacity:.75; margin-top:6px; }
 #btnBytesJSON { display: none !important; }
+/* OLD sticky toolbar (remove/disable)
 #ng-dp-actions{
   position: sticky;
   top: 10px;
@@ -201,6 +211,8 @@ body{ padding-top: var(--ng_tb_pad_top) !important; }
   border-radius: 12px;
   border: 1px solid #e5e5e5;
 }
+*/
+
 /* Force placement: Row-1 Title, Row-2 Toolbar (Actions + Toggle) */
 h2{
   grid-column: 1 / -1 !important;
