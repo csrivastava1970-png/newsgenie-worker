@@ -38,6 +38,8 @@
 </style>
 
 </head>
+<!-- NG_MARKER: 2026-01-06_IST_TEST_123 -->
+
 
 <body>
 
@@ -6462,8 +6464,623 @@ function store(raw){
 </script>
 <!-- NG_ENSURE_DRAFT_HAS_DIGIPACK_V4_END -->
 
+<!-- NG_STORYVIEW_DEDUP_V1 -->
+<script>
+(function(){
+  try{
+    if (window.__NG_STORYVIEW_DEDUP_V1) return;
+    window.__NG_STORYVIEW_DEDUP_V1 = true;
+
+    function dedup(tag){
+      try{
+        var roots = [];
+        var a = document.querySelector("#ng-storyview"); if (a) roots.push(a);
+        var b = document.querySelector("#storyview");    if (b) roots.push(b);
+        var c = document.querySelector("#storyView");    if (c) roots.push(c);
+        var more = document.querySelectorAll('div[id*="storyview" i],section[id*="storyview" i],aside[id*="storyview" i],main[id*="storyview" i]');
+        for (var i=0;i<more.length;i++) roots.push(more[i]);
+
+        // unique
+        var uniq = [];
+        for (var j=0;j<roots.length;j++){
+          if (uniq.indexOf(roots[j]) === -1) uniq.push(roots[j]);
+        }
+        if (uniq.length <= 1) return { tag: tag, found: uniq.length, changed: false };
+
+        function z(el){
+          var v = parseInt(getComputedStyle(el).zIndex, 10);
+          return isFinite(v) ? v : 0;
+        }
+        function area(el){
+          var r = el.getBoundingClientRect();
+          return Math.max(0,r.width) * Math.max(0,r.height);
+        }
+        function visible(el){
+          var cs = getComputedStyle(el);
+          return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
+        }
+        function score(el){
+          return (visible(el) ? 1e12 : 0) + (z(el)*1e6) + area(el);
+        }
+
+        uniq.sort(function(x,y){ return score(y) - score(x); });
+        var keep = uniq[0];
+
+        for (var k=0;k<uniq.length;k++){
+          var el = uniq[k];
+          if (el === keep) continue;
+          el.style.setProperty("display","none","important");
+          el.style.setProperty("visibility","hidden","important");
+          el.style.setProperty("pointer-events","none","important");
+          el.setAttribute("data-ng-hidden-dup-storyview","1");
+        }
+
+        var out = { tag: tag, found: uniq.length, kept_id: keep ? keep.id : "", changed: true };
+        console.log("[NG_STORYVIEW_DEDUP_V1]", out);
+        return out;
+      }catch(e){
+        console.warn("[NG_STORYVIEW_DEDUP_V1] dedup error", e);
+      }
+    }
+
+    // Run on load
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function(){ dedup("domcontentloaded"); }, { once:true });
+    } else {
+      setTimeout(function(){ dedup("ready"); }, 50);
+    }
+
+    // Run when storyview open button is clicked (covers re-renders)
+    document.addEventListener("click", function(ev){
+      var t = ev.target;
+      if (!t) return;
+      var btn = (t.closest && t.closest("#btn-storyview-v9, #btn-open-storyview, button[id*='storyview'], [id*='storyview'][role='button']")) || null;
+      if (!btn) return;
+      setTimeout(function(){ dedup("storyview_click_60ms"); }, 60);
+      setTimeout(function(){ dedup("storyview_click_350ms"); }, 350);
+      setTimeout(function(){ dedup("storyview_click_900ms"); }, 900);
+    }, true);
+
+    // Manual trigger
+    window.NG_storyViewDedupNow = function(){ return dedup("manual"); };
+
+    console.log("[NG_STORYVIEW_DEDUP_V1] installed ✓");
+  }catch(e){
+    console.warn("[NG_STORYVIEW_DEDUP_V1] install error", e);
+  }
+})();
+</script>
+<!-- /NG_STORYVIEW_DEDUP_V1 -->
+<!-- NG_AUTORUN_SEGMENTS_V2 -->
+<script>
+(function(){
+  try{
+    if (window.__NG_AUTORUN_SEGMENTS_V2) return;
+    window.__NG_AUTORUN_SEGMENTS_V2 = true;
+
+    function findStoryPanels(){
+      var panels = [];
+      var more = document.querySelectorAll('div[id*="storyview" i],section[id*="storyview" i],aside[id*="storyview" i],main[id*="storyview" i]');
+      for (var i=0;i<more.length;i++){
+        var el = more[i];
+        if (!el || !el.querySelector) continue;
+        if (!el.querySelector("textarea")) continue;
+        panels.push(el);
+      }
+      // prefer overlay panel if present
+      panels.sort(function(a,b){
+        var ao = /overlay/i.test(a.id||"") ? 1 : 0;
+        var bo = /overlay/i.test(b.id||"") ? 1 : 0;
+        return bo-ao;
+      });
+      return panels;
+    }
+
+    function findTA(){
+      var panels = findStoryPanels();
+      for (var i=0;i<panels.length;i++){
+        var ta = panels[i].querySelector("textarea");
+        if (ta) return ta;
+      }
+      // fallback biggest textarea
+      var arr = Array.prototype.slice.call(document.querySelectorAll("textarea"));
+      arr.sort(function(a,b){ return (b.clientWidth*b.clientHeight)-(a.clientWidth*a.clientHeight); });
+      return arr[0] || null;
+    }
+
+    function normalizeRaw(raw){
+      raw = String(raw || "");
+      // remove trailing "\" artifacts if present
+      raw = raw.replace(/\r/g,"")
+               .replace(/[ \t]*\\\s*\n/g,"\n")
+               .replace(/\\n/g,"\n")
+               .replace(/[ \t]*\\$/gm,"");
+      return raw;
+    }
+
+    function run(tag){
+      try{
+        var raw0 = localStorage.getItem("NG_LAST_RAW") || "";
+        var raw  = normalizeRaw(raw0);
+        if (raw !== raw0) { try{ localStorage.setItem("NG_LAST_RAW", raw); }catch(e){} }
+
+        var ta  = findTA();
+        var seg = document.getElementById("ngSegBtnV2");
+
+        if (ta && raw.length > 200){
+          if (ta.value !== raw) ta.value = raw;
+          ta.dispatchEvent(new Event("input",  { bubbles:true }));
+          ta.dispatchEvent(new Event("change", { bubbles:true }));
+        }
+
+        if (seg) seg.click();
+
+        var out = { tag: tag, rawLen: raw.length, taFound: !!ta, taLen: ta ? ta.value.length : 0, segBtnFound: !!seg };
+        console.log("[NG_AUTORUN_SEGMENTS_V2]", out);
+        return out;
+      }catch(e){
+        console.warn("[NG_AUTORUN_SEGMENTS_V2] run error", e);
+      }
+    }
+
+    // run whenever StoryView open button is clicked
+    document.addEventListener("click", function(ev){
+      var t = ev.target;
+      if (!t) return;
+      var btn = (t.closest && t.closest("#btn-storyview-v9, #btn-open-storyview, button[id*='storyview']")) || null;
+      if (!btn) return;
+
+      // allow UI render time
+      setTimeout(function(){ run("storyview_click_80ms"); }, 80);
+      setTimeout(function(){ run("storyview_click_350ms"); }, 350);
+      setTimeout(function(){ run("storyview_click_900ms"); }, 900);
+    }, true);
+
+    // manual trigger
+    window.NG_autoSegmentsNow = function(){ return run("manual"); };
+
+    console.log("[NG_AUTORUN_SEGMENTS_V2] installed ✓");
+  }catch(e){
+    console.warn("[NG_AUTORUN_SEGMENTS_V2] install error", e);
+  }
+})();
+</script>
+<!-- /NG_AUTORUN_SEGMENTS_V2 -->
+  <!-- (बाकी existing scripts as-is रहने दें) -->
+
+ 
+
+
+
+</body>
+<!-- NG_PATCH_START: AUTORUN_KILL_V1 -->
+<script>
+(function AUTORUN_KILL_V1(){
+  if (window.__NG_AUTORUN_KILL_V1__) return;
+  window.__NG_AUTORUN_KILL_V1__ = true;
+
+  const _log = console.log.bind(console);
+  console.log = (...a) => {
+    try {
+      if (typeof a[0] === "string" && a[0].startsWith("[NG_AUTORUN_SEGMENTS_V2]")) return;
+    } catch {}
+    return _log(...a);
+  };
+
+  const _setTimeout = window.setTimeout.bind(window);
+  window.setTimeout = function(fn, delay, ...rest){
+    const d = Number(delay);
+    if (d === 80 || d === 350 || d === 900) {
+      let stack = "";
+      try { stack = (new Error()).stack || ""; } catch {}
+      if (/NG_AUTORUN_SEGMENTS_V2|AUTORUN_SEGMENTS/i.test(stack)) {
+        return 0;
+      }
+    }
+    return _setTimeout(fn, delay, ...rest);
+  };
+
+  _log("[AUTORUN_KILL_V1] installed");
+})();
+</script>
+<!-- NG_PATCH_END: AUTORUN_KILL_V1 -->
+<!-- NG_PATCH_START: LIBBAR_NO_OVERLAY_V2 -->
+<script>
+(function LIBBAR_NO_OVERLAY_V2(){
+  if (window.__NG_LIBBAR_NO_OVERLAY_V2__) return;
+  window.__NG_LIBBAR_NO_OVERLAY_V2__ = true;
+
+  const TAG = "[LIBBAR_NO_OVERLAY_V2]";
+
+  function t(el){ return ((el && el.textContent) ? el.textContent : "").trim(); }
+
+  function findLibraryBar(){
+    // find a container that has Download TXT and Download JSON buttons
+    const btns = Array.from(document.querySelectorAll("button"));
+    const bTxt = btns.find(b => /download\s*txt/i.test(t(b)));
+    if (!bTxt) return null;
+
+    let p = bTxt;
+    for (let i=0; i<10 && p; i++){
+      if (p.querySelectorAll){
+        const inside = Array.from(p.querySelectorAll("button")).map(x => t(x));
+        const hasTxt  = inside.some(s => /download\s*txt/i.test(s));
+        const hasJson = inside.some(s => /download\s*json/i.test(s));
+        if (hasTxt && hasJson) return p;
+      }
+      p = p.parentElement;
+    }
+    return bTxt.parentElement;
+  }
+
+  function isInside(el, parent){
+    try { return !!(el && parent && parent.contains(el)); } catch { return false; }
+  }
+
+  function toggleMainLibraryButton(excludeBar){
+    const all = Array.from(document.querySelectorAll("button"));
+    const cand = all.find(b => t(b) === "Library" && !isInside(b, excludeBar));
+    if (cand && typeof cand.click === "function") { cand.click(); return true; }
+    return false;
+  }
+
+  function ensureSpacer(bar){
+    let sp = document.getElementById("ngLibBarSpacer");
+    const h = Math.ceil((bar.getBoundingClientRect().height || 0));
+    if (!sp) {
+      sp = document.createElement("div");
+      sp.id = "ngLibBarSpacer";
+      sp.style.cssText = "width:100%; height:0px;";
+      (document.body || document.documentElement).prepend(sp);
+    }
+    sp.style.height = (h > 0 ? h : 56) + "px";
+  }
+
+  function removeSpacer(){
+    const sp = document.getElementById("ngLibBarSpacer");
+    if (sp) sp.remove();
+  }
+
+  function injectClose(bar){
+    if (bar.querySelector('button[data-ng-libbar-close="1"]')) return;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.textContent = "Close";
+    closeBtn.setAttribute("data-ng-libbar-close","1");
+    closeBtn.style.cssText =
+      "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; " +
+      "background:#171a1d; color:#e8eaed; cursor:pointer; margin-left:8px;";
+
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      bar.style.setProperty("display","none","important");
+      removeSpacer();
+      toggleMainLibraryButton(bar);
+      console.log("✅ LIBBAR CLOSED");
+    }, true);
+
+    bar.appendChild(closeBtn);
+  }
+
+  function makeNonOverlay(bar){
+    // Try to force STICKY (best)
+    bar.style.setProperty("position", "sticky", "important");
+    bar.style.setProperty("top", "0px", "important");
+    bar.style.setProperty("left", "0px", "important");
+    bar.style.setProperty("right", "0px", "important");
+    bar.style.setProperty("z-index", "9999", "important");
+    bar.style.setProperty("box-sizing", "border-box", "important");
+    bar.style.setProperty("background", "rgba(11,13,15,0.95)", "important");
+    bar.style.setProperty("backdrop-filter", "blur(6px)", "important");
+    bar.style.setProperty("padding", "8px", "important");
+    bar.style.setProperty("border-radius", "14px", "important");
+    bar.style.setProperty("margin", "8px", "important");
+    bar.style.setProperty("transform", "translateZ(0)", "important");
+
+    injectClose(bar);
+
+    // If some script still keeps it FIXED, add spacer so it never covers content
+    setTimeout(() => {
+      try {
+        const pos = getComputedStyle(bar).position;
+        if (pos === "fixed") ensureSpacer(bar);
+        else removeSpacer();
+      } catch {}
+    }, 0);
+  }
+
+  function apply(){
+    const bar = findLibraryBar();
+    if (!bar) return;
+    makeNonOverlay(bar);
+  }
+
+  apply();
+  new MutationObserver(apply).observe(document.documentElement, { childList:true, subtree:true });
+  // extra safety: if other scripts re-override after a delay
+  setInterval(apply, 500);
+
+  console.log(TAG, "installed");
+})();
+</script>
+<!-- NG_PATCH_END: LIBBAR_NO_OVERLAY_V2 -->
+
+
+
+<!-- NG_PATCH_START: STORYVIEW_SWAP_FIX_V7CLEAN -->
+<script>
+(function STORYVIEW_SWAP_FIX_V7CLEAN(){
+  if (window.__NG_SV_FIX_V7CLEAN_INSTALLED__) return;
+  window.__NG_SV_FIX_V7CLEAN_INSTALLED__ = true;
+
+  const SEG_IDS = ["ngSegBtnV2", "ng-seg-copy"];
+
+  function killSegments(){
+    for (const id of SEG_IDS) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+  }
+
+  function ensureStoryBtn(){
+    const b = document.getElementById("btn-storyview-v9");
+    if (!b) return null;
+    b.type = "button";
+    b.style.setProperty("pointer-events", "auto", "important");
+    b.style.setProperty("z-index", "2147483647", "important");
+    return b;
+  }
+
+  function safeGetLS(key){
+    try { return localStorage.getItem(key); } catch { return null; }
+  }
+
+  function collectStoryText(){
+    const keys = [
+      "NG_DRAFTS",
+      "NG_DRAFTS_V2",
+      "NG_LASTPACK_CAPTURE_V1",
+      "NG_LASTPACK",
+      "NG_TRANSCRIPT",
+      "NG_TRANSCRIPT_JSON",
+      "NG_LAST_API_DIGIPACK",
+      "NG_DIGIPACK_LAST"
+    ];
+
+    const found = [];
+    for (const k of keys) {
+      const v = safeGetLS(k);
+      if (v && String(v).length) found.push({ k, len: String(v).length, v });
+    }
+
+    try {
+      const extra = [];
+      for (let i=0; i<localStorage.length && extra.length<6; i++){
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (/draft|digipack|storyview|transcript/i.test(k) && !keys.includes(k)){
+          const v = safeGetLS(k);
+          if (v && String(v).length) extra.push({ k, len: String(v).length, v });
+        }
+      }
+      found.push(...extra);
+    } catch {}
+
+    const main = found.slice().sort((a,b)=>b.len-a.len)[0];
+    const header = [
+      "NewsGenie Story View (FIX) — fallback modal",
+      "Time: " + new Date().toISOString(),
+      "Found keys: " + (found.map(x => `${x.k}(${x.len})`).join(", ") || "NONE"),
+      "",
+      main ? `Showing: ${main.k} (len=${main.len})` : "No saved story/draft data found in localStorage."
+    ].join("\n");
+
+    return header + "\n\n" + (main ? String(main.v) : "");
+  }
+
+  function restoreLibraryBestEffort(){
+    const ids = ["btn-open-library", "btn-open-lib", "btn-library", "btnOpenLibrary", "btn-open-library-v2"];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el && typeof el.click === "function") { el.click(); return true; }
+    }
+    const b = [...document.querySelectorAll("button")].find(x => /library/i.test((x.textContent||"").trim()));
+    if (b && typeof b.click === "function") { b.click(); return true; }
+    return false;
+  }
+
+  function ensureModal(){
+    let m = document.getElementById("ngSvFixModal");
+    if (m) return m;
+
+    m = document.createElement("div");
+    m.id = "ngSvFixModal";
+    m.style.cssText = [
+      "position:fixed",
+      "inset:0",
+      "display:none",
+      "background:rgba(0,0,0,0.55)",
+      "z-index:2147483646"
+    ].join(";");
+
+    const panel = document.createElement("div");
+    panel.style.cssText = [
+      "position:absolute",
+      "left:24px",
+      "right:24px",
+      "top:24px",
+      "bottom:24px",
+      "background:#101214",
+      "color:#e8eaed",
+      "border-radius:14px",
+      "box-shadow:0 10px 30px rgba(0,0,0,0.6)",
+      "padding:12px",
+      "overflow:hidden",
+      "font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial"
+    ].join(";");
+
+    const bar = document.createElement("div");
+    bar.style.cssText = "display:flex; gap:8px; align-items:center; justify-content:space-between; padding:6px 4px 10px 4px;";
+
+    const title = document.createElement("div");
+    title.textContent = "Story View (FIX)";
+    title.style.cssText = "font-weight:700; font-size:14px;";
+
+    const btns = document.createElement("div");
+    btns.style.cssText = "display:flex; gap:8px; align-items:center;";
+
+    const mkBtn = (txt) => {
+      const b = document.createElement("button");
+      b.textContent = txt;
+      b.type = "button";
+      b.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#171a1d; color:#e8eaed; cursor:pointer;";
+      return b;
+    };
+
+    const bRefresh = mkBtn("Refresh");
+    const bCopy    = mkBtn("Copy");
+    const bClose   = mkBtn("Close");
+
+    btns.appendChild(bRefresh);
+    btns.appendChild(bCopy);
+    btns.appendChild(bClose);
+
+    bar.appendChild(title);
+    bar.appendChild(btns);
+
+    const pre = document.createElement("pre");
+    pre.id = "ngSvFixBody";
+    pre.style.cssText = [
+      "white-space:pre-wrap",
+      "word-break:break-word",
+      "margin:0",
+      "height:calc(100% - 44px)",
+      "overflow:auto",
+      "padding:10px",
+      "border-radius:12px",
+      "background:#0b0d0f",
+      "border:1px solid #2b2f33",
+      "font-size:12px",
+      "line-height:1.35"
+    ].join(";");
+
+    panel.appendChild(bar);
+    panel.appendChild(pre);
+    m.appendChild(panel);
+
+    (document.body || document.documentElement).appendChild(m);
+
+    const fill = () => { pre.textContent = collectStoryText(); };
+
+    bRefresh.onclick = () => { fill(); console.log("✅ FIX REFRESH"); };
+
+    bCopy.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(pre.textContent || "");
+        console.log("✅ FIX COPIED");
+      } catch(e) {
+        const ta = document.createElement("textarea");
+        ta.value = pre.textContent || "";
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        console.log("✅ FIX COPIED (fallback)");
+      }
+    };
+
+    bClose.onclick = () => {
+      try { m.style.setProperty("display","none","important"); } catch {}
+      try { m.remove(); } catch {}
+      console.log("✅ FIX CLOSED (removed)");
+      restoreLibraryBestEffort();
+    };
+
+    m.addEventListener("click", (e) => { if (e.target === m) bClose.onclick(); });
+
+    fill();
+    console.log("[SV_FIX_V7] ngSvFixModal created");
+    return m;
+  }
+
+  function openModal(){
+    const m = ensureModal();
+    m.style.setProperty("display", "block", "important");
+    m.style.setProperty("visibility", "visible", "important");
+    m.style.setProperty("opacity", "1", "important");
+    return true;
+  }
+
+  function isStoryViewHit(ev){
+    const b = ensureStoryBtn();
+    if (!b) return false;
+
+    const path = ev.composedPath ? ev.composedPath() : [];
+    if (ev.target === b || path.includes(b)) return true;
+
+    const r = b.getBoundingClientRect();
+    const x = ev.clientX, y = ev.clientY;
+    return (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom);
+  }
+
+  // V7 one-shot + click-block
+  let __ng_sv_lastHit = 0;
+
+  function onSVPointer(ev){
+    if (!ev || !ev.isTrusted) return;
+    if (!isStoryViewHit(ev)) return;
+
+    const t = Date.now();
+    if (t - __ng_sv_lastHit < 600) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      return;
+    }
+    __ng_sv_lastHit = t;
+
+    killSegments();
+    ensureStoryBtn();
+    openModal();
+    console.log("✅ FIX OPEN (V7)");
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+  }
+
+  function onSVClickBlock(ev){
+    if (!ev || !ev.isTrusted) return;
+    if (Date.now() - __ng_sv_lastHit > 800) return;
+    if (!isStoryViewHit(ev)) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+  }
+
+  // IMPORTANT: install EARLY by placing this block right after <body>
+  window.addEventListener("pointerdown", onSVPointer, true);
+  window.addEventListener("click", onSVClickBlock, true);
+
+  // Keep stable after refresh / reinserts
+  const mo = new MutationObserver(() => { killSegments(); ensureStoryBtn(); });
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+
+  killSegments();
+  ensureStoryBtn();
+  console.log("[SV_FIX_V7] installed");
+})();
+</script>
+<!-- NG_PATCH_END: STORYVIEW_SWAP_FIX_V7CLEAN -->
+
+
 </body>
 </html>
+
+
+
 
 
 
