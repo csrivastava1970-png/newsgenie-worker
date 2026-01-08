@@ -1,4 +1,4 @@
-﻿
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,186 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NewsGenie Digital Producer</title>
 <link rel="icon" href="data:,">
-  <!-- NG_STD_UI_TOOLBAR_ROW_V2_START -->
-<style>
-  /* NG_STD_UI_TOOLBAR_ROW_V2
-     Goal: single-row toolbar (actions left, UI toggle right) — CSS-only, hang-free
-     Rules: NO DOM moving, NO MutationObserver, only CSS overrides.
-  */
-
-  /* 1) Layout: make page a simple grid so toolbar can be a row */
-  body{
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-auto-rows: auto;
-    column-gap: 12px;
-    row-gap: 8px;
-    align-items: start;
-  }
-
-  /* Title full width */
-  h2{ grid-column: 1 / -1; grid-row: 1; }
-
-
-  /* 2) Actions row (left) */
-  #ng-dp-actions{
-  grid-column: 1 / 2;
-  grid-row: 2;
-
-    grid-column: 1 / 2;
-    align-self: center;
-
-    display: flex !important;
-    flex-wrap: nowrap !important;     /* override inline wrap */
-    gap: 8px !important;
-    align-items: center !important;
-
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    min-width: 0;                    /* allow grid to size correctly */
-  }
-
-  body > #ng-dp-actions > button{
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-
-  /* Hide horizontal scrollbar but keep scrolling */
-  #ng-dp-actions{ scrollbar-width: none; }              /* Firefox */
-  #ng-dp-actions::-webkit-scrollbar{ height: 0; }       /* Chrome/Edge */
-
-  /* 3) If toggle is inside some wrapper, flatten that wrapper (CSS-only) */
- /* Flatten wrappers up to 4 levels so toggle becomes a grid item of body */
-body *:has(> #ng-std-ui-toggle-root){ display: contents !important; }
-body *:has(> * > #ng-std-ui-toggle-root){ display: contents !important; }
-body *:has(> * > * > #ng-std-ui-toggle-root){ display: contents !important; }
-body *:has(> * > * > * > #ng-std-ui-toggle-root){ display: contents !important; }
-
-
-  /* Toggle: force normal flow + place it on toolbar row (right) */
-  #ng-std-ui-toggle-root,
-  #ng-std-ui-toggle-root .ngpill{
-    position: static !important;
-    inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    transform: none !important;
-    z-index: auto !important;
-  }
-
-  #ng-std-ui-toggle-root{
-  grid-column: 2 / 3;
-  grid-row: 2;
-
-    grid-column: 2 / 3;
-    align-self: center;
-    justify-self: end;
-
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-
-    margin: 10px 0 !important;
-    white-space: nowrap !important;
-  }
-
-  #ng-std-ui-toggle-root .ngpill{
-    display: inline-flex !important;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-  }
-
-  /* 4) Everything else should be full width below toolbar */
-  /* default: anything that becomes a grid item spans full width */
-body *{ grid-column: 1 / -1; }
-
-
-  /* 5) Responsive: on narrower screens, drop toggle below + allow actions wrap */
- 
-/* NG_STD_UI_TOOLBAR_FIXED_V1_START — robust, DOM-depth independent */
-:root{
-  --ng_tb_edge: 12px;
-  --ng_tb_pad_top: 78px;           /* body push-down */
-  --ng_tb_toggle_reserve: 230px;   /* right space for toggle */
-}
-
-/* Push content down so fixed toolbar doesn't overlap */
-body{
-  padding-top: var(--ng_tb_pad_top) !important;
-}
-
-/* Actions bar (left) */
-#ng-dp-actions{
-  position: fixed !important;
-  left: var(--ng_tb_edge) !important;
-  top: var(--ng_tb_edge) !important;
-  right: calc(var(--ng_tb_edge) + var(--ng_tb_toggle_reserve)) !important;
-  z-index: 9999 !important;
-
-  margin: 0 !important;
-  padding: 6px 8px !important;
-  border: 1px solid rgba(0,0,0,0.10) !important;
-  border-radius: 12px !important;
-  background: rgba(255,255,255,0.92) !important;
-  backdrop-filter: blur(6px);
-
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
-  align-items: center !important;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Toggle (right) */
-#ng-std-ui-toggle-root{
-  position: fixed !important;
-  right: var(--ng_tb_edge) !important;
-  top: var(--ng_tb_edge) !important;
-  z-index: 10000 !important;
-
-  margin: 0 !important;
-  padding: 6px 8px !important;
-  border: 1px solid rgba(0,0,0,0.10) !important;
-  border-radius: 12px !important;
-  background: rgba(255,255,255,0.92) !important;
-  backdrop-filter: blur(6px);
-
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Hide scrollbar (still scrolls) */
-#ng-dp-actions{ scrollbar-width: none; }
-#ng-dp-actions::-webkit-scrollbar{ height: 0; }
-
-/* Small screens: stack toggle under actions */
-@media (max-width: 980px){
-  :root{
-    --ng_tb_toggle_reserve: 0px;
-    --ng_tb_pad_top: 126px;
-  }
-  #ng-dp-actions{
-    right: var(--ng_tb_edge) !important;
-  }
-  #ng-std-ui-toggle-root{
-    top: calc(var(--ng_tb_edge) + 56px) !important;
-  }
-}
-/* NG_STD_UI_TOOLBAR_FIXED_V1_END */
-
-
 
   <style>
     body { font-family: system-ui, Arial; margin: 16px; }
@@ -201,7 +21,6 @@ body{
     .status { font-size: 13px; }
     .muted { font-size:12px; opacity:.75; margin-top:6px; }
 #btnBytesJSON { display: none !important; }
-/* OLD sticky toolbar (remove/disable)
 #ng-dp-actions{
   position: sticky;
   top: 10px;
@@ -211,50 +30,14 @@ body{
   border-radius: 12px;
   border: 1px solid #e5e5e5;
 }
-*/
-
-/* Force placement: Row-1 Title, Row-2 Toolbar (Actions + Toggle) */
-h2{
-  grid-column: 1 / -1 !important;
-  grid-row: 1 !important;
-}
-
-#ng-dp-actions{
-  grid-column: 1 / 2 !important;
-  grid-row: 2 !important;
-}
-
-#ng-std-ui-toggle-root{
-  grid-column: 2 / 3 !important;
-  grid-row: 2 !important;
-  justify-self: end !important;
-  align-self: center !important;
-}
 
 
   </style>
 <style>
 #ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
-
-/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_START */
-body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) #bytesWrap {
-  display: none !important;
-}
-body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) #bytesWrap {
-  display: block !important;
-}
-/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_END */
-
-</style>
-<style id="ng-simple-hide-bytes-v1">
-  body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) .panel:has(#ng-sec-bytes){ display:none !important; }
-body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng-sec-bytes){ display:block !important; }
-
 </style>
 
 </head>
-<!-- NG_MARKER: 2026-01-06_IST_TEST_123 -->
-
 
 <body>
 
@@ -288,22 +71,32 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 <section style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
     <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
-    <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
+   
   </div>
 
-  <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
-    Paste Reverie output JSON here (display_text à¤¯à¤¾ text). Load à¤•à¤°à¤¨à¥‡ à¤ªà¤° localStorage à¤®à¥‡à¤‚ save à¤­à¥€ à¤¹à¥‹à¤—à¤¾.
-  </p>
+  <details id="ng-transcript-manual-box" style="margin-top:10px;">
+  <summary style="cursor:pointer; font-weight:600;">
+    Manual Transcript (Fallback) — Paste Reverie JSON
+  </summary>
 
-  <textarea id="ta-transcript-json" rows="8"
-    style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
-    placeholder='Paste JSON here...'></textarea>
+  <div style="margin-top:8px;">
+    <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
+      Paste Reverie output JSON here (display_text या text). Load करने पर localStorage में save होगा।
+      (Auto mode: MP4 → BAT → “Reverie → Load” button)
+    </p>
 
-  <div style="display:flex; gap:8px; margin-top:10px;">
-    <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
-    <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
+    <textarea id="ta-transcript-json" rows="8"
+      style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
+      placeholder="Paste JSON here..."></textarea>
+
+    <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+      <button type="button" id="btn-load-transcript-json">Load</button>
+      <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
+      <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
+    </div>
   </div>
-</section>
+</details>
+
 
     <div style="margin-top:10px;">
       <label>Story Type</label>
@@ -346,21 +139,16 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     </div>
 
     <!-- VISUALS -->
-    <!-- NG_STD_VISUALS_WRAP_V1_START -->
-<div id="visualsWrap" data-ng-sec="visuals">
-  <div class="panel" id="step-visuals">
-    <b>Visuals</b>
-    <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
+    <div class="panel" id="step-visuals">
+      <b>Visuals</b>
+      <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
-    <div id="visuals-wrap"></div>
+      <div id="visuals-wrap"></div>
 
-    <div style="margin-top:8px;">
-      <button type="button" id="add-visual">+ Add Visual</button>
+      <div style="margin-top:8px;">
+        <button type="button" id="add-visual">+ Add Visual</button>
+      </div>
     </div>
-  </div>
-</div>
-<!-- NG_STD_VISUALS_WRAP_V1_END -->
-
 
     <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
       <button id="btnGenerate" type="button" class="primary" onclick="generateDigiPack(event)" disabled>
@@ -3806,8 +3594,11 @@ setCurrentId(drafts[i].id || drafts[i].uid || "");
   } catch(e) {}
 
 (function(){
-  if (window.__NG_FORCE_DLTEXT_V2) return;
-  window.__NG_FORCE_DLTEXT_V2 = true;
+ // DISABLED: NG_FORCE_DLTEXT_V2 (auto-download bug)
+window.__NG_FORCE_DLTEXT_V2 = true; return;
+if (window.__NG_FORCE_DLTEXT_V2) return;
+window.__NG_FORCE_DLTEXT_V2 = true;
+
   window.__NG_FORCE_DLTEXT_HITS = 0;
 
   function S(v){ return (v==null) ? "" : String(v); }
@@ -6683,1591 +6474,1329 @@ function store(raw){
 })();
 </script>
 <!-- NG_ENSURE_DRAFT_HAS_DIGIPACK_V4_END -->
-
-<!-- NG_STORYVIEW_DEDUP_V1 -->
+<!-- NG_WEBARTICLE_CLEAN_V1_START -->
 <script>
 (function(){
-  try{
-    if (window.__NG_STORYVIEW_DEDUP_V1) return;
-    window.__NG_STORYVIEW_DEDUP_V1 = true;
-
-    function dedup(tag){
-      try{
-        var roots = [];
-        var a = document.querySelector("#ng-storyview"); if (a) roots.push(a);
-        var b = document.querySelector("#storyview");    if (b) roots.push(b);
-        var c = document.querySelector("#storyView");    if (c) roots.push(c);
-        var more = document.querySelectorAll('div[id*="storyview" i],section[id*="storyview" i],aside[id*="storyview" i],main[id*="storyview" i]');
-        for (var i=0;i<more.length;i++) roots.push(more[i]);
-
-        // unique
-        var uniq = [];
-        for (var j=0;j<roots.length;j++){
-          if (uniq.indexOf(roots[j]) === -1) uniq.push(roots[j]);
-        }
-        if (uniq.length <= 1) return { tag: tag, found: uniq.length, changed: false };
-
-        function z(el){
-          var v = parseInt(getComputedStyle(el).zIndex, 10);
-          return isFinite(v) ? v : 0;
-        }
-        function area(el){
-          var r = el.getBoundingClientRect();
-          return Math.max(0,r.width) * Math.max(0,r.height);
-        }
-        function visible(el){
-          var cs = getComputedStyle(el);
-          return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
-        }
-        function score(el){
-          return (visible(el) ? 1e12 : 0) + (z(el)*1e6) + area(el);
-        }
-
-        uniq.sort(function(x,y){ return score(y) - score(x); });
-        var keep = uniq[0];
-
-        for (var k=0;k<uniq.length;k++){
-          var el = uniq[k];
-          if (el === keep) continue;
-          el.style.setProperty("display","none","important");
-          el.style.setProperty("visibility","hidden","important");
-          el.style.setProperty("pointer-events","none","important");
-          el.setAttribute("data-ng-hidden-dup-storyview","1");
-        }
-
-        var out = { tag: tag, found: uniq.length, kept_id: keep ? keep.id : "", changed: true };
-        console.log("[NG_STORYVIEW_DEDUP_V1]", out);
-        return out;
-      }catch(e){
-        console.warn("[NG_STORYVIEW_DEDUP_V1] dedup error", e);
-      }
-    }
-
-    // Run on load
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function(){ dedup("domcontentloaded"); }, { once:true });
-    } else {
-      setTimeout(function(){ dedup("ready"); }, 50);
-    }
-
-    // Run when storyview open button is clicked (covers re-renders)
-    document.addEventListener("click", function(ev){
-      var t = ev.target;
-      if (!t) return;
-      var btn = (t.closest && t.closest("#btn-storyview-v9, #btn-open-storyview, button[id*='storyview'], [id*='storyview'][role='button']")) || null;
-      if (!btn) return;
-      setTimeout(function(){ dedup("storyview_click_60ms"); }, 60);
-      setTimeout(function(){ dedup("storyview_click_350ms"); }, 350);
-      setTimeout(function(){ dedup("storyview_click_900ms"); }, 900);
-    }, true);
-
-    // Manual trigger
-    window.NG_storyViewDedupNow = function(){ return dedup("manual"); };
-
-    console.log("[NG_STORYVIEW_DEDUP_V1] installed ✓");
-  }catch(e){
-    console.warn("[NG_STORYVIEW_DEDUP_V1] install error", e);
+  if (!window.ensureDraftHasDigipack) {
+    console.warn("[NG_WEBARTICLE_CLEAN_V1] ensureDraftHasDigipack not found");
+    return;
   }
+  var prev = window.ensureDraftHasDigipack;
+  window.ensureDraftHasDigipack = function(){
+    var dp = prev.apply(this, arguments);
+    try{
+      var g = dp && dp.blocks && dp.blocks.generated;
+      if (g && g.web_article){
+        g.web_article = String(g.web_article)
+          .replace(/^\s*#{1,6}\s*WEB[_\s-]*ARTICLE\s*\n+/i, "")
+          .replace(/^\s*WEB[_\s-]*ARTICLE\s*:\s*\n+/i, "")
+          .trim();
+      }
+    }catch(e){}
+    return dp;
+  };
+  console.log("[NG_WEBARTICLE_CLEAN_V1] installed ✓");
 })();
 </script>
-<!-- /NG_STORYVIEW_DEDUP_V1 -->
-<!-- NG_AUTORUN_SEGMENTS_V2 -->
+<!-- NG_WEBARTICLE_CLEAN_V1_END -->
+<!-- NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1_START -->
 <script>
 (function(){
-  try{
-    if (window.__NG_AUTORUN_SEGMENTS_V2) return;
-    window.__NG_AUTORUN_SEGMENTS_V2 = true;
+  if (window.__NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1) return;
+  window.__NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1 = true;
+return; // DISABLED: was causing auto-download on clicks
 
-    function findStoryPanels(){
-      var panels = [];
-      var more = document.querySelectorAll('div[id*="storyview" i],section[id*="storyview" i],aside[id*="storyview" i],main[id*="storyview" i]');
-      for (var i=0;i<more.length;i++){
-        var el = more[i];
-        if (!el || !el.querySelector) continue;
-        if (!el.querySelector("textarea")) continue;
-        panels.push(el);
-      }
-      // prefer overlay panel if present
-      panels.sort(function(a,b){
-        var ao = /overlay/i.test(a.id||"") ? 1 : 0;
-        var bo = /overlay/i.test(b.id||"") ? 1 : 0;
-        return bo-ao;
-      });
-      return panels;
+  function fixMojibake(s){
+    s = (s==null) ? "" : String(s);
+    var reps = [
+      ["â€“","–"], ["â€”","—"], ["â€¢","•"],
+      ["â€˜","‘"], ["â€™","’"], ["â€œ","“"], ["â€�","”"],
+      ["Â",""], ["Ã—","×"]
+    ];
+    for (var i=0;i<reps.length;i++){
+      s = s.split(reps[i][0]).join(reps[i][1]);
     }
-
-    function findTA(){
-      var panels = findStoryPanels();
-      for (var i=0;i<panels.length;i++){
-        var ta = panels[i].querySelector("textarea");
-        if (ta) return ta;
-      }
-      // fallback biggest textarea
-      var arr = Array.prototype.slice.call(document.querySelectorAll("textarea"));
-      arr.sort(function(a,b){ return (b.clientWidth*b.clientHeight)-(a.clientWidth*a.clientHeight); });
-      return arr[0] || null;
-    }
-
-    function normalizeRaw(raw){
-      raw = String(raw || "");
-      // remove trailing "\" artifacts if present
-      raw = raw.replace(/\r/g,"")
-               .replace(/[ \t]*\\\s*\n/g,"\n")
-               .replace(/\\n/g,"\n")
-               .replace(/[ \t]*\\$/gm,"");
-      return raw;
-    }
-
-    function run(tag){
-      try{
-        var raw0 = localStorage.getItem("NG_LAST_RAW") || "";
-        var raw  = normalizeRaw(raw0);
-        if (raw !== raw0) { try{ localStorage.setItem("NG_LAST_RAW", raw); }catch(e){} }
-
-        var ta  = findTA();
-        var seg = document.getElementById("ngSegBtnV2");
-
-        if (ta && raw.length > 200){
-          if (ta.value !== raw) ta.value = raw;
-          ta.dispatchEvent(new Event("input",  { bubbles:true }));
-          ta.dispatchEvent(new Event("change", { bubbles:true }));
-        }
-
-        if (seg) seg.click();
-
-        var out = { tag: tag, rawLen: raw.length, taFound: !!ta, taLen: ta ? ta.value.length : 0, segBtnFound: !!seg };
-        console.log("[NG_AUTORUN_SEGMENTS_V2]", out);
-        return out;
-      }catch(e){
-        console.warn("[NG_AUTORUN_SEGMENTS_V2] run error", e);
-      }
-    }
-
-    // run whenever StoryView open button is clicked
-    document.addEventListener("click", function(ev){
-      var t = ev.target;
-      if (!t) return;
-      var btn = (t.closest && t.closest("#btn-storyview-v9, #btn-open-storyview, button[id*='storyview']")) || null;
-      if (!btn) return;
-
-      // allow UI render time
-      setTimeout(function(){ run("storyview_click_80ms"); }, 80);
-      setTimeout(function(){ run("storyview_click_350ms"); }, 350);
-      setTimeout(function(){ run("storyview_click_900ms"); }, 900);
-    }, true);
-
-    // manual trigger
-    window.NG_autoSegmentsNow = function(){ return run("manual"); };
-
-    console.log("[NG_AUTORUN_SEGMENTS_V2] installed ✓");
-  }catch(e){
-    console.warn("[NG_AUTORUN_SEGMENTS_V2] install error", e);
+    return s;
   }
-})();
-</script>
-<!-- /NG_AUTORUN_SEGMENTS_V2 -->
-  <!-- (बाकी existing scripts as-is रहने दें) -->
 
- 
+  function slugifyHindi(s){
+    s = (s==null) ? "" : String(s);
+    s = s.replace(/[^\u0900-\u097F0-9A-Za-z]+/g,"_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
+    return s.slice(0,60) || "draft";
+  }
 
-
-
-</body>
-<!-- NG_PATCH_START: AUTORUN_KILL_V1 -->
-<script>
-(function AUTORUN_KILL_V1(){
-  if (window.__NG_AUTORUN_KILL_V1__) return;
-  window.__NG_AUTORUN_KILL_V1__ = true;
-
-  const _log = console.log.bind(console);
-  console.log = (...a) => {
-    try {
-      if (typeof a[0] === "string" && a[0].startsWith("[NG_AUTORUN_SEGMENTS_V2]")) return;
-    } catch {}
-    return _log(...a);
-  };
-
-  const _setTimeout = window.setTimeout.bind(window);
-  window.setTimeout = function(fn, delay, ...rest){
-    const d = Number(delay);
-    if (d === 80 || d === 350 || d === 900) {
-      let stack = "";
-      try { stack = (new Error()).stack || ""; } catch {}
-      if (/NG_AUTORUN_SEGMENTS_V2|AUTORUN_SEGMENTS/i.test(stack)) {
-        return 0;
-      }
+  function dlUTF8(filename, text){
+    try{
+      // UTF-8 BOM => Windows Notepad mojibake stops
+      var bom = "\uFEFF";
+      var blob = new Blob([bom + text], {type:"text/plain;charset=utf-8"});
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        try{ URL.revokeObjectURL(a.href); }catch(e){}
+        try{ a.remove(); }catch(e){}
+      }, 0);
+      return true;
+    }catch(e){
+      console.warn("[NG_DLTEXT_UTF8] failed", e);
+      return false;
     }
-    return _setTimeout(fn, delay, ...rest);
-  };
+  }
 
-  _log("[AUTORUN_KILL_V1] installed");
+  function isDownloadTxtBtn(t){
+    if (!t) return false;
+    var b = t.closest ? t.closest("button,a,[role='button']") : null;
+    var id = ((b && b.id) ? b.id : (t.id||"")).toLowerCase();
+    var txt = (((b && b.textContent) ? b.textContent : t.textContent) || "").toLowerCase();
+    return (id.indexOf("download")>=0 && id.indexOf("txt")>=0) || (txt.indexOf("download txt")>=0);
+  }
+
+  window.addEventListener("click", function(e){
+    try{
+      if (!isDownloadTxtBtn(e.target)) return;
+
+      // block existing handler
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      e.cancelBubble = true;
+
+      // get text via existing makeTXT (if it returns a string)
+      var out = "";
+      if (typeof window.makeTXT === "function") out = window.makeTXT();
+      else if (typeof window.NG_makeTXT === "function") out = window.NG_makeTXT();
+
+      // fallback minimal (should rarely be needed)
+      if (typeof out !== "string" || !out) {
+        var dp = (typeof window.ensureDraftHasDigipack === "function") ? window.ensureDraftHasDigipack() : null;
+        var g = dp && dp.blocks && dp.blocks.generated ? dp.blocks.generated : {};
+        out = [
+          "DIGIPACK (SEGMENTS)\n--------------------------------",
+          "HEADLINE: " + (g.headline||""),
+          "\nKEY POINTS\n--------------------------------",
+          (g.key_points||[]).map(function(x){return "- " + x;}).join("\n"),
+          "\nWEB ARTICLE\n--------------------------------",
+          (g.web_article||""),
+          "\nVO LINES\n--------------------------------",
+          (g.lines||[]).map(function(x){return "• " + x;}).join("\n")
+        ].join("\n");
+      }
+
+      out = fixMojibake(out);
+
+      var headline = "";
+      try{
+        var dp2 = (typeof window.ensureDraftHasDigipack === "function") ? window.ensureDraftHasDigipack() : null;
+        headline = dp2 && dp2.blocks && dp2.blocks.generated ? (dp2.blocks.generated.headline||"") : "";
+      }catch(_){}
+
+      var fname = "SEGMENTED__" + Date.now() + "__" + slugifyHindi(headline) + ".txt";
+      dlUTF8(fname, out);
+
+      console.log("[NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1] downloaded", {fname: fname, len: out.length});
+    } catch(err){
+      console.warn("[NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1] error", err);
+    }
+  }, true);
+
+  console.log("[NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1] ready");
 })();
 </script>
-<!-- NG_PATCH_END: AUTORUN_KILL_V1 -->
-<!-- NG_PATCH_START: NG_LIBRARY_DRAFT_PICKER_V1 -->
+<!-- NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1_END -->
+<!-- NG_TXT_DOWNLOAD_NORMALIZE_V1_START -->
 <script>
-(function NG_LIBRARY_DRAFT_PICKER_V1(){
-  if (window.__NG_LIBRARY_DRAFT_PICKER_V1__) return;
-  window.__NG_LIBRARY_DRAFT_PICKER_V1__ = true;
+(function(){
+  if (window.__NG_TXT_DOWNLOAD_NORMALIZE_V1) return;
+  window.__NG_TXT_DOWNLOAD_NORMALIZE_V1 = true;
 
-  const LS = {
-    drafts: "NG_DRAFTS",
-    selIdx: "NG_DIGIPACK_SELECTED_IDX",
-    curId:  "NG_DIGIPACK_CURRENT_ID"
-  };
+  function fixMojibake(s){
+    s = (s==null) ? "" : String(s);
+    var reps = [
+      ["â€“","–"], ["â€”","—"], ["â€¦","…"],
+      ["â€¢","•"],
+      ["â€˜","‘"], ["â€™","’"],
+      ["â€œ","“"], ["â€�","”"],
+      ["Â",""]
+    ];
+    for (var i=0;i<reps.length;i++){
+      s = s.split(reps[i][0]).join(reps[i][1]);
+    }
+    return s;
+  }
 
-  const t = (el)=>((el && el.textContent)?el.textContent:"").trim();
+  // 1) Wrap makeTXT (अगर आपका downloader makeTXT से text लेता है)
+  if (typeof window.makeTXT === "function" && !window.__NG_makeTXT_wrapped){
+    window.__NG_makeTXT_wrapped = true;
+    var _origMakeTXT = window.makeTXT;
+    window.makeTXT = function(){
+      var out = _origMakeTXT.apply(this, arguments);
+      if (typeof out === "string") out = fixMojibake(out);
+      return out;
+    };
+    console.log("[NG_TXT_DOWNLOAD_NORMALIZE_V1] makeTXT wrapped");
+  }
+
+  // 2) Wrap Blob (अगर आपका downloader Blob से txt file बना रहा है)
+  //    => किसी भी text/plain download में BOM + mojibake-fix लागू
+  if (typeof window.Blob === "function" && !window.__NG_BLOB_wrapped){
+    window.__NG_BLOB_wrapped = true;
+
+    var OrigBlob = window.Blob;
+    function NGBlob(parts, opts){
+      try{
+        var type = (opts && opts.type) ? String(opts.type).toLowerCase() : "";
+        var isText = type.indexOf("text/plain") >= 0;
+
+        if (isText && Array.isArray(parts) && parts.length){
+          var newParts = parts.slice(0);
+
+          // normalize all string parts
+          for (var i=0;i<newParts.length;i++){
+            if (typeof newParts[i] === "string") newParts[i] = fixMojibake(newParts[i]);
+          }
+
+          // ensure UTF-8 BOM for Windows Notepad
+          if (typeof newParts[0] === "string" && newParts[0].charAt(0) !== "\uFEFF"){
+            newParts[0] = "\uFEFF" + newParts[0];
+          }
+
+          parts = newParts;
+        }
+      }catch(e){}
+      return new OrigBlob(parts, opts);
+    }
+    NGBlob.prototype = OrigBlob.prototype;
+
+    // keep static props (best-effort)
+    try{
+      for (var k in OrigBlob){
+        if (Object.prototype.hasOwnProperty.call(OrigBlob,k)) NGBlob[k] = OrigBlob[k];
+      }
+    }catch(e){}
+
+    window.Blob = NGBlob;
+    console.log("[NG_TXT_DOWNLOAD_NORMALIZE_V1] Blob wrapped");
+  }
+
+})();
+</script>
+<!-- NG_TXT_DOWNLOAD_NORMALIZE_V1_END -->
+<!-- NG_SAVEDRAFT_V9_LOCK_V1_START -->
+<script>
+(function(){
+  if (window.__NG_SAVEDRAFT_V9_LOCK_V1) return;
+  window.__NG_SAVEDRAFT_V9_LOCK_V1 = true;
+
+  // make other logs happy (best-effort)
+  window.__NG_SAVE_CAPTURE_V2 = true;
+  window.__NG_DIGIPACK_SAVE_PATCHED = true;
+
+  var PRIMARY_KEY = "NG_DIGIPACK_DRAFTS_V1";
+  var LEGACY_KEY  = "NG_DRAFTS";
+  var SEL_IDX_KEY = "NG_DIGIPACK_SELECTED_IDX_V1";
+  var SEL_ID_KEY  = "NG_DIGIPACK_SELECTED_ID_V1";
+
+  function jparse(s, fb){ try { return JSON.parse(s); } catch(e){ return fb; } }
+  function lget(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+  function lset(k,v){ try { localStorage.setItem(k, v); } catch(e){} }
+  function isObj(x){ return x && typeof x === "object" && !Array.isArray(x); }
+  function isArr(x){ return Array.isArray(x); }
+  function str(x){ return (x==null) ? "" : String(x); }
+
+  function poke(){
+    try{ lset("__NG_POKE__", String(Date.now())); localStorage.removeItem("__NG_POKE__"); }catch(e){}
+  }
 
   function readDrafts(){
-    try {
-      const s = localStorage.getItem(LS.drafts);
-      const j = s ? JSON.parse(s) : [];
-      return Array.isArray(j) ? j : [];
-    } catch { return []; }
+    var arr = jparse(lget(PRIMARY_KEY)||"[]", []);
+    if (arr && arr.length) return { key: PRIMARY_KEY, arr: arr };
+    arr = jparse(lget(LEGACY_KEY)||"[]", []);
+    if (arr && arr.length) return { key: LEGACY_KEY, arr: arr };
+    return { key: PRIMARY_KEY, arr: [] };
   }
 
-  function setLS(k,v){ try{ localStorage.setItem(k, String(v)); }catch{} }
+  function getDraftId(d, i){
+    return String((d && (d.id || d.uid || d.key || d._id || d.draft_id)) || ("i:"+i));
+  }
 
-  function applyFormFallback(form){
-    if (!form || typeof form !== "object") return false;
-    const els = Array.from(document.querySelectorAll("input,textarea,select"));
-    const byKey = new Map();
-    for (const el of els){
-      const key = el.name || el.id;
-      if (!key) continue;
-      if (!byKey.has(key)) byKey.set(key, []);
-      byKey.get(key).push(el);
-    }
-    for (const key of Object.keys(form)){
-      const val = form[key];
-      const targets = byKey.get(key);
-      if (!targets) continue;
-      for (const el of targets){
-        const type = (el.type || "").toLowerCase();
-        try{
-          if (type === "checkbox") el.checked = !!val;
-          else if (type === "radio") el.checked = (String(el.value) === String(val));
-          else el.value = Array.isArray(val) ? (val[0] ?? "") : String(val ?? "");
-          el.dispatchEvent(new Event("input", {bubbles:true}));
-          el.dispatchEvent(new Event("change",{bubbles:true}));
-        }catch{}
+  function pickIdx(pack){
+    var drafts = pack.arr || [];
+    if (!drafts.length) return -1;
+
+    var selId = lget(SEL_ID_KEY);
+    if (selId){
+      for (var i=0;i<drafts.length;i++){
+        if (getDraftId(drafts[i], i) === selId) return i;
       }
     }
-    return true;
+    var idx = parseInt(lget(SEL_IDX_KEY), 10);
+    if (!(idx >= 0 && idx < drafts.length)) idx = drafts.length - 1; // last
+    return idx;
   }
 
-  function applyForm(form){
-    try {
-      if (window.__NG_DASH__ && typeof window.__NG_DASH__.applyForm === "function") {
-        return window.__NG_DASH__.applyForm(form);
-      }
-    } catch {}
-    return applyFormFallback(form);
+  function looksSaveBtn(t){
+    if (!t) return false;
+    var b = t.closest ? t.closest("button,a,[role='button']") : null;
+    var id = ((b && b.id) ? b.id : (t.id||"")).toLowerCase();
+    var txt = (((b && b.textContent) ? b.textContent : t.textContent) || "").toLowerCase();
+    return (id.indexOf("save")>=0 && id.indexOf("draft")>=0) || (txt.indexOf("save draft")>=0);
   }
 
-  function loadByIdx(idx){
-    const drafts = readDrafts();
-    const i = Number(idx);
-    if (!Number.isFinite(i) || i < 0 || i >= drafts.length) return false;
-    const d = drafts[i] || {};
-    const ok = applyForm(d.form || {});
-    if (d.id) setLS(LS.curId, d.id);
-    setLS(LS.selIdx, i);
-    console.log("✅ DASH: Loaded draft", { idx:i, id:d.id, title:d.title, status:d.status, formApplied: !!ok });
-    return true;
+  function looksPublishBtn(t){
+    if (!t) return false;
+    var b = t.closest ? t.closest("button,a,[role='button']") : null;
+    var id = ((b && b.id) ? b.id : (t.id||"")).toLowerCase();
+    var txt = (((b && b.textContent) ? b.textContent : t.textContent) || "").toLowerCase();
+    return (id.indexOf("published")>=0) || (txt.indexOf("mark published")>=0);
   }
 
-  function findLibraryBar(){
-    // find a container that has Download TXT and Download JSON buttons
-    const btns = Array.from(document.querySelectorAll("button"));
-    const bTxt = btns.find(b => /download\s*txt/i.test(t(b)));
-    if (!bTxt) return null;
-
-    let p = bTxt;
-    for (let k=0; k<10 && p; k++){
-      if (p.querySelectorAll){
-        const inside = Array.from(p.querySelectorAll("button")).map(x => t(x));
-        const hasTxt  = inside.some(s => /download\s*txt/i.test(s));
-        const hasJson = inside.some(s => /download\s*json/i.test(s));
-        if (hasTxt && hasJson) return p;
-      }
-      p = p.parentElement;
+  function normalizeToV9(d){
+    // ensure dp.blocks.generated exists (use your V4 function)
+    var dp = null;
+    if (typeof window.ensureDraftHasDigipack === "function") {
+      dp = window.ensureDraftHasDigipack(d);
     }
-    return bTxt.parentElement;
+    dp = dp || (d && d.dp) || { blocks: {} };
+    if (!isObj(dp.blocks)) dp.blocks = {};
+    var g = dp.blocks.generated || {};
+    if (!isObj(g)) g = {};
+
+    // V9 fields
+    d.story = isObj(d.story) ? d.story : {};
+    d.story.view_version = 9;
+    d.story.storyview_version = 9;
+
+    // store raw in a parse-friendly shape (so future loads always work)
+    d.story.digipack = isObj(d.story.digipack) ? d.story.digipack : {};
+    try{
+      d.story.digipack.raw = JSON.stringify({ blocks: { generated: g } });
+    }catch(e){
+      d.story.digipack.raw = "";
+    }
+
+    d.storyview_v9 = {
+      version: 9,
+      ts: new Date().toISOString(),
+      headline: str(g.headline || d.headline || (d.form && d.form.headline) || d.title || ""),
+      key_points: isArr(g.key_points) ? g.key_points : [],
+      lines: isArr(g.lines) ? g.lines : [],
+      web_article: str(g.web_article || ""),
+      video: str(g.video || "")
+    };
+
+    // extra aliases (in case your UI checks different keys)
+    d.story_view_version = 9;
+    d.storyViewVersion = 9;
+    d.story_view = "v9";
+    d.storyView = "V9";
+
+    // keep dp back on draft
+    d.dp = dp;
+    return { dp: dp, g: g };
   }
 
-  function ensureUI(){
-    const bar = findLibraryBar();
-    if (!bar) return;
+  function afterAction(tag){
+    try{
+      var pack = readDrafts();
+      if (!pack.arr.length) {
+        console.warn("[NG_SAVEDRAFT_V9_LOCK] no drafts", tag);
+        return;
+      }
+      var idx = pickIdx(pack);
+      if (!(idx >= 0 && idx < pack.arr.length)) idx = pack.arr.length - 1;
 
-    if (bar.querySelector("#ngDraftPickerV1")) return;
+      var d = pack.arr[idx] || pack.arr[pack.arr.length - 1];
+      if (!d) return;
 
-    const wrap = document.createElement("div");
-    wrap.style.cssText = "display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;";
+      var out = normalizeToV9(d);
 
-    const label = document.createElement("div");
-    label.textContent = "Draft:";
-    label.style.cssText = "font-size:12px; opacity:0.85;";
+      // selection sync
+      var id = getDraftId(d, idx);
+      lset(SEL_ID_KEY, id);
+      lset(SEL_IDX_KEY, String(idx));
 
-    const sel = document.createElement("select");
-    sel.id = "ngDraftPickerV1";
-    sel.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#0b0d0f; color:#e8eaed;";
+      // persist to both stores
+      pack.arr[idx] = d;
+      lset(pack.key, JSON.stringify(pack.arr));
+      lset(PRIMARY_KEY, JSON.stringify(pack.arr));
+      lset(LEGACY_KEY, JSON.stringify(pack.arr));
 
-    const btnLoad = document.createElement("button");
-    btnLoad.type = "button";
-    btnLoad.textContent = "Load";
-    btnLoad.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#171a1d; color:#e8eaed; cursor:pointer;";
+      poke();
 
-    const btnRef = document.createElement("button");
-    btnRef.type = "button";
-    btnRef.textContent = "Refresh List";
-    btnRef.style.cssText = btnLoad.style.cssText;
-
-    function fill(){
-      const drafts = readDrafts();
-      let cur = "";
-      try { cur = localStorage.getItem(LS.selIdx) || ""; } catch {}
-      sel.innerHTML = "";
-      drafts.forEach((d, i) => {
-        const opt = document.createElement("option");
-        const title = (d && d.title) ? String(d.title) : "Untitled";
-        const st = (d && d.status) ? String(d.status) : "draft";
-        opt.value = String(i);
-        opt.textContent = `${i}: ${title} [${st}]`;
-        if (String(i) === String(cur)) opt.selected = true;
-        sel.appendChild(opt);
+      console.log("[NG_SAVEDRAFT_V9_LOCK] ok", {
+        tag: tag, idx: idx, id: id,
+        webLen: (out.g && out.g.web_article) ? String(out.g.web_article).length : 0
       });
-      if (!drafts.length) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "(No drafts found)";
-        sel.appendChild(opt);
-      }
-    }
-
-    btnLoad.addEventListener("click", () => loadByIdx(sel.value), false);
-    sel.addEventListener("change", () => loadByIdx(sel.value), false);
-    btnRef.addEventListener("click", fill, false);
-
-    wrap.appendChild(label);
-    wrap.appendChild(sel);
-    wrap.appendChild(btnLoad);
-    wrap.appendChild(btnRef);
-
-    bar.appendChild(wrap);
-    fill();
-  }
-
-  ensureUI();
-  new MutationObserver(ensureUI).observe(document.documentElement, { childList:true, subtree:true });
-
-  console.log("[NG_LIBRARY_DRAFT_PICKER_V1] installed");
-})();
-</script>
-<!-- NG_PATCH_END: NG_LIBRARY_DRAFT_PICKER_V1 -->
-<!-- NG_PATCH_START: NG_STANDARD_UI_TOGGLE_V1 -->
-<style id="ng-std-ui-style-v1">
-  .ng-std-hidden { display: none !important; }
-  #ng-std-ui-toggle-root {
-    position: fixed;
-    top: 12px;
-    right: 12px;
-    z-index: 2147483000;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    user-select: none;
-  }
-  #ng-std-ui-toggle-root .ngpill {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    padding: 8px;
-    border-radius: 999px;
-    background: rgba(20,20,20,0.78);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  }
-  #ng-std-ui-toggle-root .nglbl {
-    font-size: 12px;
-    color: rgba(255,255,255,0.82);
-    padding: 0 6px;
-  }
-  #ng-std-ui-toggle-root button {
-    border: 0;
-    border-radius: 999px;
-    padding: 6px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    background: rgba(255,255,255,0.14);
-    color: rgba(255,255,255,0.92);
-  }
-  #ng-std-ui-toggle-root button:hover { background: rgba(255,255,255,0.20); }
-  #ng-std-ui-toggle-root button.active {
-    background: rgba(255,255,255,0.92);
-    color: rgba(0,0,0,0.85);
-  }
-</style>
-
-<script id="ng-std-ui-toggle-v1">
-(function () {
-  const TAG = "NG_STANDARD_UI_TOGGLE_V1";
-  if (window.__NG_STANDARD_UI_TOGGLE_V1) {
-    console.log(`[${TAG}] already installed`);
-    return;
-  }
-
-  const KEY = "NG_STD_UI_MODE_V1";
-  const DEFAULT_MODE = "simple"; // change to "advanced" if you ever want default advanced
-  const HIDE_CLASS = "ng-std-hidden";
-  const ROOT_ID = "ng-std-ui-toggle-root";
-
-  const RX = {
-    transcript: /(load\s*transcript|transcript\s*json|reverie)/i,
-    bytes: /(copy\s*bytes\s*json|\bbytes\b|quotes\s*\/\s*sot|\bsot\b)/i,
-    visuals: /(\bvisuals\b|b-?roll|\bshot\b|\bsrt\b|web\s*,\s*video)/i,
-    logs: /(\blogs\b|debug\s*log|console\s*log)/i,
-    storyview: /(story\s*view)/i,
-  };
-
-  function log(...a){ console.log(`[${TAG}]`, ...a); }
-  function warn(...a){ console.warn(`[${TAG}]`, ...a); }
-
-  function getMode(){
-    const v = (localStorage.getItem(KEY) || "").toLowerCase();
-    return (v === "advanced" || v === "simple") ? v : DEFAULT_MODE;
-  }
-
-  function setMode(mode){
-    mode = String(mode || "").toLowerCase();
-    if (mode !== "simple" && mode !== "advanced") mode = DEFAULT_MODE;
-    localStorage.setItem(KEY, mode);
-    applyMode();
-  }
-
-  function safeText(el){
-    try {
-      return (el && el.textContent ? el.textContent : "").replace(/\s+/g, " ").trim();
-    } catch { return ""; }
-  }
-
-  function qsa(sel){
-    try { return Array.from(document.querySelectorAll(sel)); }
-    catch { return []; }
-  }
-
-  function pickBlock(el){
-    // choose a reasonably local container to hide
-    let cur = el;
-    for (let i = 0; i < 10 && cur && cur !== document.body; i++) {
-      if (cur.id === ROOT_ID) return null;
-      if (cur.closest && cur.closest("#" + ROOT_ID)) return null;
-
-      if (cur.matches && cur.matches("fieldset,section,details,article")) return cur;
-
-      // common “group” containers
-      if (cur.matches && cur.matches(".card,.panel,.box,.block,.group,.wrap,.container")) return cur;
-
-      // div with some identity and form controls inside
-      if (cur.tagName === "DIV" && (cur.id || cur.className)) {
-        const n = cur.querySelectorAll ? cur.querySelectorAll("input,textarea,select,button").length : 0;
-        if (n >= 1) return cur;
-      }
-      cur = cur.parentElement;
-    }
-    return el && el.parentElement ? el.parentElement : el;
-  }
-
-  function hideEl(el, reason){
-    if (!el) return;
-    if (el.id === ROOT_ID) return;
-    if (el.closest && el.closest("#" + ROOT_ID)) return;
-    if (el === document.body || el === document.documentElement) return;
-
-    el.classList.add(HIDE_CLASS);
-    el.setAttribute("data-ng-std-hidden", "1");
-    if (reason) el.setAttribute("data-ng-std-reason", reason);
-  }
-
-  function showEl(el){
-    if (!el) return;
-    el.classList.remove(HIDE_CLASS);
-    el.removeAttribute("data-ng-std-hidden");
-    el.removeAttribute("data-ng-std-reason");
-  }
-
-  function findHeaderHits(regex){
-    const sel = "h1,h2,h3,h4,h5,h6,legend,label,summary,button,p,small,strong";
-    return qsa(sel).filter(el => {
-      if (el.id === ROOT_ID) return false;
-      if (el.closest && el.closest("#" + ROOT_ID)) return false;
-      const t = safeText(el);
-      if (!t) return false;
-      // avoid matching huge blocks
-      if (t.length > 220) return false;
-      return regex.test(t);
-    });
-  }
-
-  function collectSimpleTargets(){
-    const targets = new Set();
-
-    function addBlockFrom(el, reason){
-      const b = pickBlock(el);
-      if (!b) return;
-      if (b === document.body || b === document.documentElement) return;
-      if (b.closest && b.closest("#" + ROOT_ID)) return;
-      b.__ngStdReason = reason;
-      targets.add(b);
-    }
-
-    // Transcript targets: headings + common ids/names
-    findHeaderHits(RX.transcript).forEach(el => addBlockFrom(el, "transcript"));
-    qsa('textarea[id*="reverie" i],textarea[name*="reverie" i],textarea[id*="transcript" i],textarea[name*="transcript" i]')
-      .forEach(el => addBlockFrom(el, "transcript"));
-
-    // Bytes targets: known field names + headings/buttons
-    qsa('input[name="byte_speaker[]"],input[name="byte_designation[]"],textarea[name="byte_text[]"],textarea[name="byte_text"],input[name="byte_time[]"],input[name="byte_time"]')
-      .forEach(el => addBlockFrom(el, "bytes"));
-    findHeaderHits(RX.bytes).forEach(el => addBlockFrom(el, "bytes"));
-
-    // Visuals targets: headings + name/id hints
-    findHeaderHits(RX.visuals).forEach(el => addBlockFrom(el, "visuals"));
-    qsa('textarea[id*="visual" i],textarea[name*="visual" i],input[id*="visual" i],input[name*="visual" i],textarea[id*="srt" i],textarea[name*="srt" i],textarea[id*="shot" i],textarea[name*="shot" i],textarea[id*="broll" i],textarea[name*="broll" i]')
-      .forEach(el => addBlockFrom(el, "visuals"));
-
-    // Logs targets: headings + id/class contains log/debug (pre/textarea/div)
-    findHeaderHits(RX.logs).forEach(el => addBlockFrom(el, "logs"));
-    qsa('pre[id*="log" i],pre[class*="log" i],textarea[id*="log" i],textarea[class*="log" i],div[id*="debug" i],div[class*="debug" i],div[id*="log" i],div[class*="log" i]')
-      .forEach(el => addBlockFrom(el, "logs"));
-
-    // Story View (Debug): hide buttons/links + any open panel-like node
-    qsa("button,a").filter(el => RX.storyview.test(safeText(el))).forEach(el => {
-      // hide the control itself (not the whole page)
-      targets.add(el);
-      el.__ngStdReason = "storyview_btn";
-    });
-
-    // attempt to catch the floating Story View panel when open
-    // heuristic: contains "Story View" + "Updated @" + "Close"
-    qsa('div,section,details').forEach(el => {
-      if (el.id === ROOT_ID) return;
-      if (el.closest && el.closest("#" + ROOT_ID)) return;
-      const t = safeText(el);
-      if (!t || t.length < 30 || t.length > 2500) return;
-      if (RX.storyview.test(t) && /updated\s*@/i.test(t) && /\bclose\b/i.test(t)) {
-        addBlockFrom(el, "storyview_panel");
-      }
-    });
-
-    return Array.from(targets);
-  }
-
-  function ensureToggleUI(){
-    if (document.getElementById(ROOT_ID)) return;
-
-    const root = document.createElement("div");
-    root.id = ROOT_ID;
-
-    root.innerHTML = `
-      <div class="ngpill">
-        <span class="nglbl">UI</span>
-        <button type="button" data-ng-mode="simple">Simple</button>
-        <button type="button" data-ng-mode="advanced">Advanced</button>
-      </div>
-    `;
-
-    root.addEventListener("click", (e) => {
-      const btn = e.target && e.target.closest ? e.target.closest("button[data-ng-mode]") : null;
-      if (!btn) return;
-      setMode(btn.getAttribute("data-ng-mode"));
-    });
-
-    (document.body || document.documentElement).appendChild(root);
-  }
-
-  function paintActive(mode){
-    const root = document.getElementById(ROOT_ID);
-    if (!root) return;
-    qsa(`#${ROOT_ID} button[data-ng-mode]`).forEach(b => {
-      const m = b.getAttribute("data-ng-mode");
-      if (m === mode) b.classList.add("active");
-      else b.classList.remove("active");
-    });
-  }
-
-  function showAllPreviouslyHidden(){
-    qsa('[data-ng-std-hidden="1"]').forEach(showEl);
-  }
-
-  let pending = false;
-  function scheduleApply(){
-    if (pending) return;
-    pending = true;
-    setTimeout(() => { pending = false; applyMode(); }, 120);
-  }
-
-  function applyMode(){
-    ensureToggleUI();
-
-    const mode = getMode();
-    document.documentElement.setAttribute("data-ng-std-ui", mode);
-    paintActive(mode);
-
-    // First: restore everything we hid
-    showAllPreviouslyHidden();
-
-    if (mode === "simple") {
-      const t = collectSimpleTargets();
-      t.forEach(el => hideEl(el, el.__ngStdReason || ""));
-      log("mode=simple", "hiddenCount=", t.length);
-    } else {
-      log("mode=advanced", "simple targets visible");
+    }catch(err){
+      console.warn("[NG_SAVEDRAFT_V9_LOCK] fail", err);
     }
   }
 
-  // public helpers for console
-  window.__NG_STANDARD_UI_TOGGLE_V1 = {
-    tag: TAG,
-    key: KEY,
-    getMode,
-    setMode,
-    applyMode,
-    rescan: applyMode,
-    debugScan: () => {
-      const t = collectSimpleTargets();
-      log("debugScan targets:", t.map(x => ({
-        tag: x.tagName,
-        id: x.id || "",
-        cls: (x.className && String(x.className).slice(0, 120)) || "",
-        reason: x.__ngStdReason || ""
-      })));
-      return t;
-    }
-  };
-
-  // run now
-  function boot(){
-    try { applyMode(); }
-    catch (e) { warn("boot error", e); }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
-
-  // keep it working for dynamically injected panels (Story View etc.)
-  try {
-    const mo = new MutationObserver(() => {
-      if (getMode() === "simple") scheduleApply();
-    });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-  } catch (e) {
-    warn("MutationObserver failed", e);
-  }
-
-  log("installed ✓", { default: DEFAULT_MODE, key: KEY });
-})();
-</script>
-<!-- NG_PATCH_END: NG_STANDARD_UI_TOGGLE_V1 -->
-<!-- NG_PATCH_START: NG_STD_SECTION_IDS_V1 -->
-<style>
-  /* Enforce Simple mode purely by IDs (deterministic) */
-  html[data-ng-std-ui="simple"] #ng-sec-transcript,
-  html[data-ng-std-ui="simple"] #ng-sec-bytes,
-  html[data-ng-std-ui="simple"] #ng-sec-visuals,
-  html[data-ng-std-ui="simple"] #ng-sec-logs,
-  html[data-ng-std-ui="simple"] #ng-btn-storyview,
-  html[data-ng-std-ui="simple"] #ng-panel-storyview {
-    display: none !important;
-  }
-</style>
-
-<script>
-(function(){
-  const TAG = "NG_STD_SECTION_IDS_V1";
-  if (window.__NG_STD_SECTION_IDS_V1) return;
-
-  const RX = {
-    addByte: /add\s*byte/i,
-    addVisual: /add\s*visual/i,
-    reverie: /reverie/i,
-    reverieLine: /reverie\s*output\s*json/i,
-    pasteJson: /paste\s*json\s*here/i,
-    storyView: /story\s*view/i,
-    updatedAt: /updated\s*@/i,
-    close: /\bclose\b/i,
-    editorial: /editorial\s*extraction/i,
-    status: /\bstatus\b/i,
-    log: /^log$/i
-  };
-
-  const IDS = {
-    transcript: "ng-sec-transcript",
-    bytes: "ng-sec-bytes",
-    visuals: "ng-sec-visuals",
-    logs: "ng-sec-logs",
-    storyBtn: "ng-btn-storyview",
-    storyPanel: "ng-panel-storyview"
-  };
-
-  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
-  function qsa(sel){ try { return Array.from(document.querySelectorAll(sel)); } catch { return []; } }
-
-  function findByButton(rx){
-    const btns = qsa("button,[role='button'],a");
-    return btns.find(b => rx.test(norm(b.textContent)));
-  }
-
-  function findByText(rx){
-    const nodes = qsa("div,span,p,strong,b,small,label,h1,h2,h3,h4,h5,h6,summary,legend");
-    return nodes.find(n => {
-      const t = norm(n.textContent);
-      return t && t.length <= 200 && rx.test(t);
-    });
-  }
-
-  function pickCard(startEl, mustHaveRx){
-    if (!startEl) return null;
-    let cur = startEl;
-    for (let i=0; i<18 && cur && cur !== document.body; i++){
-      const t = norm(cur.textContent);
-      // avoid picking the whole page/root
-      const tooBig =
-        /newsgenie/i.test(t) ||
-        /what happened/i.test(t) ||
-        /sources\s*\/\s*references/i.test(t) ||
-        /background/i.test(t) ||
-        /generate\s*digi_pack/i.test(t);
-
-      if (!tooBig) {
-        if (!mustHaveRx || mustHaveRx.test(t)) {
-          // container-ish check
-          const btnCount = cur.querySelectorAll ? cur.querySelectorAll("button").length : 0;
-          const hasTitle = cur.querySelector && cur.querySelector("h1,h2,h3,h4,strong,b,div,span");
-          if (btnCount >= 1 || hasTitle) return cur;
-        }
-      }
-      cur = cur.parentElement;
-    }
-    return null;
-  }
-
-  function setId(el, id){
-    if (!el) return false;
-    if (el.id && el.id !== id) return false;     // don't clobber existing IDs
-    if (!el.id) el.id = id;
-    el.setAttribute("data-ng-sec", id);
-    return true;
-  }
-
-  function ensureIDs(){
-    // Bytes section: find "+ Add Byte" button -> pick card containing "Bytes"
-    const btnByte = findByButton(RX.addByte);
-    const cardByte = pickCard(btnByte, /bytes/i);
-    setId(cardByte, IDS.bytes);
-
-    // Visuals section: find "+ Add Visual" button -> pick card containing "Visuals"
-    const btnVis = findByButton(RX.addVisual);
-    const cardVis = pickCard(btnVis, /visuals/i);
-    setId(cardVis, IDS.visuals);
-
-    // Transcript/Reverie section: detect by text line or placeholder-like text
-    const t1 = findByText(RX.reverieLine) || findByText(RX.pasteJson) || findByText(RX.reverie);
-    const cardTr = pickCard(t1, RX.reverie);
-    setId(cardTr, IDS.transcript);
-
-    // Story View button id (separate)
-    const storyBtn = findByButton(RX.storyView);
-    if (storyBtn && !storyBtn.id) storyBtn.id = IDS.storyBtn;
-
-    // Logs / Editorial extraction section
-    const ed = findByText(RX.editorial) || findByText(RX.status) || findByText(RX.log);
-    const cardLog = pickCard(ed, /(editorial|status|log)/i);
-    setId(cardLog, IDS.logs);
-
-    // Story View floating panel when open (looks like: "Story View" + "Updated @" + "Close")
-    qsa("div,section,article").forEach(el => {
-      if (el.id === IDS.storyPanel) return;
-      const t = norm(el.textContent);
-      if (!t || t.length < 40 || t.length > 2500) return;
-      if (RX.storyView.test(t) && RX.updatedAt.test(t) && RX.close.test(t)) {
-        if (!el.id) el.id = IDS.storyPanel;
-      }
-    });
-  }
-
-  function boot(){
-    ensureIDs();
-    try {
-      new MutationObserver(() => ensureIDs())
-        .observe(document.documentElement, { childList:true, subtree:true });
-    } catch(e){}
-    console.log("[" + TAG + "] installed ✓");
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once:true });
-  } else {
-    boot();
-  }
-
-  window.__NG_STD_SECTION_IDS_V1 = {
-    tag: TAG,
-    ensure: ensureIDs,
-    dump: () => ({
-      transcript: !!document.getElementById(IDS.transcript),
-      bytes: !!document.getElementById(IDS.bytes),
-      visuals: !!document.getElementById(IDS.visuals),
-      logs: !!document.getElementById(IDS.logs),
-      storyBtn: !!document.getElementById(IDS.storyBtn),
-      storyPanel: !!document.getElementById(IDS.storyPanel),
-    })
-  };
-})();
-</script>
-<!-- NG_PATCH_END: NG_STD_SECTION_IDS_V1 -->
-<!-- NG_PATCH_START: NG_STD_SECTION_IDS_FIX_V1 -->
-<script>
-(function(){
-  const TAG = "NG_STD_SECTION_IDS_FIX_V1";
-  if (window.__NG_STD_SECTION_IDS_FIX_V1) return;
-
-  const base = window.__NG_STD_SECTION_IDS_V1;
-  if (!base) {
-    console.warn("[" + TAG + "] base NG_STD_SECTION_IDS_V1 not found");
-    return;
-  }
-
-  const IDS = {
-    transcript: "ng-sec-transcript",
-    bytes: "ng-sec-bytes",
-    visuals: "ng-sec-visuals",
-    logs: "ng-sec-logs",
-    storyBtn: "ng-btn-storyview",
-    storyPanel: "ng-panel-storyview"
-  };
-
-  const RX = {
-    addByte: /add\s*byte/i,
-    addVisual: /add\s*visual/i,
-    storyView: /story\s*view/i,        // catches "Story View V9"
-    editorial: /editorial\s*extraction/i,
-    discard: /discard/i,
-    clearSug: /clear\s*suggestions/i,
-    pushToBytes: /push\s*selected\s*to\s*bytes/i,
-    status: /\bstatus\b/i,
-    logWord: /^log$/i
-  };
-
-  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
-  function qsa(sel){ try { return Array.from(document.querySelectorAll(sel)); } catch { return []; } }
-
-  function findClickable(rx){
-    // scan common clickable candidates (not only <button>)
-    const nodes = qsa("button,a,[role='button'],[onclick],div,span");
-    for (const el of nodes){
-      const t = norm(el.textContent);
-      if (!t || t.length > 80) continue;
-      if (rx.test(t)) return el;
-    }
-    return null;
-  }
-
-  function pickCardFrom(startEl){
-    if (!startEl) return null;
-    let cur = startEl;
-    for (let i=0; i<20 && cur && cur !== document.body; i++){
-      const t = norm(cur.textContent);
-
-      // avoid grabbing whole form/page
-      const tooBig =
-        /newsgenie/i.test(t) ||
-        /what happened/i.test(t) ||
-        /sources\s*\/\s*references/i.test(t) ||
-        /background/i.test(t) ||
-        /generate\s*digi_pack/i.test(t);
-
-      if (!tooBig && cur.querySelectorAll) {
-        // a section/card usually has at least 1 control
-        const controls = cur.querySelectorAll("input,textarea,select,button").length;
-        if (controls >= 1) return cur;
-      }
-      cur = cur.parentElement;
-    }
-    return null;
-  }
-
-  function setId(el, id){
-    if (!el) return false;
-    if (el.id && el.id !== id) return false;
-    if (!el.id) el.id = id;
-    el.setAttribute("data-ng-sec", id);
-    return true;
-  }
-
-  // FIXED ensure: stronger anchors for visuals/logs/storyBtn
-  function ensureFix(){
-    // Visuals: anchor = "+ Add Visual"
-    const addVis = findClickable(RX.addVisual);
-    const visCard = pickCardFrom(addVis);
-    setId(visCard, IDS.visuals);
-
-    // Logs: anchors = "Editorial Extraction" OR "Discard" OR "Clear suggestions" OR "Push selected to Bytes" OR "Status" OR "Log"
-    const logAnchor =
-      findClickable(RX.editorial) ||
-      findClickable(RX.discard) ||
-      findClickable(RX.clearSug) ||
-      findClickable(RX.pushToBytes) ||
-      findClickable(RX.status) ||
-      findClickable(RX.logWord);
-
-    const logCard = pickCardFrom(logAnchor);
-    setId(logCard, IDS.logs);
-
-    // Story View button: anchor = "Story View"
-    const sv = findClickable(RX.storyView);
-    if (sv) setId(sv, IDS.storyBtn);
-
-    // Story View floating panel (when open): already handled by base, but re-check quickly
-    qsa("div,section,article").forEach(el => {
-      const t = norm(el.textContent);
-      if (!t || t.length < 40 || t.length > 2500) return;
-      if (RX.storyView.test(t) && /updated\s*@/i.test(t) && /\bclose\b/i.test(t)) {
-        if (!el.id) el.id = IDS.storyPanel;
-      }
-    });
-  }
-
-  // wrap base.ensure() so FIX runs every time too
-  const origEnsure = base.ensure;
-  base.ensure = function(){
-    try { origEnsure && origEnsure(); } catch(e){}
-    try { ensureFix(); } catch(e){ console.warn("[" + TAG + "]", e); }
-  };
-
-  // run now + keep watching
-  base.ensure();
-  try {
-    new MutationObserver(() => base.ensure())
-      .observe(document.documentElement, { childList:true, subtree:true });
-  } catch(e){}
-
-  window.__NG_STD_SECTION_IDS_FIX_V1 = { tag: TAG };
-  console.log("[" + TAG + "] installed ✓");
-})();
-</script>
-<!-- NG_PATCH_END: NG_STD_SECTION_IDS_FIX_V1 -->
-<!-- NG_PATCH_START: NG_STD_STORYBTN_BIND_V2 -->
-<script>
-(function(){
-  const TAG = "NG_STD_STORYBTN_BIND_V2";
-  if (window.__NG_STD_STORYBTN_BIND_V2) return;
-
-  const TARGET_ID = "ng-btn-storyview";
-  const ATTR = "data-ng-storybtn";
-
-  const base = window.__NG_STD_SECTION_IDS_V1;
-
-  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
-  function isClickable(el){
-    if (!el || !el.tagName) return false;
-    const tag = el.tagName.toUpperCase();
-    if (tag === "BUTTON" || tag === "A" || tag === "SUMMARY" || tag === "LABEL") return true;
-    const role = el.getAttribute && el.getAttribute("role");
-    if (role && role.toLowerCase() === "button") return true;
-    if (el.hasAttribute && (el.hasAttribute("onclick") || el.hasAttribute("tabindex"))) return true;
-    return false;
-  }
-
-  function closestClickable(el){
-    let cur = el;
-    for (let i=0; i<18 && cur && cur !== document.body; i++){
-      if (isClickable(cur)) return cur;
-      cur = cur.parentElement;
-    }
-    return null;
-  }
-
-  function findByTextNode(){
-    const root = document.body || document.documentElement;
-    if (!root) return null;
-
-    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-      acceptNode(node){
-        const t = norm(node.nodeValue);
-        if (!t) return NodeFilter.FILTER_REJECT;
-        const low = t.toLowerCase();
-        // catch "Story View", "StoryView", "Story View V9" etc.
-        if (/(story\s*view|storyview)/i.test(low)) return NodeFilter.FILTER_ACCEPT;
-        return NodeFilter.FILTER_REJECT;
-      }
-    });
-
-    let n;
-    while ((n = tw.nextNode())) {
-      const parent = n.parentElement;
-      if (!parent) continue;
-
-      // prefer the smallest meaningful clickable ancestor
-      const clickEl = closestClickable(parent) || parent;
-      const txt = (norm(clickEl.textContent) + " " +
-                   norm(clickEl.getAttribute?.("aria-label")) + " " +
-                   norm(clickEl.getAttribute?.("title"))).toLowerCase();
-
-      if (!/(story\s*view|storyview)/i.test(txt)) {
-        // if ancestor lost the phrase, keep climbing a bit
-        const up = closestClickable(clickEl.parentElement);
-        if (up) return up;
-      }
-      return clickEl;
-    }
-    return null;
-  }
-
-  function bind(){
-    // already bound?
-    if (document.getElementById(TARGET_ID)) return true;
-
-    const el = findByTextNode();
-    if (!el) return false;
-
-    // Always mark attribute (deterministic selector)
-    try { el.setAttribute(ATTR, "1"); } catch(e){}
-
-    // Set ID only if safe (no existing id)
-    if (!el.id) {
-      el.id = TARGET_ID;
-    } else {
-      // don't clobber existing id; attribute is enough
-    }
-
-    // Patch dump() so storyBtn reflects attribute too
-    if (base && base.dump && !base.__dumpPatchedStoryBtnV2) {
-      const origDump = base.dump.bind(base);
-      base.dump = function(){
-        const d = origDump();
-        const byId = !!document.getElementById(TARGET_ID);
-        const byAttr = !!document.querySelector("[" + ATTR + "='1']");
-        d.storyBtn = byId || byAttr;
-        return d;
-      };
-      base.__dumpPatchedStoryBtnV2 = true;
-    }
-
-    console.log("[" + TAG + "] bound ✓", { tag: el.tagName, id: el.id || "(kept)", hasAttr: el.hasAttribute(ATTR) });
-    return true;
-  }
-
-  function boot(){
-    // try now and keep retrying (because StoryView control may appear only in Advanced)
-    bind();
-    let tries = 0;
-    const timer = setInterval(() => {
-      tries++;
-      if (bind() || tries > 120) clearInterval(timer);
-    }, 150);
-
-    try {
-      new MutationObserver(() => bind())
-        .observe(document.documentElement, { childList:true, subtree:true });
-    } catch(e){}
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once:true });
-  } else {
-    boot();
-  }
-
-  window.__NG_STD_STORYBTN_BIND_V2 = { tag: TAG, bind };
-})();
-</script>
-<!-- NG_PATCH_END: NG_STD_STORYBTN_BIND_V2 -->
-
-
-<!-- NG_PATCH_START: LIBBAR_NO_OVERLAY_V2 -->
-<script>
-(function LIBBAR_NO_OVERLAY_V2(){
-  if (window.__NG_LIBBAR_NO_OVERLAY_V2__) return;
-  window.__NG_LIBBAR_NO_OVERLAY_V2__ = true;
-
-  const TAG = "[LIBBAR_NO_OVERLAY_V2]";
-
-  function t(el){ return ((el && el.textContent) ? el.textContent : "").trim(); }
-
-  function findLibraryBar(){
-    // find a container that has Download TXT and Download JSON buttons
-    const btns = Array.from(document.querySelectorAll("button"));
-    const bTxt = btns.find(b => /download\s*txt/i.test(t(b)));
-    if (!bTxt) return null;
-
-    let p = bTxt;
-    for (let i=0; i<10 && p; i++){
-      if (p.querySelectorAll){
-        const inside = Array.from(p.querySelectorAll("button")).map(x => t(x));
-        const hasTxt  = inside.some(s => /download\s*txt/i.test(s));
-        const hasJson = inside.some(s => /download\s*json/i.test(s));
-        if (hasTxt && hasJson) return p;
-      }
-      p = p.parentElement;
-    }
-    return bTxt.parentElement;
-  }
-
-  function isInside(el, parent){
-    try { return !!(el && parent && parent.contains(el)); } catch { return false; }
-  }
-
-  function toggleMainLibraryButton(excludeBar){
-    const all = Array.from(document.querySelectorAll("button"));
-    const cand = all.find(b => t(b) === "Library" && !isInside(b, excludeBar));
-    if (cand && typeof cand.click === "function") { cand.click(); return true; }
-    return false;
-  }
-
-  function ensureSpacer(bar){
-    let sp = document.getElementById("ngLibBarSpacer");
-    const h = Math.ceil((bar.getBoundingClientRect().height || 0));
-    if (!sp) {
-      sp = document.createElement("div");
-      sp.id = "ngLibBarSpacer";
-      sp.style.cssText = "width:100%; height:0px;";
-      (document.body || document.documentElement).prepend(sp);
-    }
-    sp.style.height = (h > 0 ? h : 56) + "px";
-  }
-
-  function removeSpacer(){
-    const sp = document.getElementById("ngLibBarSpacer");
-    if (sp) sp.remove();
-  }
-
-  function injectClose(bar){
-    if (bar.querySelector('button[data-ng-libbar-close="1"]')) return;
-
-    const closeBtn = document.createElement("button");
-    closeBtn.type = "button";
-    closeBtn.textContent = "Close";
-    closeBtn.setAttribute("data-ng-libbar-close","1");
-    closeBtn.style.cssText =
-      "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; " +
-      "background:#171a1d; color:#e8eaed; cursor:pointer; margin-left:8px;";
-
-    closeBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      bar.style.setProperty("display","none","important");
-      removeSpacer();
-      toggleMainLibraryButton(bar);
-      console.log("✅ LIBBAR CLOSED");
-    }, true);
-
-    bar.appendChild(closeBtn);
-  }
-
-  function makeNonOverlay(bar){
-    // Try to force STICKY (best)
-    bar.style.setProperty("position", "sticky", "important");
-    bar.style.setProperty("top", "0px", "important");
-    bar.style.setProperty("left", "0px", "important");
-    bar.style.setProperty("right", "0px", "important");
-    bar.style.setProperty("z-index", "9999", "important");
-    bar.style.setProperty("box-sizing", "border-box", "important");
-    bar.style.setProperty("background", "rgba(11,13,15,0.95)", "important");
-    bar.style.setProperty("backdrop-filter", "blur(6px)", "important");
-    bar.style.setProperty("padding", "8px", "important");
-    bar.style.setProperty("border-radius", "14px", "important");
-    bar.style.setProperty("margin", "8px", "important");
-    bar.style.setProperty("transform", "translateZ(0)", "important");
-
-    injectClose(bar);
-
-    // If some script still keeps it FIXED, add spacer so it never covers content
-    setTimeout(() => {
-      try {
-        const pos = getComputedStyle(bar).position;
-        if (pos === "fixed") ensureSpacer(bar);
-        else removeSpacer();
-      } catch {}
-    }, 0);
-  }
-
-  function apply(){
-    const bar = findLibraryBar();
-    if (!bar) return;
-    makeNonOverlay(bar);
-  }
-
-  apply();
-  new MutationObserver(apply).observe(document.documentElement, { childList:true, subtree:true });
-  // extra safety: if other scripts re-override after a delay
-  setInterval(apply, 500);
-
-  console.log(TAG, "installed");
-})();
-</script>
-<!-- NG_PATCH_END: LIBBAR_NO_OVERLAY_V2 -->
-
-
-
-<!-- NG_PATCH_START: STORYVIEW_SWAP_FIX_V7CLEAN -->
-<script>
-(function STORYVIEW_SWAP_FIX_V7CLEAN(){
-  if (window.__NG_SV_FIX_V7CLEAN_INSTALLED__) return;
-  window.__NG_SV_FIX_V7CLEAN_INSTALLED__ = true;
-
-  const SEG_IDS = ["ngSegBtnV2", "ng-seg-copy"];
-
-  function killSegments(){
-    for (const id of SEG_IDS) {
-      const el = document.getElementById(id);
-      if (el) el.remove();
-    }
-  }
-
-  function ensureStoryBtn(){
-    const b = document.getElementById("btn-storyview-v9");
-    if (!b) return null;
-    b.type = "button";
-    b.style.setProperty("pointer-events", "auto", "important");
-    b.style.setProperty("z-index", "2147483647", "important");
-    return b;
-  }
-
-  function safeGetLS(key){
-    try { return localStorage.getItem(key); } catch { return null; }
-  }
-
-  function collectStoryText(){
-    const keys = [
-      "NG_DRAFTS",
-      "NG_DRAFTS_V2",
-      "NG_LASTPACK_CAPTURE_V1",
-      "NG_LASTPACK",
-      "NG_TRANSCRIPT",
-      "NG_TRANSCRIPT_JSON",
-      "NG_LAST_API_DIGIPACK",
-      "NG_DIGIPACK_LAST"
-    ];
-
-    const found = [];
-    for (const k of keys) {
-      const v = safeGetLS(k);
-      if (v && String(v).length) found.push({ k, len: String(v).length, v });
-    }
-
-    try {
-      const extra = [];
-      for (let i=0; i<localStorage.length && extra.length<6; i++){
-        const k = localStorage.key(i);
-        if (!k) continue;
-        if (/draft|digipack|storyview|transcript/i.test(k) && !keys.includes(k)){
-          const v = safeGetLS(k);
-          if (v && String(v).length) extra.push({ k, len: String(v).length, v });
-        }
-      }
-      found.push(...extra);
-    } catch {}
-
-    const main = found.slice().sort((a,b)=>b.len-a.len)[0];
-    const header = [
-      "NewsGenie Story View (FIX) — fallback modal",
-      "Time: " + new Date().toISOString(),
-      "Found keys: " + (found.map(x => `${x.k}(${x.len})`).join(", ") || "NONE"),
-      "",
-      main ? `Showing: ${main.k} (len=${main.len})` : "No saved story/draft data found in localStorage."
-    ].join("\n");
-
-    return header + "\n\n" + (main ? String(main.v) : "");
-  }
-
-  function restoreLibraryBestEffort(){
-    const ids = ["btn-open-library", "btn-open-lib", "btn-library", "btnOpenLibrary", "btn-open-library-v2"];
-    for (const id of ids) {
-      const el = document.getElementById(id);
-      if (el && typeof el.click === "function") { el.click(); return true; }
-    }
-    const b = [...document.querySelectorAll("button")].find(x => /library/i.test((x.textContent||"").trim()));
-    if (b && typeof b.click === "function") { b.click(); return true; }
-    return false;
-  }
-
-  function ensureModal(){
-    let m = document.getElementById("ngSvFixModal");
-    if (m) return m;
-
-    m = document.createElement("div");
-    m.id = "ngSvFixModal";
-    m.style.cssText = [
-      "position:fixed",
-      "inset:0",
-      "display:none",
-      "background:rgba(0,0,0,0.55)",
-      "z-index:2147483646"
-    ].join(";");
-
-    const panel = document.createElement("div");
-    panel.style.cssText = [
-      "position:absolute",
-      "left:24px",
-      "right:24px",
-      "top:24px",
-      "bottom:24px",
-      "background:#101214",
-      "color:#e8eaed",
-      "border-radius:14px",
-      "box-shadow:0 10px 30px rgba(0,0,0,0.6)",
-      "padding:12px",
-      "overflow:hidden",
-      "font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial"
-    ].join(";");
-
-    const bar = document.createElement("div");
-    bar.style.cssText = "display:flex; gap:8px; align-items:center; justify-content:space-between; padding:6px 4px 10px 4px;";
-
-    const title = document.createElement("div");
-    title.textContent = "Story View (FIX)";
-    title.style.cssText = "font-weight:700; font-size:14px;";
-
-    const btns = document.createElement("div");
-    btns.style.cssText = "display:flex; gap:8px; align-items:center;";
-
-    const mkBtn = (txt) => {
-      const b = document.createElement("button");
-      b.textContent = txt;
-      b.type = "button";
-      b.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#171a1d; color:#e8eaed; cursor:pointer;";
-      return b;
-    };
-
-    const bRefresh = mkBtn("Refresh");
-    const bCopy    = mkBtn("Copy");
-    const bClose   = mkBtn("Close");
-
-    btns.appendChild(bRefresh);
-    btns.appendChild(bCopy);
-    btns.appendChild(bClose);
-
-    bar.appendChild(title);
-    bar.appendChild(btns);
-
-    const pre = document.createElement("pre");
-    pre.id = "ngSvFixBody";
-    pre.style.cssText = [
-      "white-space:pre-wrap",
-      "word-break:break-word",
-      "margin:0",
-      "height:calc(100% - 44px)",
-      "overflow:auto",
-      "padding:10px",
-      "border-radius:12px",
-      "background:#0b0d0f",
-      "border:1px solid #2b2f33",
-      "font-size:12px",
-      "line-height:1.35"
-    ].join(";");
-
-    panel.appendChild(bar);
-    panel.appendChild(pre);
-    m.appendChild(panel);
-
-    (document.body || document.documentElement).appendChild(m);
-
-    const fill = () => { pre.textContent = collectStoryText(); };
-
-    bRefresh.onclick = () => { fill(); console.log("✅ FIX REFRESH"); };
-
-    bCopy.onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(pre.textContent || "");
-        console.log("✅ FIX COPIED");
-      } catch(e) {
-        const ta = document.createElement("textarea");
-        ta.value = pre.textContent || "";
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        ta.remove();
-        console.log("✅ FIX COPIED (fallback)");
-      }
-    };
-
-    bClose.onclick = () => {
-      try { m.style.setProperty("display","none","important"); } catch {}
-      try { m.remove(); } catch {}
-      console.log("✅ FIX CLOSED (removed)");
-      restoreLibraryBestEffort();
-    };
-
-    m.addEventListener("click", (e) => { if (e.target === m) bClose.onclick(); });
-
-    fill();
-    console.log("[SV_FIX_V7] ngSvFixModal created");
-    return m;
-  }
-
-  function openModal(){
-    const m = ensureModal();
-    m.style.setProperty("display", "block", "important");
-    m.style.setProperty("visibility", "visible", "important");
-    m.style.setProperty("opacity", "1", "important");
-    return true;
-  }
-
-  function isStoryViewHit(ev){
-    const b = ensureStoryBtn();
-    if (!b) return false;
-
-    const path = ev.composedPath ? ev.composedPath() : [];
-    if (ev.target === b || path.includes(b)) return true;
-
-    const r = b.getBoundingClientRect();
-    const x = ev.clientX, y = ev.clientY;
-    return (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom);
-  }
-
-  // V7 one-shot + click-block
-  let __ng_sv_lastHit = 0;
-
-  function onSVPointer(ev){
-    if (!ev || !ev.isTrusted) return;
-    if (!isStoryViewHit(ev)) return;
-
-    const t = Date.now();
-    if (t - __ng_sv_lastHit < 600) {
-      ev.preventDefault();
-      ev.stopImmediatePropagation();
+  // Capture-phase: let existing handler run, then normalize
+  window.addEventListener("click", function(e){
+    var t = e && e.target;
+    if (!t) return;
+
+    if (looksSaveBtn(t)){
+      setTimeout(function(){ afterAction("save_draft"); }, 80);
+      setTimeout(function(){ afterAction("save_draft_late"); }, 220);
       return;
     }
-    __ng_sv_lastHit = t;
 
-    killSegments();
-    ensureStoryBtn();
-    openModal();
-    console.log("✅ FIX OPEN (V7)");
+    if (looksPublishBtn(t)){
+      setTimeout(function(){ afterAction("mark_published"); }, 80);
+      setTimeout(function(){ afterAction("mark_published_late"); }, 220);
+      return;
+    }
+  }, true);
 
-    ev.preventDefault();
-    ev.stopImmediatePropagation();
-  }
-
-  function onSVClickBlock(ev){
-    if (!ev || !ev.isTrusted) return;
-    if (Date.now() - __ng_sv_lastHit > 800) return;
-    if (!isStoryViewHit(ev)) return;
-
-    ev.preventDefault();
-    ev.stopImmediatePropagation();
-  }
-
-  // IMPORTANT: install EARLY by placing this block right after <body>
-  window.addEventListener("pointerdown", onSVPointer, true);
-  window.addEventListener("click", onSVClickBlock, true);
-
-  // Keep stable after refresh / reinserts
-  const mo = new MutationObserver(() => { killSegments(); ensureStoryBtn(); });
-  mo.observe(document.documentElement, { childList: true, subtree: true });
-
-  killSegments();
-  ensureStoryBtn();
-  console.log("[SV_FIX_V7] installed");
+  console.log("[NG_SAVEDRAFT_V9_LOCK_V1] installed ✓");
 })();
-</script> 
-<!-- NG_PATCH_END: STORYVIEW_SWAP_FIX_V7CLEAN -->
-
-
+</script>
+<!-- NG_SAVEDRAFT_V9_LOCK_V1_END -->
+<!-- NG_FORCE_STORYVIEW_V9_AUTO_V1_START -->
 <script>
-/* NG_STD_SIMPLE_HIDE_VISUALS_V1 */
+/* NG_FORCE_STORYVIEW_V9_AUTO_V1_GUARD */
 (function(){
-  function norm(t){ return String(t||"").trim().toLowerCase(); }
+  var forceSV = (localStorage.getItem('NG_FORCE_STORYVIEW') === '1') || /[?&]storyview=1\b/.test(location.search);
+  if (!forceSV) { console.log('[NG_FORCE_STORYVIEW_V9_AUTO_V1] skipped (no force)'); return; }
 
-  function findButtons(){
-    const all = Array.from(document.querySelectorAll("button"));
-    const simple = all.find(b => norm(b.textContent) === "simple");
-    const adv    = all.find(b => norm(b.textContent) === "advanced");
-    return { simple, adv };
+(function(){
+  if (window.__NG_FORCE_STORYVIEW_V9_AUTO_V1) return;
+  window.__NG_FORCE_STORYVIEW_V9_AUTO_V1 = true;
+
+  var PRIMARY_KEY = "NG_DIGIPACK_DRAFTS_V1";
+  var LEGACY_KEY  = "NG_DRAFTS";
+  var SEL_IDX_KEY = "NG_DIGIPACK_SELECTED_IDX_V1";
+  var SEL_ID_KEY  = "NG_DIGIPACK_SELECTED_ID_V1";
+
+  function jparse(s, fb){ try { return JSON.parse(s); } catch(e){ return fb; } }
+  function lget(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+  function lset(k,v){ try { localStorage.setItem(k, v); } catch(e){} }
+  function isObj(x){ return x && typeof x === "object" && !Array.isArray(x); }
+  function isArr(x){ return Array.isArray(x); }
+  function str(x){ return (x==null) ? "" : String(x); }
+
+  function fixMojibake(s){
+    s = (s==null) ? "" : String(s);
+    var reps = [
+      ["â€“","–"], ["â€”","—"], ["â€¦","…"], ["â€¢","•"],
+      ["â€˜","‘"], ["â€™","’"], ["â€œ","“"], ["â€�","”"],
+      ["Â",""]
+    ];
+    for (var i=0;i<reps.length;i++) s = s.split(reps[i][0]).join(reps[i][1]);
+    return s;
   }
 
-  function looksActive(b){
-    if(!b) return false;
-    if (b.getAttribute("aria-pressed")==="true") return true;
-    const c = b.classList;
-    if (c.contains("active") || c.contains("on") || c.contains("selected")) return true;
-    if (b.dataset && (b.dataset.active==="1" || b.dataset.on==="1")) return true;
-    // style-based fallback (often active pill has different bg)
+  function readDrafts(){
+    var a = jparse(lget(PRIMARY_KEY)||"[]", []);
+    if (Array.isArray(a) && a.length) return { key: PRIMARY_KEY, arr: a };
+    a = jparse(lget(LEGACY_KEY)||"[]", []);
+    if (Array.isArray(a) && a.length) return { key: LEGACY_KEY, arr: a };
+    return { key: PRIMARY_KEY, arr: [] };
+  }
+
+  function getDraftId(d,i){
+    return String((d && (d.id || d.uid || d.key || d._id || d.draft_id)) || ("i:"+i));
+  }
+
+  function pickSelected(pack){
+    var drafts = pack.arr || [];
+    if (!drafts.length) return { idx:-1, draft:null };
+
+    var selId = lget(SEL_ID_KEY);
+    if (selId){
+      for (var i=0;i<drafts.length;i++){
+        if (getDraftId(drafts[i], i) === selId) return { idx:i, draft:drafts[i] };
+      }
+    }
+    var idx = parseInt(lget(SEL_IDX_KEY),10);
+    if (!(idx>=0 && idx<drafts.length)) idx = drafts.length-1; // auto last
+    return { idx: idx, draft: drafts[idx] };
+  }
+
+  function tryParseAnyJSON(text){
+    var t = str(text).trim();
+    if (!t) return null;
+    // plain json
+    if (t[0]==="{" || t[0]==="["){
+      var o1 = jparse(t, null);
+      if (o1) return o1;
+    }
+    // extract inner {...}
+    var a = t.indexOf("{");
+    var b = t.lastIndexOf("}");
+    if (a>=0 && b>a){
+      var sub = t.slice(a, b+1);
+      var o2 = jparse(sub, null);
+      if (o2) return o2;
+    }
+    return null;
+  }
+
+  function normalizeGenerated(g){
+    if (typeof g === "string") g = jparse(g, {});
+    if (!isObj(g)) g = {};
+    var out = {
+      headline: str(g.headline || g.title || ""),
+      key_points: isArr(g.key_points) ? g.key_points : (isArr(g.KEY_POINTS)?g.KEY_POINTS:[]),
+      lines: isArr(g.lines) ? g.lines : (isArr(g.LINES)?g.LINES:[]),
+      web_article: str(g.web_article || g.webArticle || g.article || g.web || g.body || g.copy || ""),
+      video: str(g.video || g.video_script || g.videoScript || g.social_video || "")
+    };
+    out.web_article = fixMojibake(out.web_article)
+      .replace(/^\s*#{1,6}\s*WEB[_\s-]*ARTICLE\s*\n+/i, "")
+      .replace(/^\s*WEB[_\s-]*ARTICLE\s*:\s*\n+/i, "")
+      .trim();
+    return out;
+  }
+
+  function extractGeneratedFromRaw(d){
+    // strongest source: story.digipack.raw
+    var raw = d && d.story && d.story.digipack && d.story.digipack.raw;
+    var parsed = tryParseAnyJSON(raw);
+    if (parsed){
+      // common shapes
+      if (parsed.blocks && parsed.blocks.generated) return normalizeGenerated(parsed.blocks.generated);
+      if (parsed.dp && parsed.dp.blocks && parsed.dp.blocks.generated) return normalizeGenerated(parsed.dp.blocks.generated);
+      // deep-ish: if blocks.generated_text exists
+      if (parsed.blocks && parsed.blocks.generated_text) return normalizeGenerated(parsed.blocks.generated_text);
+      // fallback: try best fields
+      return normalizeGenerated(parsed);
+    }
+    // fallback: dp.blocks.generated
+    if (d && d.dp && d.dp.blocks && d.dp.blocks.generated) return normalizeGenerated(d.dp.blocks.generated);
+    // last resort: call ensureDraftHasDigipack
+    if (typeof window.ensureDraftHasDigipack === "function"){
+      var dp = window.ensureDraftHasDigipack(d);
+      if (dp && dp.blocks && dp.blocks.generated) return normalizeGenerated(dp.blocks.generated);
+    }
+    return normalizeGenerated({});
+  }
+
+  function forceV9OnSelected(tag){
+    var pack = readDrafts();
+    if (!pack.arr.length) return;
+
+    var picked = pickSelected(pack);
+    var idx = picked.idx;
+    var d = picked.draft;
+    if (!d) return;
+
+    // build V9 snapshot from existing raw
+    var g = extractGeneratedFromRaw(d);
+
+    d.story = isObj(d.story) ? d.story : {};
+    d.story.view_version = 9;
+    d.story.storyview_version = 9;
+
+    // ensure raw exists (don’t destroy existing)
+    d.story.digipack = isObj(d.story.digipack) ? d.story.digipack : {};
+    if (!str(d.story.digipack.raw).trim()){
+      try{ d.story.digipack.raw = JSON.stringify({ blocks:{ generated:g } }); }catch(e){ d.story.digipack.raw = ""; }
+    }
+
+    d.storyview_v9 = {
+      version: 9,
+      ts: new Date().toISOString(),
+      headline: g.headline || str(d.headline || (d.form && d.form.headline) || d.title || ""),
+      key_points: g.key_points || [],
+      lines: g.lines || [],
+      web_article: g.web_article || "",
+      video: g.video || ""
+    };
+
+    // extra aliases (कई जगह UI अलग key देखता है)
+    d.story_view_version = 9;
+    d.storyViewVersion = 9;
+    d.storyview = d.storyview_v9;      // V8 fallback bypass
+    d.story_view = d.storyview_v9;     // alt
+
+    // selection keys hard sync
+    var id = getDraftId(d, idx);
+    lset(SEL_ID_KEY, id);
+    lset(SEL_IDX_KEY, String(idx));
+
+    // persist both stores
+    pack.arr[idx] = d;
+    lset(pack.key, JSON.stringify(pack.arr));
+    lset(PRIMARY_KEY, JSON.stringify(pack.arr));
+    lset(LEGACY_KEY, JSON.stringify(pack.arr));
+
+    console.log("[NG_FORCE_STORYVIEW_V9_AUTO] ok", { tag: tag, idx: idx, id: id, raw_len: str(d.story.digipack.raw).length, web_len: str(d.storyview_v9.web_article).length });
+  }
+
+  // run once on load (helps when reopening library)
+  setTimeout(function(){ forceV9OnSelected("boot"); }, 120);
+
+  // run after ANY click that might change draft/selection (save/publish/library/preview/segments)
+  var timer = null;
+  window.addEventListener("click", function(e){
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(function(){
+      forceV9OnSelected("click");
+      // one more late pass (some handlers save async)
+      setTimeout(function(){ forceV9OnSelected("click_late"); }, 180);
+    }, 80);
+  }, true);
+
+  // expose manual command
+  window.NG_forceV9Now = function(){ forceV9OnSelected("manual"); return true; };
+
+  console.log("[NG_FORCE_STORYVIEW_V9_AUTO_V1] installed ✓");
+})();
+})(); // NG_FORCE_STORYVIEW_V9_AUTO_V1_GUARD_END
+</script>
+<!-- NG_SAVEDRAFT_V9_LOCK_V1_END -->
+
+<!-- NG_FORCE_STORYVIEW_V9_AUTO_V1_START -->
+<script>
+/* NG_FORCE_STORYVIEW_V9_AUTO_V1_GUARD */
+(function(){
+  var forceSV = (localStorage.getItem('NG_FORCE_STORYVIEW') === '1') || /[?&]storyview=1\b/.test(location.search);
+  if (!forceSV) { console.log('[NG_FORCE_STORYVIEW_V9_AUTO_V1] skipped (no force)'); return; }
+
+/* NG_FORCE_STORYVIEW_V9_AUTO_V1 */
+
+// ✅ Guard: StoryView should NOT auto-open unless explicitly forced
+(function(){
+  var forceSV =
+    (localStorage.getItem("NG_FORCE_STORYVIEW") === "1") ||
+    /[?&]storyview=1\b/.test(location.search);
+
+  if (!forceSV) {
+    console.log("[NG_FORCE_STORYVIEW_V9_AUTO_V1] skipped (no force)");
+    return;
+  }
+
+  /* === existing NG_FORCE_STORYVIEW_V9_AUTO_V1 code continues below === */
+
+
+(function(){
+  if (window.__NG_V9_NORMALIZE_ALL_DRAFTS_V1) return;
+  window.__NG_V9_NORMALIZE_ALL_DRAFTS_V1 = true;
+
+  var PRIMARY="NG_DIGIPACK_DRAFTS_V1";
+  var LEGACY ="NG_DRAFTS";
+  var SEL_IDX_KEY="NG_DIGIPACK_SELECTED_IDX_V1";
+  var SEL_ID_KEY ="NG_DIGIPACK_SELECTED_ID_V1";
+
+  function jparse(s, fb){ try{return JSON.parse(s);}catch(e){return fb;} }
+  function lget(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
+  function lset(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+  function isObj(x){ return x && typeof x==="object" && !Array.isArray(x); }
+  function isArr(x){ return Array.isArray(x); }
+  function str(x){ return (x==null) ? "" : String(x); }
+
+  function fixMojibake(s){
+    s = (s==null) ? "" : String(s);
+    var reps = [["â€“","–"],["â€”","—"],["â€¦","…"],["â€¢","•"],["Â",""]];
+    for (var i=0;i<reps.length;i++) s = s.split(reps[i][0]).join(reps[i][1]);
+    return s;
+  }
+
+  function tryParseAnyJSON(text){
+    var t = str(text).trim();
+    if (!t) return null;
+    if (t[0]==="{" || t[0]==="["){
+      var o1 = jparse(t,null); if (o1) return o1;
+    }
+    var a=t.indexOf("{"), b=t.lastIndexOf("}");
+    if (a>=0 && b>a){
+      var sub=t.slice(a,b+1);
+      var o2=jparse(sub,null); if (o2) return o2;
+    }
+    return null;
+  }
+
+  function normalizeGenerated(g){
+    if (typeof g==="string") g=jparse(g,{});
+    if (!isObj(g)) g={};
+    var out={
+      headline: str(g.headline||g.title||""),
+      key_points: isArr(g.key_points)?g.key_points:(isArr(g.KEY_POINTS)?g.KEY_POINTS:[]),
+      lines: isArr(g.lines)?g.lines:(isArr(g.LINES)?g.LINES:[]),
+      web_article: str(g.web_article||g.webArticle||g.article||g.web||g.body||g.copy||""),
+      video: str(g.video||g.video_script||g.videoScript||"")
+    };
+    out.web_article = fixMojibake(out.web_article)
+      .replace(/^\s*#{1,6}\s*WEB[_\s-]*ARTICLE\s*\n+/i,"")
+      .replace(/^\s*WEB[_\s-]*ARTICLE\s*:\s*\n+/i,"")
+      .trim();
+    return out;
+  }
+
+  function extractGenerated(d){
+    var raw = d && d.story && d.story.digipack && d.story.digipack.raw;
+    var parsed = tryParseAnyJSON(raw);
+    if (parsed){
+      if (parsed.blocks && parsed.blocks.generated) return normalizeGenerated(parsed.blocks.generated);
+      if (parsed.dp && parsed.dp.blocks && parsed.dp.blocks.generated) return normalizeGenerated(parsed.dp.blocks.generated);
+      if (parsed.blocks && parsed.blocks.generated_text) return normalizeGenerated(parsed.blocks.generated_text);
+      return normalizeGenerated(parsed);
+    }
+    if (d && d.dp && d.dp.blocks && d.dp.blocks.generated) return normalizeGenerated(d.dp.blocks.generated);
+    if (typeof window.ensureDraftHasDigipack==="function"){
+      var dp = window.ensureDraftHasDigipack(d);
+      if (dp && dp.blocks && dp.blocks.generated) return normalizeGenerated(dp.blocks.generated);
+    }
+    return normalizeGenerated({});
+  }
+
+  function getDraftId(d,i){
+    return String((d && (d.id||d.uid||d.key||d._id||d.draft_id)) || ("i:"+i));
+  }
+
+  function readPrimary(){
+    var a = jparse(lget(PRIMARY)||"[]", []);
+    return Array.isArray(a) ? a : [];
+  }
+
+  function normalizeAll(tag){
+    var drafts = readPrimary();
+    if (!drafts.length){
+      drafts = jparse(lget(LEGACY)||"[]", []);
+      if (!Array.isArray(drafts)) drafts = [];
+    }
+    if (!drafts.length){
+      console.warn("[NG_V9_NORMALIZE_ALL] no drafts", tag);
+      return {ok:false, n:0};
+    }
+
+    var changed = 0;
+    for (var i=0;i<drafts.length;i++){
+      var d = drafts[i];
+      if (!d) continue;
+
+      // already v9?
+      if (d.storyview_v9 && d.storyview_v9.version===9) continue;
+
+      var g = extractGenerated(d);
+
+      d.story = isObj(d.story) ? d.story : {};
+      d.story.view_version = 9;
+      d.story.storyview_version = 9;
+      d.story.digipack = isObj(d.story.digipack) ? d.story.digipack : {};
+      // keep raw as-is; only fill if empty
+      if (!str(d.story.digipack.raw).trim()){
+        try{ d.story.digipack.raw = JSON.stringify({blocks:{generated:g}}); }catch(e){ d.story.digipack.raw=""; }
+      }
+
+      d.storyview_v9 = {
+        version: 9,
+        ts: new Date().toISOString(),
+        headline: g.headline || str(d.headline || (d.form && d.form.headline) || d.title || ""),
+        key_points: g.key_points || [],
+        lines: g.lines || [],
+        web_article: g.web_article || "",
+        video: g.video || ""
+      };
+
+      // aliases (StoryView पुराने keys से भी पढ़ ले तो भी V9 मिले)
+      d.storyview = d.storyview_v9;
+      d.story_view = d.storyview_v9;
+      d.story_view_version = 9;
+      d.storyViewVersion = 9;
+
+      drafts[i] = d;
+      changed++;
+    }
+
+    // selection sync (keeps library stable)
+    var idx = parseInt(lget(SEL_IDX_KEY),10);
+    if (!(idx>=0 && idx<drafts.length)) idx = drafts.length-1;
+    lset(SEL_IDX_KEY, String(idx));
+    lset(SEL_ID_KEY, getDraftId(drafts[idx], idx));
+
+    // write BOTH stores so Source NG_DRAFTS भी V9 ही पढ़े
+    lset(PRIMARY, JSON.stringify(drafts));
+    lset(LEGACY,  JSON.stringify(drafts));
+
+    console.log("[NG_V9_NORMALIZE_ALL] ok", {tag: tag, total: drafts.length, changed: changed, sel_idx: idx});
+    return {ok:true, n: drafts.length, changed: changed};
+  }
+
+  // run at boot + after clicks (throttled)
+  var t = null;
+  setTimeout(function(){ normalizeAll("boot"); }, 120);
+
+  window.addEventListener("click", function(){
+    if (t) clearTimeout(t);
+    t = setTimeout(function(){ normalizeAll("click"); }, 180);
+  }, true);
+
+  window.NG_normAllV9 = function(){ return normalizeAll("manual"); };
+
+  console.log("[NG_V9_NORMALIZE_ALL_DRAFTS_V1] installed ✓");
+})();
+})(); // NG_FORCE_STORYVIEW_V9_AUTO_V1_GUARD_END
+</script>
+<!-- NG_V9_NORMALIZE_ALL_DRAFTS_V1_END -->
+<!-- NG_STORYVIEW_LABEL_V9_V1_START -->
+<script>
+(function(){
+  if (window.__NG_STORYVIEW_LABEL_V9_V1) return;
+  window.__NG_STORYVIEW_LABEL_V9_V1 = true;
+
+  function fixLabel(){
     try{
-      const bg = getComputedStyle(b).backgroundColor;
-      if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") return true;
+      // find the Story View header area (best-effort)
+      var els = document.querySelectorAll("h1,h2,h3,div,span");
+      for (var i=0;i<els.length;i++){
+        var el = els[i];
+        var t = (el && el.textContent) ? el.textContent : "";
+        if (!t) continue;
+        if (t.indexOf("Story View")>=0 && t.indexOf("V8")>=0){
+          el.textContent = t.replace(/V8[^)]*\)/, "V9)");
+          return true;
+        }
+      }
     }catch(e){}
     return false;
   }
 
-  function getMode(){
-    // prefer app/local saved state if any
-    try{
-      const saved = norm(localStorage.getItem("NG_UI_MODE") || localStorage.getItem("ng_ui_mode"));
-      if (saved === "simple" || saved === "advanced") return saved;
-    }catch(e){}
+  // run a few times after clicks (panel opens async)
+  window.addEventListener("click", function(){
+    setTimeout(fixLabel, 60);
+    setTimeout(fixLabel, 180);
+    setTimeout(fixLabel, 420);
+  }, true);
 
-    const { simple, adv } = findButtons();
-    if (looksActive(simple) && !looksActive(adv)) return "simple";
-    if (looksActive(adv) && !looksActive(simple)) return "advanced";
-    return null; // unknown
-  }
-
-  function apply(mode){
-    const v = document.getElementById("visualsWrap");
-    if(!v) return;
-
-    const m = mode || getMode();
-    // if mode unknown, do nothing (won't force-hide)
-    if (!m) return;
-
-    const hide = (m === "simple");
-    v.classList.toggle("ng-std-hidden", hide);
-    v.setAttribute("data-ng-std-hidden", hide ? "1" : "0");
-    v.setAttribute("data-ng-std-reason", hide ? "simple_ui" : "");
-  }
-
-  function setMode(m){
-    try{ localStorage.setItem("NG_UI_MODE", m); }catch(e){}
-    apply(m);
-    setTimeout(()=>apply(m), 60);
-    setTimeout(()=>apply(m), 250);
-  }
-
-  function boot(){
-    const { simple, adv } = findButtons();
-    if (simple) simple.addEventListener("click", ()=>setMode("simple"), true);
-    if (adv)    adv.addEventListener("click", ()=>setMode("advanced"), true);
-
-    // initial apply (after other scripts paint UI)
-    setTimeout(()=>apply(), 80);
-    setTimeout(()=>apply(), 300);
-  }
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
+  console.log("[NG_STORYVIEW_LABEL_V9_V1] installed ✓");
 })();
 </script>
+<!-- NG_STORYVIEW_LABEL_V9_V1_END -->
+<!-- NG_SANITIZE_LINES_V1_START -->
+<script>
+(function(){
+  if (window.__NG_SANITIZE_LINES_V1) return;
+  window.__NG_SANITIZE_LINES_V1 = true;
+
+  function toStr(x){ return (x==null) ? "" : String(x); }
+
+  function sanitizeLines(arr){
+    if (!Array.isArray(arr)) return [];
+    var out = [];
+    for (var i=0;i<arr.length;i++){
+      var s = toStr(arr[i]).replace(/\r/g,"").trim();
+      if (!s) continue;
+
+      // If a markdown section header appears anywhere inside this item, keep only before it and stop.
+      var m = s.match(/(^|\n)\s*#{1,6}\s+/);
+      if (m){
+        s = s.split(m[0])[0].trim();
+        if (s) out.push(s);
+        break;
+      }
+
+      // If "YOUTUBE/SOCIAL" markers appear inside the same line-item, cut and stop.
+      var cutAt = s.search(/\n\s*(?:###\s*)?(?:YOUTUBE|SOCIAL)\b/i);
+      if (cutAt >= 0){
+        var kept = s.slice(0, cutAt).trim();
+        if (kept) out.push(kept);
+        break;
+      }
+
+      // remove leading bullets if any
+      s = s.replace(/^\s*[•\-\*]\s+/,"");
+      out.push(s);
+    }
+    return out;
+  }
+
+  function cutAfterYouTubeBlock(text){
+    var s = toStr(text).replace(/\r/g,"");
+    // if youtube section appended, drop it
+    var idx = s.search(/\n\s*#{1,6}\s*YOUTUBE\b/i);
+    if (idx >= 0) s = s.slice(0, idx);
+    return s.trim();
+  }
+
+  if (typeof window.ensureDraftHasDigipack !== "function") {
+    console.warn("[NG_SANITIZE_LINES_V1] ensureDraftHasDigipack not found");
+    return;
+  }
+
+  var prev = window.ensureDraftHasDigipack;
+  window.ensureDraftHasDigipack = function(){
+    var dp = prev.apply(this, arguments);
+    try{
+      var g = dp && dp.blocks && dp.blocks.generated;
+      if (g){
+        g.lines = sanitizeLines(g.lines);
+        if (g.web_article) g.web_article = cutAfterYouTubeBlock(g.web_article);
+      }
+    }catch(e){}
+    return dp;
+  };
+
+  console.log("[NG_SANITIZE_LINES_V1] installed ✓");
+})();
+</script>
+<!-- NG_SANITIZE_LINES_V1_END -->
+<!-- NG_STORYVIEW_OPAQUE_MODAL_V1_START -->
+<script>
+(function(){
+  if (window.__NG_STORYVIEW_OPAQUE_MODAL_V1) return;
+  window.__NG_STORYVIEW_OPAQUE_MODAL_V1 = true;
+
+  var BACKDROP_ID = "ngStoryViewBackdropV1";
+
+  function ensureBackdrop(){
+    var bd = document.getElementById(BACKDROP_ID);
+    if (bd) return bd;
+    bd = document.createElement("div");
+    bd.id = BACKDROP_ID;
+    bd.style.position = "fixed";
+    bd.style.left = "0";
+    bd.style.top = "0";
+    bd.style.right = "0";
+    bd.style.bottom = "0";
+    bd.style.background = "rgba(0,0,0,0.55)";
+    bd.style.zIndex = "2147483646";
+    bd.style.display = "none";
+    bd.style.pointerEvents = "auto";
+    document.body.appendChild(bd);
+    return bd;
+  }
+
+  function findStoryViewPanel(){
+    // Find any element containing "Story View Updated" or "Story View"
+    var nodes = document.querySelectorAll("div,section,article,main,aside");
+    for (var i=0;i<nodes.length;i++){
+      var el = nodes[i];
+      var t = el && el.textContent ? el.textContent : "";
+      if (!t) continue;
+      if (t.indexOf("Story View Updated") >= 0 || t.indexOf("Story View") >= 0){
+        // climb up to a reasonable container
+        var cur = el;
+        for (var k=0;k<6 && cur && cur !== document.body; k++){
+          var r = cur.getBoundingClientRect ? cur.getBoundingClientRect() : null;
+          if (r && r.width > 260 && r.height > 180) return cur;
+          cur = cur.parentElement;
+        }
+        return el;
+      }
+    }
+    return null;
+  }
+
+  function isVisible(el){
+    if (!el) return false;
+    var cs = window.getComputedStyle(el);
+    if (!cs) return false;
+    if (cs.display === "none" || cs.visibility === "hidden") return false;
+    var r = el.getBoundingClientRect();
+    return r.width > 10 && r.height > 10;
+  }
+
+  function stylePanel(panel){
+    if (!panel) return;
+    panel.style.position = "fixed";
+    panel.style.left = "24px";
+    panel.style.right = "24px";
+    panel.style.top = "24px";
+    panel.style.bottom = "24px";
+    panel.style.zIndex = "2147483647";
+    panel.style.background = "#ffffff";
+    panel.style.opacity = "1";
+    panel.style.backdropFilter = "none";
+    panel.style.borderRadius = "14px";
+    panel.style.boxShadow = "0 18px 60px rgba(0,0,0,0.35)";
+    panel.style.overflow = "auto";
+    panel.style.pointerEvents = "auto";
+  }
+
+  function tryFix(tag){
+    try{
+      var bd = ensureBackdrop();
+      var panel = findStoryViewPanel();
+      if (panel && isVisible(panel)){
+        stylePanel(panel);
+        bd.style.display = "block";
+        console.log("[NG_STORYVIEW_OPAQUE_MODAL_V1] fixed", tag);
+      } else {
+        bd.style.display = "none";
+      }
+    }catch(e){}
+  }
+
+  // click anywhere: if story view opens async, fix after short delays
+  window.addEventListener("click", function(){
+    setTimeout(function(){ tryFix("click_80"); }, 80);
+    setTimeout(function(){ tryFix("click_220"); }, 220);
+    setTimeout(function(){ tryFix("click_500"); }, 500);
+  }, true);
+
+  // boot
+  setTimeout(function(){ tryFix("boot_200"); }, 200);
+
+  console.log("[NG_STORYVIEW_OPAQUE_MODAL_V1] installed");
+})();
+</script>
+<!-- NG_STORYVIEW_OPAQUE_MODAL_V1_END -->
+<!-- NG_STORYVIEW_PRETTY_RENDER_V1_START -->
+<script>
+(function(){
+  if (window.__NG_STORYVIEW_PRETTY_RENDER_V1) return;
+  window.__NG_STORYVIEW_PRETTY_RENDER_V1 = true;
+
+  var PRIMARY="NG_DIGIPACK_DRAFTS_V1";
+  var LEGACY ="NG_DRAFTS";
+  var SEL_IDX_KEY="NG_DIGIPACK_SELECTED_IDX_V1";
+  var SEL_ID_KEY ="NG_DIGIPACK_SELECTED_ID_V1";
+  var PRETTY_ID="ngStoryViewPrettyV1";
+
+  function lget(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
+  function jparse(s, fb){ try{return JSON.parse(s);}catch(e){return fb;} }
+  function str(x){ return (x==null) ? "" : String(x); }
+  function isArr(x){ return Array.isArray(x); }
+  function isObj(x){ return x && typeof x==="object" && !Array.isArray(x); }
+
+  function copyText(txt){
+    txt = str(txt);
+    try{
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).catch(function(){});
+        return true;
+      }
+    }catch(e){}
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      return true;
+    }catch(e){}
+    return false;
+  }
+
+  function getDraftId(d,i){
+    return String((d && (d.id||d.uid||d.key||d._id||d.draft_id)) || ("i:"+i));
+  }
+
+  function readDrafts(){
+    var a = jparse(lget(PRIMARY)||"[]", []);
+    if (Array.isArray(a) && a.length) return {key:PRIMARY, arr:a};
+    a = jparse(lget(LEGACY)||"[]", []);
+    if (Array.isArray(a) && a.length) return {key:LEGACY, arr:a};
+    return {key:PRIMARY, arr:[]};
+  }
+
+  function pickSelected(pack){
+    var ds = pack.arr || [];
+    if (!ds.length) return {idx:-1, d:null};
+    var selId = lget(SEL_ID_KEY);
+    if (selId){
+      for (var i=0;i<ds.length;i++){
+        if (getDraftId(ds[i], i) === selId) return {idx:i, d:ds[i]};
+      }
+    }
+    var idx = parseInt(lget(SEL_IDX_KEY),10);
+    if (!(idx>=0 && idx<ds.length)) idx = ds.length-1;
+    return {idx:idx, d:ds[idx]};
+  }
+
+  function getV9Data(d){
+    // prefer storyview_v9
+    if (d && d.storyview_v9 && d.storyview_v9.version===9) return d.storyview_v9;
+
+    // fallback: dp.blocks.generated
+    var g = null;
+    try{
+      if (d && d.dp && d.dp.blocks && d.dp.blocks.generated) g = d.dp.blocks.generated;
+    }catch(e){}
+    if (!isObj(g) && typeof window.ensureDraftHasDigipack==="function"){
+      try{
+        var dp = window.ensureDraftHasDigipack(d);
+        if (dp && dp.blocks && dp.blocks.generated) g = dp.blocks.generated;
+      }catch(e){}
+    }
+    g = isObj(g) ? g : {};
+
+    return {
+      version: 9,
+      headline: str(g.headline || d.title || ""),
+      dek: str(g.dek || g.summary || ""),
+      key_points: isArr(g.key_points) ? g.key_points : [],
+      web_article: str(g.web_article || ""),
+      video: str(g.video || ""),
+      lines: isArr(g.lines) ? g.lines : []
+    };
+  }
+
+  function findCloseBtn(){
+    var els = document.querySelectorAll("button,a,[role='button'],input[type='button']");
+    for (var i=0;i<els.length;i++){
+      var el = els[i];
+      var t = (el.textContent || el.value || "").trim().toLowerCase();
+      if (t === "close") return el;
+    }
+    return null;
+  }
+
+  function findStoryPanel(){
+    var btn = findCloseBtn();
+    if (!btn) return null;
+    var cur = btn;
+    for (var i=0;i<12 && cur && cur !== document.body; i++){
+      cur = cur.parentElement;
+      if (!cur) break;
+      var t = cur.textContent || "";
+      // panel में Headline/Key Points जैसे शब्द आते हैं
+      if (t.indexOf("Headline")>=0 && t.indexOf("Key Points")>=0) return cur;
+    }
+    return null;
+  }
+
+  function hideMessy(panel){
+    if (!panel) return;
+    // hide the “labels stuck together” area + raw JSON dumps
+    var kids = panel.querySelectorAll("div,pre,code,p,span");
+    for (var i=0;i<kids.length;i++){
+      var el = kids[i];
+      var t = (el.textContent||"");
+      if (!t) continue;
+
+      // stuck header line
+      if (t.indexOf("STORYHeadlineCopyDekCopyKey PointsCopyWeb ArticleCopyVideoCopy")>=0){
+        el.style.display = "none";
+      }
+
+      // raw json dump patterns
+      if (t.indexOf('{"generated"')>=0 || t.indexOf('\\"generated\\"')>=0 || t.indexOf('$.story.digipack.raw')>=0){
+        el.style.display = "none";
+      }
+      // very long json-ish line starting with {"video"
+      if (t.trim().charAt(0)==="{" && (t.indexOf('\\"')>=0 || t.indexOf('":')>=0) && t.length > 400){
+        el.style.display = "none";
+      }
+    }
+  }
+
+  function renderPretty(panel, v9){
+    if (!panel) return;
+
+    // remove existing pretty (avoid duplicates)
+    var old = panel.querySelector("#"+PRETTY_ID);
+    if (old) old.remove();
+
+    var wrap = document.createElement("div");
+    wrap.id = PRETTY_ID;
+    wrap.style.padding = "14px";
+    wrap.style.marginTop = "10px";
+    wrap.style.border = "1px solid rgba(0,0,0,0.08)";
+    wrap.style.borderRadius = "12px";
+    wrap.style.background = "#fff";
+    wrap.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    wrap.style.lineHeight = "1.45";
+
+    function section(title, body, isList){
+      var box = document.createElement("div");
+      box.style.margin = "12px 0";
+      var h = document.createElement("div");
+      h.style.display="flex";
+      h.style.alignItems="center";
+      h.style.justifyContent="space-between";
+      h.style.gap="12px";
+
+      var ttl = document.createElement("div");
+      ttl.textContent = title;
+      ttl.style.fontWeight="700";
+      ttl.style.fontSize="14px";
+
+      var btn = document.createElement("button");
+      btn.textContent = "Copy";
+      btn.style.padding="6px 10px";
+      btn.style.border="1px solid rgba(0,0,0,0.15)";
+      btn.style.borderRadius="10px";
+      btn.style.cursor="pointer";
+      btn.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); copyText(isList ? body.join("\n") : body); };
+
+      h.appendChild(ttl);
+      h.appendChild(btn);
+
+      var content = document.createElement("div");
+      content.style.marginTop="8px";
+      content.style.whiteSpace="pre-wrap";
+      content.style.fontSize="14px";
+
+      if (isList){
+        var ul = document.createElement("ul");
+        ul.style.margin="0";
+        ul.style.paddingLeft="18px";
+        for (var i=0;i<body.length;i++){
+          var li = document.createElement("li");
+          li.textContent = str(body[i]);
+          ul.appendChild(li);
+        }
+        content.appendChild(ul);
+      } else {
+        content.textContent = str(body).trim();
+      }
+
+      box.appendChild(h);
+      box.appendChild(content);
+      return box;
+    }
+
+    wrap.appendChild(section("Headline", v9.headline || "", false));
+    if (v9.dek) wrap.appendChild(section("Dek", v9.dek, false));
+    wrap.appendChild(section("Key Points", (v9.key_points||[]), true));
+    wrap.appendChild(section("Web Article", v9.web_article || "", false));
+    wrap.appendChild(section("Video", v9.video || "", false));
+
+    // Lines: numbered
+    var lines = (v9.lines||[]).map(function(x){ return str(x).trim(); }).filter(Boolean);
+    var linesBox = document.createElement("div");
+    linesBox.style.margin="12px 0";
+    var h2 = document.createElement("div");
+    h2.style.display="flex";
+    h2.style.alignItems="center";
+    h2.style.justifyContent="space-between";
+    var t2 = document.createElement("div");
+    t2.textContent="VO Lines";
+    t2.style.fontWeight="700";
+    t2.style.fontSize="14px";
+    var b2 = document.createElement("button");
+    b2.textContent="Copy";
+    b2.style.padding="6px 10px";
+    b2.style.border="1px solid rgba(0,0,0,0.15)";
+    b2.style.borderRadius="10px";
+    b2.style.cursor="pointer";
+    b2.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); copyText(lines.join("\n")); };
+    h2.appendChild(t2); h2.appendChild(b2);
+    var pre = document.createElement("div");
+    pre.style.marginTop="8px";
+    pre.style.whiteSpace="pre-wrap";
+    pre.style.fontSize="14px";
+    pre.textContent = lines.map(function(s,i){ return (i+1)+") "+s; }).join("\n");
+    linesBox.appendChild(h2);
+    linesBox.appendChild(pre);
+    wrap.appendChild(linesBox);
+
+    // insert pretty view near top
+    panel.insertBefore(wrap, panel.firstChild);
+
+    // hide messy/raw parts
+    hideMessy(panel);
+  }
+
+  function apply(tag){
+    try{
+      // keep your existing V9 locks fresh
+      if (typeof window.NG_forceV9Now==="function") window.NG_forceV9Now();
+      if (typeof window.NG_normAllV9==="function") window.NG_normAllV9();
+
+      var panel = findStoryPanel();
+      if (!panel) return;
+
+      var pack = readDrafts();
+      var picked = pickSelected(pack);
+      if (!picked.d) return;
+
+      var v9 = getV9Data(picked.d);
+      renderPretty(panel, v9);
+
+      // light CSS fix: stop text/labels from sticking (best effort)
+      panel.style.whiteSpace = "normal";
+      panel.style.color = "#111";
+      panel.style.background = "#fff";
+      panel.style.opacity = "1";
+
+      console.log("[NG_STORYVIEW_PRETTY_RENDER_V1] applied", tag);
+    }catch(e){
+      console.warn("[NG_STORYVIEW_PRETTY_RENDER_V1] error", e);
+    }
+  }
+
+  // run after clicks (open/refresh async)
+  window.addEventListener("click", function(){
+    setTimeout(function(){ apply("click_120"); }, 120);
+    setTimeout(function(){ apply("click_320"); }, 320);
+  }, true);
+
+  // also watch DOM updates
+  var mo = new MutationObserver(function(){
+    setTimeout(function(){ apply("mo_220"); }, 220);
+  });
+  try{ mo.observe(document.body, {childList:true, subtree:true}); }catch(e){}
+
+  setTimeout(function(){ apply("boot_250"); }, 250);
+  console.log("[NG_STORYVIEW_PRETTY_RENDER_V1] installed ✓");
+})();
+
+/* NG_TRANSCRIPT_AUTOPULL_V1 */
+(function(){
+  if (window.NG_TRANSCRIPT_AUTOPULL_V1) return;
+  window.NG_TRANSCRIPT_AUTOPULL_V1 = true;
+
+  function pickText(payload){
+    if (!payload) return "";
+    // Reverie/other formats
+    return String(
+      payload.display_text ||
+      payload.text ||
+      payload.transcript ||
+      payload.raw ||
+      ""
+    );
+  }
+
+  window.NG_fetchLatestTranscript = async function(){
+    try{
+      const r = await fetch("/api/transcript/latest", { cache: "no-store" });
+      const j = await r.json();
+
+      if (!j || !j.ok) {
+        console.error("[NG_AUTOPULL] No transcript yet", j);
+        return j;
+      }
+
+      const payload = j.payload || {};
+      const txt = pickText(payload) || JSON.stringify(payload);
+
+      // persist for safety
+      try {
+        localStorage.setItem("NG_TRANSCRIPT_LAST", txt);
+        localStorage.setItem("NG_TRANSCRIPT_LAST_TS", j.ts || new Date().toISOString());
+      } catch(e){}
+
+      // ingest into your pipeline
+      if (typeof window.NG_ingestTranscript === "function") {
+        window.NG_ingestTranscript(txt);
+        console.error("[NG_AUTOPULL] Ingested via NG_ingestTranscript", { ts: j.ts, len: txt.length });
+      } else if (typeof window.NG_setEditorialSuggestions === "function") {
+        // fallback: if you only have suggestion setter
+        window.NG_setEditorialSuggestions(txt);
+        console.error("[NG_AUTOPULL] Sent to NG_setEditorialSuggestions", { ts: j.ts, len: txt.length });
+      } else {
+        console.error("[NG_AUTOPULL] No ingest hook found. Saved to localStorage only.", { ts: j.ts, len: txt.length });
+      }
+
+      return { ok:true, ts: j.ts, len: txt.length };
+    } catch(err){
+      console.error("[NG_AUTOPULL] Error", err);
+      return { ok:false, error: String(err && err.message || err) };
+    }
+  };
+})();
+
+</script>
+<!-- NG_STORYVIEW_PRETTY_RENDER_V1_END -->
+<script src="/ng_transcript_autopull_v1.js"></script>
+<script src="/ng_console_silencer_v1.js"></script>
+<script src="/ng_transcript_fetch_button_v1.js"></script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

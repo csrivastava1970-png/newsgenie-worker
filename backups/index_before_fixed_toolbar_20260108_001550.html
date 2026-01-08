@@ -111,14 +111,11 @@ body *{ grid-column: 1 / -1; }
 /* NG_STD_UI_TOOLBAR_FIXED_V1_START — robust, DOM-depth independent */
 :root{
   --ng_tb_edge: 12px;
-  --ng_tb_pad_top: 78px;           /* body push-down */
-  --ng_tb_toggle_reserve: 230px;   /* right space for toggle */
+  --ng_tb_pad_top: 78px;     /* body push-down */
+  --ng_tb_toggle_reserve: 230px;  /* right space for toggle */
 }
 
-/* Push content down so fixed toolbar doesn't overlap */
-body{
-  padding-top: var(--ng_tb_pad_top) !important;
-}
+body{ padding-top: var(--ng_tb_pad_top) !important; }
 
 /* Actions bar (left) */
 #ng-dp-actions{
@@ -143,7 +140,6 @@ body{
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Toggle (right) */
@@ -161,9 +157,6 @@ body{
   backdrop-filter: blur(6px);
 
   display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
 }
 
 /* Hide scrollbar (still scrolls) */
@@ -176,15 +169,13 @@ body{
     --ng_tb_toggle_reserve: 0px;
     --ng_tb_pad_top: 126px;
   }
-  #ng-dp-actions{
-    right: var(--ng_tb_edge) !important;
-  }
-  #ng-std-ui-toggle-root{
-    top: calc(var(--ng_tb_edge) + 56px) !important;
-  }
+  #ng-dp-actions{ right: var(--ng_tb_edge) !important; }
+  #ng-std-ui-toggle-root{ top: calc(var(--ng_tb_edge) + 56px) !important; }
 }
 /* NG_STD_UI_TOOLBAR_FIXED_V1_END */
 
+</style>
+<!-- NG_STD_UI_TOOLBAR_ROW_V2_END -->
 
 
   <style>
@@ -201,7 +192,6 @@ body{
     .status { font-size: 13px; }
     .muted { font-size:12px; opacity:.75; margin-top:6px; }
 #btnBytesJSON { display: none !important; }
-/* OLD sticky toolbar (remove/disable)
 #ng-dp-actions{
   position: sticky;
   top: 10px;
@@ -211,8 +201,6 @@ body{
   border-radius: 12px;
   border: 1px solid #e5e5e5;
 }
-*/
-
 /* Force placement: Row-1 Title, Row-2 Toolbar (Actions + Toggle) */
 h2{
   grid-column: 1 / -1 !important;
@@ -235,21 +223,6 @@ h2{
   </style>
 <style>
 #ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
-
-/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_START */
-body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) #bytesWrap {
-  display: none !important;
-}
-body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) #bytesWrap {
-  display: block !important;
-}
-/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_END */
-
-</style>
-<style id="ng-simple-hide-bytes-v1">
-  body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) .panel:has(#ng-sec-bytes){ display:none !important; }
-body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng-sec-bytes){ display:block !important; }
-
 </style>
 
 </head>
@@ -346,21 +319,16 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     </div>
 
     <!-- VISUALS -->
-    <!-- NG_STD_VISUALS_WRAP_V1_START -->
-<div id="visualsWrap" data-ng-sec="visuals">
-  <div class="panel" id="step-visuals">
-    <b>Visuals</b>
-    <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
+    <div class="panel" id="step-visuals">
+      <b>Visuals</b>
+      <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
-    <div id="visuals-wrap"></div>
+      <div id="visuals-wrap"></div>
 
-    <div style="margin-top:8px;">
-      <button type="button" id="add-visual">+ Add Visual</button>
+      <div style="margin-top:8px;">
+        <button type="button" id="add-visual">+ Add Visual</button>
+      </div>
     </div>
-  </div>
-</div>
-<!-- NG_STD_VISUALS_WRAP_V1_END -->
-
 
     <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
       <button id="btnGenerate" type="button" class="primary" onclick="generateDigiPack(event)" disabled>
@@ -8175,94 +8143,12 @@ function store(raw){
   ensureStoryBtn();
   console.log("[SV_FIX_V7] installed");
 })();
-</script> 
+</script>
 <!-- NG_PATCH_END: STORYVIEW_SWAP_FIX_V7CLEAN -->
 
 
-<script>
-/* NG_STD_SIMPLE_HIDE_VISUALS_V1 */
-(function(){
-  function norm(t){ return String(t||"").trim().toLowerCase(); }
-
-  function findButtons(){
-    const all = Array.from(document.querySelectorAll("button"));
-    const simple = all.find(b => norm(b.textContent) === "simple");
-    const adv    = all.find(b => norm(b.textContent) === "advanced");
-    return { simple, adv };
-  }
-
-  function looksActive(b){
-    if(!b) return false;
-    if (b.getAttribute("aria-pressed")==="true") return true;
-    const c = b.classList;
-    if (c.contains("active") || c.contains("on") || c.contains("selected")) return true;
-    if (b.dataset && (b.dataset.active==="1" || b.dataset.on==="1")) return true;
-    // style-based fallback (often active pill has different bg)
-    try{
-      const bg = getComputedStyle(b).backgroundColor;
-      if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") return true;
-    }catch(e){}
-    return false;
-  }
-
-  function getMode(){
-    // prefer app/local saved state if any
-    try{
-      const saved = norm(localStorage.getItem("NG_UI_MODE") || localStorage.getItem("ng_ui_mode"));
-      if (saved === "simple" || saved === "advanced") return saved;
-    }catch(e){}
-
-    const { simple, adv } = findButtons();
-    if (looksActive(simple) && !looksActive(adv)) return "simple";
-    if (looksActive(adv) && !looksActive(simple)) return "advanced";
-    return null; // unknown
-  }
-
-  function apply(mode){
-    const v = document.getElementById("visualsWrap");
-    if(!v) return;
-
-    const m = mode || getMode();
-    // if mode unknown, do nothing (won't force-hide)
-    if (!m) return;
-
-    const hide = (m === "simple");
-    v.classList.toggle("ng-std-hidden", hide);
-    v.setAttribute("data-ng-std-hidden", hide ? "1" : "0");
-    v.setAttribute("data-ng-std-reason", hide ? "simple_ui" : "");
-  }
-
-  function setMode(m){
-    try{ localStorage.setItem("NG_UI_MODE", m); }catch(e){}
-    apply(m);
-    setTimeout(()=>apply(m), 60);
-    setTimeout(()=>apply(m), 250);
-  }
-
-  function boot(){
-    const { simple, adv } = findButtons();
-    if (simple) simple.addEventListener("click", ()=>setMode("simple"), true);
-    if (adv)    adv.addEventListener("click", ()=>setMode("advanced"), true);
-
-    // initial apply (after other scripts paint UI)
-    setTimeout(()=>apply(), 80);
-    setTimeout(()=>apply(), 300);
-  }
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
-})();
-</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 

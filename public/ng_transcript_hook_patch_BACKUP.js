@@ -1,0 +1,57 @@
+(function () {
+  var FLAG = "__NG_TRANSCRIPT_HOOK_V1__";
+  if (window[FLAG]) return;
+  window[FLAG] = true;
+
+  // Safe stub: prevents ReferenceError
+  window.syncEePushBtn = window.syncEePushBtn || function () {
+    try {
+      var btn = document.getElementById("ee-push") || document.querySelector("[data-ee-push]");
+      var list = document.getElementById("ee-list");
+      if (!btn || !list) return;
+      var checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
+      btn.disabled = (checked === 0);
+    } catch (e) {}
+  };
+
+  function installHookOnce() {
+    var d = Object.getOwnPropertyDescriptor(window, "NG_TRANSCRIPT");
+
+    // already accessor => done
+    if (d && (typeof d.get === "function" || typeof d.set === "function")) return true;
+
+    // non-configurable => cannot hook
+    if (d && d.configurable === false) {
+      console.warn("[PATCH] NG_TRANSCRIPT not configurable; cannot hook");
+      return true;
+    }
+
+    var _t = (d && ("value" in d)) ? d.value : window.NG_TRANSCRIPT;
+
+    Object.defineProperty(window, "NG_TRANSCRIPT", {
+      configurable: true,
+      enumerable: true,
+      get: function () { return _t; },
+      set: function (v) {
+        _t = v;
+        try {
+          if (typeof window.NG_ingestTranscript === "function") {
+            window.NG_ingestTranscript(v, "setter_patch");
+          }
+        } catch (e2) {
+          console.warn("[PATCH] ingest failed", e2);
+        }
+      }
+    });
+
+    console.log("[PATCH] NG_TRANSCRIPT hook installed OK");
+    return true;
+  }
+
+  var tries = 0;
+  var timer = setInterval(function () {
+    tries++;
+    var done = installHookOnce();
+    if (done || tries >= 40) clearInterval(timer);
+  }, 250);
+})();

@@ -6872,6 +6872,80 @@ function store(raw){
 
 
 
+<script>
+/* NG_STD_SIMPLE_HIDE_VISUALS_V1 */
+(function(){
+  function norm(t){ return String(t||"").trim().toLowerCase(); }
+
+  function findButtons(){
+    const all = Array.from(document.querySelectorAll("button"));
+    const simple = all.find(b => norm(b.textContent) === "simple");
+    const adv    = all.find(b => norm(b.textContent) === "advanced");
+    return { simple, adv };
+  }
+
+  function looksActive(b){
+    if(!b) return false;
+    if (b.getAttribute("aria-pressed")==="true") return true;
+    const c = b.classList;
+    if (c.contains("active") || c.contains("on") || c.contains("selected")) return true;
+    if (b.dataset && (b.dataset.active==="1" || b.dataset.on==="1")) return true;
+    // style-based fallback (often active pill has different bg)
+    try{
+      const bg = getComputedStyle(b).backgroundColor;
+      if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") return true;
+    }catch(e){}
+    return false;
+  }
+
+  function getMode(){
+    // prefer app/local saved state if any
+    try{
+      const saved = norm(localStorage.getItem("NG_UI_MODE") || localStorage.getItem("ng_ui_mode"));
+      if (saved === "simple" || saved === "advanced") return saved;
+    }catch(e){}
+
+    const { simple, adv } = findButtons();
+    if (looksActive(simple) && !looksActive(adv)) return "simple";
+    if (looksActive(adv) && !looksActive(simple)) return "advanced";
+    return null; // unknown
+  }
+
+  function apply(mode){
+    const v = document.getElementById("visualsWrap");
+    if(!v) return;
+
+    const m = mode || getMode();
+    // if mode unknown, do nothing (won't force-hide)
+    if (!m) return;
+
+    const hide = (m === "simple");
+    v.classList.toggle("ng-std-hidden", hide);
+    v.setAttribute("data-ng-std-hidden", hide ? "1" : "0");
+    v.setAttribute("data-ng-std-reason", hide ? "simple_ui" : "");
+  }
+
+  function setMode(m){
+    try{ localStorage.setItem("NG_UI_MODE", m); }catch(e){}
+    apply(m);
+    setTimeout(()=>apply(m), 60);
+    setTimeout(()=>apply(m), 250);
+  }
+
+  function boot(){
+    const { simple, adv } = findButtons();
+    if (simple) simple.addEventListener("click", ()=>setMode("simple"), true);
+    if (adv)    adv.addEventListener("click", ()=>setMode("advanced"), true);
+
+    // initial apply (after other scripts paint UI)
+    setTimeout(()=>apply(), 80);
+    setTimeout(()=>apply(), 300);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})();
+</script>
 </body>
 <!-- NG_PATCH_START: AUTORUN_KILL_V1 -->
 <script>
@@ -8255,10 +8329,6 @@ function store(raw){
 </script>
 </body>
 </html>
-
-
-
-
 
 
 
