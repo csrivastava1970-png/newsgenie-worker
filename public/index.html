@@ -552,7 +552,17 @@ window.NG_getBytesJSON = function () {
 
       updatePromptPreview(promptObj);
 
-      const payload = { prompt: JSON.stringify(promptObj) };
+      /* NG_TRANSCRIPT_ATTACH_V1 */
+      try{
+        var tr = null;
+        try{ tr = localStorage.getItem("NG_TRANSCRIPT"); }catch(e){}
+        if(!tr){ try{ tr = localStorage.getItem("NG_REVERIE_TEXT"); }catch(e){} }
+        tr = (tr==null) ? "" : String(tr);
+        // attach only if not already present in promptObj
+        if (tr.trim() && promptObj && !promptObj.transcript && !promptObj.transcript_text && !promptObj.reverie_text){
+          promptObj.transcript = tr; console.log("[NG_TRANSCRIPT_ATTACH_V1] attached",{len: tr.length}); }
+      }catch(e){}
+const payload = { prompt: JSON.stringify(promptObj) };
 
       setStatus("Calling /api/digi-pack ...");
       logLine("POST /api/digi-pack");
@@ -8253,8 +8263,84 @@ function store(raw){
   else boot();
 })();
 </script>
+<script>
+/* NG_REVERIE_BRIDGE_V1 */
+(function(){
+  function S(x){ return (x==null) ? "" : String(x); }
+  function pickText(parsed){
+    if(!parsed) return "";
+    if(typeof parsed === "string") return parsed;
+    var t = parsed.display_text || parsed.displayText || parsed.text || parsed.transcript || "";
+    if(!t && parsed.data) t = parsed.data.display_text || parsed.data.text || parsed.data.transcript || "";
+    return S(t);
+  }
+  function boot(){
+    var ta  = document.getElementById("ta-transcript-json");
+    var btn = document.getElementById("btn-load-transcript-json");
+    if(!ta || !btn){
+      console.warn("[NG_REVERIE_BRIDGE_V1] missing ids", {ta:!!ta, btn:!!btn});
+      return;
+    }
+    btn.addEventListener("click", function(){
+      try{
+        var raw = S(ta.value).trim();
+        if(!raw){ console.warn("[NG_REVERIE_BRIDGE_V1] empty"); return; }
+        var parsed = raw;
+        try{ parsed = JSON.parse(raw); }catch(e){}
+        var text = pickText(parsed).trim();
+        if(!text){ console.warn("[NG_REVERIE_BRIDGE_V1] no display_text/text found"); return; }
+        try{
+          localStorage.setItem("NG_REVERIE_TEXT", text);
+          localStorage.setItem("NG_TRANSCRIPT", text);
+          localStorage.setItem("NG_REVERIE_TS", new Date().toISOString());
+        /* NG_REVERIE_BRIDGE_AUTOFILL_V2 */
+        try{
+          /* NG_REVERIE_BRIDGE_AUTOFILL_V2_STORE_V1 */
+          try{ localStorage.setItem("NG_TRANSCRIPT", String(text||"")); localStorage.setItem("NG_REVERIE_TEXT", String(text||"")); }catch(e){}
+
+          // 1) If core ingest exists, let it run too
+          if (typeof window.NG_ingestTranscript === "function") {
+            try { window.NG_ingestTranscript(text); } catch(e){}
+          }
+
+          // 2) Autofill What Happened if empty
+          var wh = document.getElementById("whatHappened")
+                || document.querySelector('textarea[name="whatHappened"],textarea[name="what_happened"]');
+          if (wh && !String(wh.value||"").trim()){
+            var lines = String(text||"").split(/\r?\n+/).map(function(s){return s.trim();}).filter(Boolean).slice(0,4);
+            if(lines.length){
+              wh.value = lines.join("\n");
+              wh.dispatchEvent(new Event("input", {bubbles:true}));
+            }
+          }
+
+          // 3) Re-run validation if available
+          if (typeof window.validateGenerate === "function") {
+            try { window.validateGenerate(); } catch(e){}
+          }
+        }catch(e){}
+}catch(e){
+          console.error("[NG_REVERIE_BRIDGE_V1] localStorage failed", e);
+          return;
+        }
+        console.log("[NG_REVERIE_BRIDGE_V1] stored", {len:text.length});
+      }catch(e){
+        console.error("[NG_REVERIE_BRIDGE_V1] err", e);
+      }
+    }, true);
+    console.log("[NG_REVERIE_BRIDGE_V1] armed");
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot, {once:true});
+  else boot();
+})();
+</script>
 </body>
 </html>
+
+
+
+
+
 
 
 
