@@ -287,9 +287,19 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 <!-- ========================= -->
 <section style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-    <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+  <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
     <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
+
+    <!-- NEW -->
+    <button type="button" id="btn-paste-transcript-json">Paste from Clipboard</button>
+    <button type="button" id="btn-import-transcript-json">Import file</button>
+    <input type="file" id="file-transcript-json" accept=".json,application/json,.txt" style="display:none;">
   </div>
+</div>
+
 
   <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
     Paste Reverie output JSON here (display_text à¤¯à¤¾ text). Load à¤•à¤°à¤¨à¥‡ à¤ªà¤° localStorage à¤®à¥‡à¤‚ save à¤­à¥€ à¤¹à¥‹à¤—à¤¾.
@@ -552,17 +562,7 @@ window.NG_getBytesJSON = function () {
 
       updatePromptPreview(promptObj);
 
-      /* NG_TRANSCRIPT_ATTACH_V1 */
-      try{
-        var tr = null;
-        try{ tr = localStorage.getItem("NG_TRANSCRIPT"); }catch(e){}
-        if(!tr){ try{ tr = localStorage.getItem("NG_REVERIE_TEXT"); }catch(e){} }
-        tr = (tr==null) ? "" : String(tr);
-        // attach only if not already present in promptObj
-        if (tr.trim() && promptObj && !promptObj.transcript && !promptObj.transcript_text && !promptObj.reverie_text){
-          promptObj.transcript = tr; console.log("[NG_TRANSCRIPT_ATTACH_V1] attached",{len: tr.length}); }
-      }catch(e){}
-const payload = { prompt: JSON.stringify(promptObj) };
+      const payload = { prompt: JSON.stringify(promptObj) };
 
       setStatus("Calling /api/digi-pack ...");
       logLine("POST /api/digi-pack");
@@ -8187,168 +8187,229 @@ function store(raw){
 })();
 </script> 
 <!-- NG_PATCH_END: STORYVIEW_SWAP_FIX_V7CLEAN -->
-
-
 <script>
-/* NG_STD_SIMPLE_HIDE_VISUALS_V1 */
-(function(){
-  function norm(t){ return String(t||"").trim().toLowerCase(); }
+/* NG_REVERIE_BUTTONS_V1 */
+(function () {
+  if (window.__NG_REVERIE_BUTTONS_V1__) return;
+  window.__NG_REVERIE_BUTTONS_V1__ = true;
 
-  function findButtons(){
-    const all = Array.from(document.querySelectorAll("button"));
-    const simple = all.find(b => norm(b.textContent) === "simple");
-    const adv    = all.find(b => norm(b.textContent) === "advanced");
-    return { simple, adv };
+  const byId = (id) => document.getElementById(id);
+
+  function setHint(msg) {
+    const el = byId("transcript-load-hint");
+    if (el) el.textContent = msg || "";
   }
 
-  function looksActive(b){
-    if(!b) return false;
-    if (b.getAttribute("aria-pressed")==="true") return true;
-    const c = b.classList;
-    if (c.contains("active") || c.contains("on") || c.contains("selected")) return true;
-    if (b.dataset && (b.dataset.active==="1" || b.dataset.on==="1")) return true;
-    // style-based fallback (often active pill has different bg)
-    try{
-      const bg = getComputedStyle(b).backgroundColor;
-      if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") return true;
-    }catch(e){}
-    return false;
+  function setTA(txt) {
+    const ta = byId("ta-transcript-json");
+    if (!ta) return false;
+    ta.value = String(txt || "");
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
+    ta.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
   }
 
-  function getMode(){
-    // prefer app/local saved state if any
-    try{
-      const saved = norm(localStorage.getItem("NG_UI_MODE") || localStorage.getItem("ng_ui_mode"));
-      if (saved === "simple" || saved === "advanced") return saved;
-    }catch(e){}
-
-    const { simple, adv } = findButtons();
-    if (looksActive(simple) && !looksActive(adv)) return "simple";
-    if (looksActive(adv) && !looksActive(simple)) return "advanced";
-    return null; // unknown
+  function clickLoad() {
+    const btn = byId("btn-load-transcript-json");
+    if (btn) btn.click();
   }
 
-  function apply(mode){
-    const v = document.getElementById("visualsWrap");
-    if(!v) return;
-
-    const m = mode || getMode();
-    // if mode unknown, do nothing (won't force-hide)
-    if (!m) return;
-
-    const hide = (m === "simple");
-    v.classList.toggle("ng-std-hidden", hide);
-    v.setAttribute("data-ng-std-hidden", hide ? "1" : "0");
-    v.setAttribute("data-ng-std-reason", hide ? "simple_ui" : "");
-  }
-
-  function setMode(m){
-    try{ localStorage.setItem("NG_UI_MODE", m); }catch(e){}
-    apply(m);
-    setTimeout(()=>apply(m), 60);
-    setTimeout(()=>apply(m), 250);
-  }
-
-  function boot(){
-    const { simple, adv } = findButtons();
-    if (simple) simple.addEventListener("click", ()=>setMode("simple"), true);
-    if (adv)    adv.addEventListener("click", ()=>setMode("advanced"), true);
-
-    // initial apply (after other scripts paint UI)
-    setTimeout(()=>apply(), 80);
-    setTimeout(()=>apply(), 300);
-  }
-
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
-})();
-</script>
-<script>
-/* NG_REVERIE_BRIDGE_V1 */
-(function(){
-  function S(x){ return (x==null) ? "" : String(x); }
-  function pickText(parsed){
-    if(!parsed) return "";
-    if(typeof parsed === "string") return parsed;
-    var t = parsed.display_text || parsed.displayText || parsed.text || parsed.transcript || "";
-    if(!t && parsed.data) t = parsed.data.display_text || parsed.data.text || parsed.data.transcript || "";
-    return S(t);
-  }
-  function boot(){
-    var ta  = document.getElementById("ta-transcript-json");
-    var btn = document.getElementById("btn-load-transcript-json");
-    if(!ta || !btn){
-      console.warn("[NG_REVERIE_BRIDGE_V1] missing ids", {ta:!!ta, btn:!!btn});
+  async function onPaste() {
+    const ta = byId("ta-transcript-json");
+    if (!ta) {
+      console.warn("[NG_REVERIE_BUTTONS_V1] textarea missing");
       return;
     }
-    btn.addEventListener("click", function(){
-      try{
-        var raw = S(ta.value).trim();
-        if(!raw){ console.warn("[NG_REVERIE_BRIDGE_V1] empty"); return; }
-        var parsed = raw;
-        try{ parsed = JSON.parse(raw); }catch(e){}
-        var text = pickText(parsed).trim();
-        if(!text){ console.warn("[NG_REVERIE_BRIDGE_V1] no display_text/text found"); return; }
-        try{
-          localStorage.setItem("NG_REVERIE_TEXT", text);
-          localStorage.setItem("NG_TRANSCRIPT", text);
-          localStorage.setItem("NG_REVERIE_TS", new Date().toISOString());
-        /* NG_REVERIE_BRIDGE_AUTOFILL_V2 */
-        try{
-          /* NG_REVERIE_BRIDGE_AUTOFILL_V2_STORE_V1 */
-          try{ localStorage.setItem("NG_TRANSCRIPT", String(text||"")); localStorage.setItem("NG_REVERIE_TEXT", String(text||"")); }catch(e){}
 
-          // 1) If core ingest exists, let it run too
-          if (typeof window.NG_ingestTranscript === "function") {
-            try { window.NG_ingestTranscript(text); } catch(e){}
-          }
+    if (!(window.isSecureContext && navigator.clipboard && navigator.clipboard.readText)) {
+      console.warn("[NG_REVERIE_BUTTONS_V1] Clipboard API unavailable. (Use https/localhost; permission needed)");
+      ta.focus();
+      setHint("Clipboard unavailable — paste manually.");
+      return;
+    }
 
-          // 2) Autofill What Happened if empty
-          var wh = document.getElementById("whatHappened")
-                || document.querySelector('textarea[name="whatHappened"],textarea[name="what_happened"]');
-          if (wh && !String(wh.value||"").trim()){
-            var lines = String(text||"").split(/\r?\n+/).map(function(s){return s.trim();}).filter(Boolean).slice(0,4);
-            if(lines.length){
-              wh.value = lines.join("\n");
-              wh.dispatchEvent(new Event("input", {bubbles:true}));
-            }
-          }
-
-          // 3) Re-run validation if available
-          if (typeof window.validateGenerate === "function") {
-            try { window.validateGenerate(); } catch(e){}
-          }
-        }catch(e){}
-}catch(e){
-          console.error("[NG_REVERIE_BRIDGE_V1] localStorage failed", e);
-          return;
-        }
-        console.log("[NG_REVERIE_BRIDGE_V1] stored", {len:text.length});
-      }catch(e){
-        console.error("[NG_REVERIE_BRIDGE_V1] err", e);
+    try {
+      const txt = await navigator.clipboard.readText();
+      if (!txt || !txt.trim()) {
+        setHint("Clipboard empty.");
+        return;
       }
-    }, true);
-    console.log("[NG_REVERIE_BRIDGE_V1] armed");
+      setTA(txt);
+      setHint("Pasted ✓  (Loading…)");
+      clickLoad();
+    } catch (e) {
+      console.warn("[NG_REVERIE_BUTTONS_V1] clipboard read failed", e);
+      setHint("Clipboard read failed — paste manually.");
+      ta.focus();
+    }
   }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot, {once:true});
-  else boot();
+
+  function onImportClick() {
+    const fin = byId("file-transcript-json");
+    if (fin) fin.click();
+  }
+
+  function onFileChange(ev) {
+    const fin = ev && ev.target;
+    const file = fin && fin.files && fin.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      const txt = String(reader.result || "");
+      setTA(txt);
+      setHint("File loaded ✓  (Loading…)");
+      clickLoad();
+      fin.value = "";
+    };
+    reader.onerror = function () {
+      console.warn("[NG_REVERIE_BUTTONS_V1] file read failed");
+      setHint("File read failed.");
+      fin.value = "";
+    };
+    reader.readAsText(file);
+  }
+
+  function install() {
+    const btnPaste = byId("btn-paste-transcript-json");
+    const btnImport = byId("btn-import-transcript-json");
+    const fin = byId("file-transcript-json");
+
+    if (btnPaste && !btnPaste.dataset.ngWired) {
+      btnPaste.addEventListener("click", onPaste);
+      btnPaste.dataset.ngWired = "1";
+    }
+    if (btnImport && !btnImport.dataset.ngWired) {
+      btnImport.addEventListener("click", onImportClick);
+      btnImport.dataset.ngWired = "1";
+    }
+    if (fin && !fin.dataset.ngWired) {
+      fin.addEventListener("change", onFileChange);
+      fin.dataset.ngWired = "1";
+    }
+
+    console.log("[NG_REVERIE_BUTTONS_V1] installed ✓", {
+      paste: !!btnPaste,
+      import: !!btnImport,
+      file: !!fin,
+      ta: !!byId("ta-transcript-json"),
+      loadBtn: !!byId("btn-load-transcript-json")
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", install);
+  } else {
+    install();
+  }
 })();
 </script>
+<script>
+/* NG_UI_HEALTHCHECK_V1 */
+window.__NG_UI_HEALTHCHECK__ = function () {
+  const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+  const byId = (id) => document.getElementById(id);
+
+  const ids = [
+    "btn-generate",
+    "btn-save-draft",
+    "btn-open-library",
+    "btn-mark-published",
+    "btn-new-story",
+
+    "ng-reverie-block",
+    "btn-load-transcript-json",
+    "btn-clear-transcript-json",
+    "btn-paste-transcript-json",
+    "btn-import-transcript-json",
+    "file-transcript-json",
+    "ta-transcript-json",
+    "transcript-load-hint"
+  ];
+
+  const out = {
+    ok: true,
+    ts: new Date().toISOString(),
+    dom: {},
+    duplicates: {},
+    buttons: {},
+    localStorage: {},
+    patches: Array.isArray(window.__NG_PATCHES__) ? window.__NG_PATCHES__.slice() : [],
+    notes: []
+  };
+
+  // DOM + duplicate id counts
+  ids.forEach((id) => {
+    const nodes = qsa(`[id="${id}"]`);
+    out.duplicates[id] = nodes.length;
+    out.dom[id] = { present: nodes.length > 0, count: nodes.length };
+
+    const el = nodes[0];
+    if (el && el.tagName === "BUTTON") {
+      out.buttons[id] = {
+        disabled: !!el.disabled,
+        wired: (el.dataset && el.dataset.ngWired) ? "yes" : "",
+        text: (el.textContent || "").trim().slice(0, 40)
+      };
+    }
+  });
+
+  // localStorage check
+  const lsKeys = ["NG_TRANSCRIPT", "NG_REVERIE_TEXT", "NG_DRAFTS", "NG_LASTPACK"];
+  lsKeys.forEach((k) => {
+    const v = localStorage.getItem(k);
+    if (v == null) {
+      out.localStorage[k] = { present: false };
+      return;
+    }
+    let isJSON = false, parsed = null;
+    try { parsed = JSON.parse(v); isJSON = true; } catch (e) {}
+
+    const row = { present: true, bytes: String(v).length, isJSON };
+
+    if (k === "NG_TRANSCRIPT") {
+      // NG_TRANSCRIPT may be string OR JSON depending on your bridge
+      if (isJSON && parsed && typeof parsed === "object") {
+        const t = parsed.transcript || parsed.display_text || parsed.text || "";
+        if (typeof t === "string" && t) {
+          row.transcriptLen = t.length;
+          row.transcriptStart = t.slice(0, 40);
+        }
+        row.keys = Object.keys(parsed).slice(0, 20);
+      } else {
+        const t = String(v || "");
+        row.transcriptLen = t.length;
+        row.transcriptStart = t.slice(0, 40);
+      }
+    }
+
+    out.localStorage[k] = row;
+  });
+
+  // minimal required ids
+  ["btn-load-transcript-json", "ta-transcript-json"].forEach((id) => {
+    if (!byId(id)) out.ok = false;
+  });
+
+  // duplicates warning
+  Object.entries(out.duplicates).forEach(([id, count]) => {
+    if (count > 1) out.notes.push(`Duplicate id="${id}" x${count}`);
+  });
+
+  console.log("[NG_UI_HEALTHCHECK]", out);
+  try {
+    console.table(Object.entries(out.buttons).map(([id, v]) => ({
+      id, disabled: v.disabled, wired: v.wired, text: v.text
+    })));
+  } catch (e) {}
+
+  return out;
+};
+</script>
+
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
