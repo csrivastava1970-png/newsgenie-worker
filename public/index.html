@@ -265,7 +265,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     <div class="row">
       <div>
         <label>Topic</label>
-        <input name="topic" id="topic" placeholder="E.g., à¤¸à¤‚à¤¸à¤¦ à¤ªà¥à¤°à¤¦à¥‚à¤·à¤£ à¤µà¤¿à¤µà¤¾à¤¦" required />
+        <input name="topic" id="topic" placeholder="E.g., संसद प्रदूषण विवाद" required />
+
       </div>
 
       <div>
@@ -279,7 +280,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
       <div>
         <label>Angle (optional)</label>
-        <input name="angle" id="angle" placeholder="E.g., à¤µà¤¿à¤ªà¤•à¥à¤· à¤¬à¤¨à¤¾à¤® à¤¸à¤°à¤•à¤¾à¤°" />
+        
       </div>
     </div>
 <!-- ========================= -->
@@ -302,7 +303,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
 
   <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
-    Paste Reverie output JSON here (display_text à¤¯à¤¾ text). Load à¤•à¤°à¤¨à¥‡ à¤ªà¤° localStorage à¤®à¥‡à¤‚ save à¤­à¥€ à¤¹à¥‹à¤—à¤¾.
+    Reverie output JSON यहाँ पेस्ट करें (display_text या text)। Load करने पर localStorage में save भी होगा।
+
   </p>
 
   <textarea id="ta-transcript-json" rows="8"
@@ -328,7 +330,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
     <div style="margin-top:10px;">
       <label>What Happened (mandatory)</label>
-      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2â€“4 lines à¤®à¥‡à¤‚ à¤•à¥à¤¯à¤¾ à¤¹à¥à¤†?" required></textarea>
+      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
+
     </div>
 
     <div style="margin-top:10px;">
@@ -347,7 +350,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;">
         <div style="font-size:12px;opacity:.75;">
-          Multiple bytes à¤œà¥‹à¤¡à¤¼ à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚. Transcript AI generate à¤•à¤°à¥‡à¤—à¤¾.
+          Multiple bytes जोड़ सकते हैं. Transcript AI generate करेगा.
+
         </div>
         <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
       </div>
@@ -387,7 +391,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
   <h3 style="margin:0 0 8px 0;">Editorial Extraction</h3>
 
   <div id="ee-empty" style="opacity:.7;font-size:13px;padding:10px;border:1px dashed #bbb;border-radius:10px;">
-    NG_TRANSCRIPT à¤¸à¥‡ suggested bytes à¤¯à¤¹à¤¾à¤ à¤¦à¤¿à¤–à¥‡à¤‚à¤—à¥‡.
+    NG_TRANSCRIPT से suggested bytes यहाँ दिखेंगे.
+
   </div>
 
   <div id="ee-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;"></div>
@@ -739,7 +744,8 @@ function byteRowTemplate(i) {
             type="text"
             name="byte_speaker[]"
             data-byte-field="speaker"
-            placeholder="E.g., à¤œà¤¯à¤°à¤¾à¤® à¤°à¤®à¥‡à¤¶"
+            placeholder="E.g., जयराम रमेश"
+
             autocomplete="off"
           />
         </div>
@@ -749,7 +755,8 @@ function byteRowTemplate(i) {
             type="text"
             name="byte_designation[]"
             data-byte-field="designation"
-            placeholder="à¤•à¤¾à¤‚à¤—à¥à¤°à¥‡à¤¸ à¤¨à¥‡à¤¤à¤¾"
+            placeholder="कांग्रेस नेता"
+
             autocomplete="off"
           />
         </div>
@@ -758,7 +765,8 @@ function byteRowTemplate(i) {
   <textarea
     name="byte_text[]"
     data-byte-field="text"
-    placeholder="à¤¯à¤¹à¤¾à¤ à¤¬à¤¾à¤‡à¤Ÿ à¤•à¤¾ actual quote à¤²à¤¿à¤–à¥‡à¤‚"
+    placeholder="यहाँ बाइट का actual quote लिखें"
+"
     rows="2"
     autocomplete="off"
     style="width:100%; resize:vertical;"
@@ -907,7 +915,8 @@ function initBytesUI() {
 
         <div style="margin-top:8px;">
           <label style="font-size:12px;opacity:.8;display:block;margin-bottom:4px;">What to show</label>
-          <input type="text" name="visual_what[]" placeholder="E.g., à¤¦à¥à¤•à¤¾à¤¨ à¤ªà¤° à¤›à¤¾à¤ªà¤¾, à¤¸à¥€à¤² à¤ªà¥ˆà¤•, à¤…à¤¸à¥à¤ªà¤¤à¤¾à¤², à¤²à¥ˆà¤¬, à¤¦à¤¸à¥à¤¤à¤¾à¤µà¥‡à¤œà¤¼"
+          placeholder="E.g., दुकान पर छापा, सील पैक, अस्पताल, लैब, दस्तावेज"
+
             style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" />
         </div>
 
@@ -982,11 +991,12 @@ function initBytesUI() {
 
         if (what && !what.value.trim()) {
           what.value =
-            type === "ARCHIVE"  ? "à¤«à¤¾à¤‡à¤² à¤«à¥à¤Ÿà¥‡à¤œ / à¤ªà¥à¤°à¤¾à¤¨à¥€ à¤•à¥à¤²à¤¿à¤ª" :
-            type === "LOCATION" ? "à¤²à¥‹à¤•à¥‡à¤¶à¤¨ à¤¶à¥‰à¤Ÿ / à¤¸à¤¾à¤‡à¤¨à¤¬à¥‹à¤°à¥à¤¡ / à¤à¤°à¤¿à¤¯à¤¾ à¤µà¤¿à¤œà¥à¤…à¤²" :
-            type === "GRAPHIC"  ? "à¤Ÿà¤¾à¤‡à¤®à¤²à¤¾à¤‡à¤¨ / à¤¨à¤‚à¤¬à¤° / à¤®à¥ˆà¤ª à¤ªà¥à¤²à¥‡à¤Ÿ" :
-            type === "SCREEN"   ? "à¤µà¥‡à¤¬à¤¸à¤¾à¤‡à¤Ÿ/à¤¦à¤¸à¥à¤¤à¤¾à¤µà¥‡à¤œà¤¼ à¤¸à¥à¤•à¥à¤°à¥€à¤¨" :
-                                  "B-roll (à¤œà¤¾à¤‚à¤š/à¤°à¤¿à¤à¤•à¥à¤¶à¤¨/à¤¡à¤¿à¤Ÿà¥‡à¤² à¤¶à¥‰à¤Ÿ)";
+            type === "ARCHIVE"  ? "फाइल फुटेज / पुरानी क्लिप" :
+type === "LOCATION" ? "लोकेशन शॉट / साइनबोर्ड / एरिया विजुअल" :
+type === "GRAPHIC"  ? "टाइमलाइन / नंबर / मैप प्लेट" :
+type === "SCREEN"   ? "वेबसाइट/दस्तावेज़ स्क्रीन" :
+                        "B-roll (जांच/रिएक्शन/डिटेल शॉट)";
+
         }
         if (src && !src.value.trim()) src.value = "Reporter/Archive";
         return;
@@ -8405,6 +8415,206 @@ window.__NG_UI_HEALTHCHECK__ = function () {
 
   return out;
 };
+</script>
+<script>
+/* NG_SAVEDRAFT_LASTPACK_BRIDGE_V1 */
+(function () {
+  if (window.__NG_SAVEDRAFT_LASTPACK_BRIDGE_V1__) return;
+  window.__NG_SAVEDRAFT_LASTPACK_BRIDGE_V1__ = true;
+
+  const byId = (id) => document.getElementById(id);
+
+  function pickLastResp() {
+    const keys = [
+      "NG_LAST_DIGIPACK_RESP_V3",
+      "NG_LAST_DIGIPACK_RESP",
+      "NG_LASTPACK"
+    ];
+    for (const k of keys) {
+      let v = "";
+      try { v = localStorage.getItem(k) || ""; } catch (e) {}
+      if (String(v).trim()) return { key: k, val: String(v) };
+    }
+    return null;
+  }
+
+  function normalizeToJSONText(v) {
+    const s = String(v || "").trim();
+    if (!s) return "";
+    if (s[0] === "{" || s[0] === "[") return s;
+    return JSON.stringify({ ok: true, raw: s });
+  }
+
+  function mirrorForSaveDraft() {
+    const pick = pickLastResp();
+    if (!pick) {
+      console.warn("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] no last response found");
+      return;
+    }
+    const jsonText = normalizeToJSONText(pick.val);
+    if (!jsonText) {
+      console.warn("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] empty last response");
+      return;
+    }
+
+    try {
+      localStorage.setItem("NG_LASTPACK", jsonText);
+      localStorage.setItem("NG_LASTPACK_CAPTURE", jsonText);
+      localStorage.setItem("NG_LASTPACK_TS", new Date().toISOString());
+    } catch (e) {
+      console.error("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] localStorage set failed", e);
+      return;
+    }
+
+    console.log("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] mirrored", {
+      from: pick.key,
+      len: jsonText.length
+    });
+  }
+
+  function install() {
+    const btn = byId("btn-save-draft");
+    if (!btn) {
+      console.warn("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] btn-save-draft not found");
+      return;
+    }
+    btn.addEventListener("click", mirrorForSaveDraft, true);
+    console.log("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] armed ✓");
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install);
+  else install();
+})();
+</script>
+<script>
+/* NG_AUTORESTORE_LAST_DRAFT_V1 */
+(function () {
+  if (window.__NG_AUTORESTORE_LAST_DRAFT_V1__) return;
+  window.__NG_AUTORESTORE_LAST_DRAFT_V1__ = true;
+
+  const byId = (id) => document.getElementById(id);
+
+  function setHint(msg) {
+    const el = byId("transcript-load-hint");
+    if (el) el.textContent = msg || "";
+  }
+
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  function readDrafts() {
+    const keys = ["NG_DIGIPACK_DRAFTS_V1", "NG_DIGIPACK_DRAFTS"];
+    for (const k of keys) {
+      const v = lsGet(k);
+      if (!v) continue;
+      try {
+        const arr = JSON.parse(v);
+        if (Array.isArray(arr) && arr.length) return { key: k, arr };
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  function getCurrentSel() {
+    const id = (lsGet("NG_DIGIPACK_CURRENT_ID") || lsGet("NG_DIGIPACK_CURRENT_ID_V1") || "").trim();
+    const idxStr = (lsGet("NG_DIGIPACK_SELECTED_IDX") || lsGet("NG_DIGIPACK_SELECTED_IDX_V1") || "").trim();
+    const idxNum = Number(idxStr);
+    return { id, idx: Number.isFinite(idxNum) ? idxNum : null };
+  }
+
+  function pickDraft(drafts, sel) {
+    if (!drafts || !drafts.length) return null;
+
+    if (sel && sel.id) {
+      const hit = drafts.find(d => String((d && d.id) || "") === sel.id);
+      if (hit) return hit;
+    }
+    if (sel && sel.idx != null && sel.idx >= 0 && sel.idx < drafts.length) {
+      return drafts[sel.idx];
+    }
+    return drafts[0] || null;
+  }
+
+  function getAny(obj, keys) {
+    for (const k of keys) {
+      if (obj && obj[k] != null && String(obj[k]).trim() !== "") return obj[k];
+    }
+    return "";
+  }
+
+  function setField(id, val) {
+    const el = byId(id);
+    if (!el) return false;
+
+    // Don’t overwrite if user already typed something after refresh
+    if (String(el.value || "").trim()) return true;
+
+    el.value = (val == null) ? "" : String(val);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+  }
+
+  function restoreOnce() {
+    const draftsObj = readDrafts();
+    if (!draftsObj) {
+      setHint("Drafts not found in localStorage.");
+      return { ok: false, reason: "no_drafts" };
+    }
+
+    const sel = getCurrentSel();
+    const draft = pickDraft(draftsObj.arr, sel);
+    if (!draft) {
+      setHint("No draft to restore.");
+      return { ok: false, reason: "no_pick" };
+    }
+
+    const topic = getAny(draft, ["topic", "headline", "title"]);
+    const platform = getAny(draft, ["platform"]);
+    const angle = getAny(draft, ["angle"]);
+    const storyType = getAny(draft, ["storyType", "story_type", "type"]);
+    const whatHappened = getAny(draft, ["whatHappened", "what_happened"]);
+    const sources = getAny(draft, ["sources", "source", "references", "refs"]);
+    const background = getAny(draft, ["background", "context"]);
+
+    const filled = {
+      topic: setField("topic", topic),
+      platform: setField("platform", platform),
+      angle: setField("angle", angle),
+      storyType: setField("storyType", storyType),
+      whatHappened: setField("whatHappened", whatHappened),
+      sources: setField("sources", sources),
+      background: setField("background", background)
+    };
+
+    setHint(`Draft restored: ${draft.id || "(no id)"}`);
+    console.log("[NG_AUTORESTORE_LAST_DRAFT_V1] restored ✓", { sel, draftId: draft.id, filled, from: draftsObj.key });
+    return { ok: true, sel, draftId: draft.id, filled, from: draftsObj.key };
+  }
+
+  function install() {
+    let tries = 0;
+    const maxTries = 12;
+
+    const tick = () => {
+      tries++;
+      const hasCore = !!(byId("topic") && byId("whatHappened") && byId("sources") && byId("storyType"));
+      if (hasCore) {
+        restoreOnce();
+        return;
+      }
+      if (tries >= maxTries) {
+        console.warn("[NG_AUTORESTORE_LAST_DRAFT_V1] fields not ready after retries");
+        return;
+      }
+      setTimeout(tick, 150);
+    };
+
+    setTimeout(tick, 150);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install);
+  else install();
+})();
 </script>
 
 
