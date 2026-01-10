@@ -8616,7 +8616,330 @@ window.__NG_UI_HEALTHCHECK__ = function () {
   else install();
 })();
 </script>
+<!-- NG_HEALTH_PILL_V1_START -->
+<div id="ngHealthPill" style="position:fixed;right:10px;bottom:10px;z-index:999999;font:12px/1.2 Arial,sans-serif;padding:6px 10px;border-radius:999px;border:1px solid #999;background:#f4f4f4;box-shadow:0 2px 10px rgba(0,0,0,.08);">
+HEALTH: …
+</div>
+<script>
+(function(){
+  var pill = document.getElementById("ngHealthPill");
+  function set(ok, txt){
+    pill.textContent = txt;
+    pill.style.background = ok ? "#eaffea" : "#ffecec";
+    pill.style.borderColor = ok ? "#2a9d3a" : "#cc2b2b";
+  }
+  async function poll(){
+    try{
+      var r = await fetch("/api/health", { cache:"no-store" });
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      var j = await r.json();
+      set(true, "HEALTH: OK • " + (j.boot_ts || ""));
+    }catch(e){
+      set(false, "HEALTH: DOWN");
+    }
+    setTimeout(poll, 2000);
+  }
+  poll();
+})();
+</script>
+<!-- NG_HEALTH_PILL_V1_END -->
+<!-- NG_CRASH_GUARD_V1_START -->
+<div id="ngCrashOverlay" style="display:none;position:fixed;inset:0;z-index:999998;background:rgba(0,0,0,.6);">
+  <div style="position:absolute;left:50%;top:14%;transform:translateX(-50%);width:min(760px,92vw);background:#fff;border:1px solid #ddd;border-radius:14px;padding:12px 12px;font:14px/1.35 Arial,sans-serif;">
+    <b>NewsGenie Crash Guard</b>
+    <div style="margin-top:8px;">UI में error आया है। नीचे diagnostics copy करके भेज दें।</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+      <button id="ngCrashReload" style="padding:8px 10px;border:1px solid #999;border-radius:10px;background:#fff;cursor:pointer;">Reload</button>
+      <button id="ngCrashCopy" style="padding:8px 10px;border:1px solid #999;border-radius:10px;background:#fff;cursor:pointer;">Copy Diagnostics</button>
+      <button id="ngCrashHide" style="padding:8px 10px;border:1px solid #999;border-radius:10px;background:#fff;cursor:pointer;">Hide</button>
+    </div>
+    <pre id="ngCrashPre" style="margin-top:10px;background:#f7f7f7;padding:10px;border-radius:10px;overflow:auto;max-height:280px;">{}</pre>
+  </div>
+</div>
 
+<script>
+(function(){
+  var ov = document.getElementById("ngCrashOverlay");
+  var pre = document.getElementById("ngCrashPre");
+  var btnR = document.getElementById("ngCrashReload");
+  var btnC = document.getElementById("ngCrashCopy");
+  var btnH = document.getElementById("ngCrashHide");
+
+  function nowISO(){ return new Date().toISOString(); }
+  function safeStr(x){
+    try { return (x && x.stack) ? String(x.stack) : String(x); } catch(e){ return "unknown"; }
+  }
+  function getArr(k){ try { return JSON.parse(localStorage.getItem(k)||"[]"); } catch(e){ return []; } }
+  function setArr(k,a){ try { localStorage.setItem(k, JSON.stringify(a.slice(-50))); } catch(e){} }
+
+  var KEY = "NG_LAST_ERRORS_V1";
+  var errs = getArr(KEY);
+
+  function showOverlay(payload){
+    try{
+      ov.style.display = "block";
+      pre.textContent = JSON.stringify(payload, null, 2);
+      localStorage.setItem("NG_LAST_DIAG_V1", pre.textContent);
+    }catch(e){}
+  }
+
+  function record(kind, errLike){
+    var e = { ts: nowISO(), kind: kind, msg: safeStr(errLike) };
+    errs.push(e); errs = errs.slice(-50);
+    setArr(KEY, errs);
+    showOverlay({
+      ts: nowISO(),
+      url: location.href,
+      ua: navigator.userAgent,
+      lastErrors: errs
+    });
+  }
+
+  window.addEventListener("error", function(ev){
+    record("error", ev.error || ev.message || "error");
+  });
+
+  window.addEventListener("unhandledrejection", function(ev){
+    record("unhandledrejection", ev.reason || "promise");
+  });
+
+  // restore last diag (useful next day)
+  try{
+    var saved = localStorage.getItem("NG_LAST_DIAG_V1");
+    if(saved && saved.length > 10) pre.textContent = saved;
+  }catch(e){}
+
+  btnR.onclick = function(){ location.reload(); };
+  btnH.onclick = function(){ ov.style.display = "none"; };
+  btnC.onclick = async function(){
+    var txt = pre.textContent || "";
+    try { await navigator.clipboard.writeText(txt); alert("Diagnostics copied"); }
+    catch(e){ alert("Copy failed"); }
+  };
+})();
+</script>
+<!-- NG_CRASH_GUARD_V1_END -->
+<script>
+/* ===== NG_UI_FREEZE_GUARD_V1 START ===== */
+(function(){
+  const _fetch = window.fetch.bind(window);
+
+  const GUARD = window.__NG_GUARD__ = {
+    inflight: 0,
+    lastErr: null,
+    hardTimer: null,
+    timeoutMs: 60000,
+    retryOnce: true,
+    btnIds: ["btn-generate","btnGenerate","btn-bytes","btnBytes","btn-visuals","btnVisuals"],
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function setButtonsDisabled(disabled){
+    GUARD.btnIds.forEach(id => { const b=$(id); if(b) b.disabled = !!disabled; });
+  }
+
+  function armHardUnfreeze(){
+    clearTimeout(GUARD.hardTimer);
+    GUARD.hardTimer = setTimeout(() => {
+      if (GUARD.inflight > 0) {
+        console.warn("[NG_UI_GUARD] hard-unfreeze", { inflight: GUARD.inflight, lastErr: GUARD.lastErr });
+        GUARD.inflight = 0;
+        setButtonsDisabled(false);
+      }
+    }, GUARD.timeoutMs + 2000);
+  }
+
+  function combineSignals(sigA, sigB){
+    if (!sigA) return sigB;
+    if (!sigB) return sigA;
+    const ac = new AbortController();
+    const onAbort = () => ac.abort(sigA.reason || sigB.reason || "aborted");
+    sigA.addEventListener("abort", onAbort, { once:true });
+    sigB.addEventListener("abort", onAbort, { once:true });
+    return ac.signal;
+  }
+
+  async function guardedFetch(input, init = {}) {
+    const url = (typeof input === "string") ? input : (input && input.url) || "";
+    const isNG = /\/api\/(digi-pack|bytes|visuals)\b/i.test(url);
+
+    if (!isNG) return _fetch(input, init);
+
+    if (GUARD.inflight > 0) throw new Error("NG_BUSY_inflight");
+
+    GUARD.inflight++;
+    setButtonsDisabled(true);
+    armHardUnfreeze();
+
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort("ui_timeout"), GUARD.timeoutMs);
+    const mergedSignal = combineSignals(init.signal, ac.signal);
+
+    const doOnce = async () => _fetch(input, { ...init, signal: mergedSignal });
+
+    try {
+      let res = await doOnce();
+      if (GUARD.retryOnce && (res.status === 429 || res.status >= 500)) {
+        console.warn("[NG_UI_GUARD] retry once", { url, status: res.status });
+        await new Promise(r => setTimeout(r, 800));
+        res = await doOnce();
+      }
+      return res;
+    } catch (e) {
+      GUARD.lastErr = e;
+      console.error("[NG_UI_GUARD] fetch fail", e);
+      throw e;
+    } finally {
+      clearTimeout(t);
+      GUARD.inflight = Math.max(0, GUARD.inflight - 1);
+      if (GUARD.inflight === 0) setButtonsDisabled(false);
+    }
+  }
+
+  window.fetch = guardedFetch;
+
+  window.__NG_GUARD_STATUS__ = () => ({
+    inflight: GUARD.inflight,
+    lastErr: GUARD.lastErr ? String(GUARD.lastErr) : null,
+    timeoutMs: GUARD.timeoutMs
+  });
+
+  window.addEventListener("unhandledrejection", () => { setButtonsDisabled(false); GUARD.inflight = 0; });
+  window.addEventListener("error", () => { setButtonsDisabled(false); GUARD.inflight = 0; });
+
+  console.log("[NG_UI_FREEZE_GUARD_V1] installed", window.__NG_GUARD_STATUS__());
+})();
+ /* ===== NG_UI_FREEZE_GUARD_V1 END ===== */
+</script>
+
+
+<script>
+/* ===== NG_CLEARUI_FIX_V2 START ===== */
+window.clearUI = function clearUI(){
+  try {
+    const form = document.getElementById("digi-pack-form");
+    const root = form || document.body;
+
+    let clearedInputs = 0, clearedTextareas = 0, resetSelects = 0;
+
+    // Clear inputs (including inputs without type attribute)
+    root.querySelectorAll("input").forEach(el => {
+      const t = String(el.type || "").toLowerCase(); // default becomes "text" in browser, but keep safe
+      if (["button","submit","reset","checkbox","radio","file","hidden"].includes(t)) return;
+
+      // If input is missing type, browser reports "text" anyway; we still clear
+      el.value = "";
+      clearedInputs++;
+
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    // Clear all textareas
+    root.querySelectorAll("textarea").forEach(el => {
+      el.value = "";
+      clearedTextareas++;
+
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    // Reset selects
+    root.querySelectorAll("select").forEach(sel => {
+      if (sel.options && sel.options.length) {
+        sel.selectedIndex = 0;
+        resetSelects++;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+
+    console.log("[NG_CLEARUI_FIX_V2] cleared", { clearedInputs, clearedTextareas, resetSelects });
+  } catch (e) {
+    console.error("[NG_CLEARUI_FIX_V2] failed", e);
+  }
+};
+/* ===== NG_CLEARUI_FIX_V2 END ===== */
+</script>
+
+<script>
+/* ===== NG_CLEAR_BTN_DIRTY_GUARD_V1 START ===== */
+(function(){
+  function getRoot(){
+    return document.getElementById("digi-pack-form") || document.body;
+  }
+
+  function findClearButtons(){
+    // 1) Best: button that calls clearUI
+    let btns = Array.from(document.querySelectorAll('button[onclick*="clearUI"]'));
+    if (btns.length) return btns;
+
+    // 2) Fallback: text/id contains clear/क्लियर
+    btns = Array.from(document.querySelectorAll("button")).filter(b => {
+      const t = (b.textContent || "").trim();
+      const id = (b.id || "");
+      return /clear/i.test(id) || /clear|क्लियर/i.test(t);
+    });
+    return btns;
+  }
+
+  function isDirty(){
+    const root = getRoot();
+
+    // inputs
+    for (const el of root.querySelectorAll("input")) {
+      const t = String(el.type || "").toLowerCase();
+      if (["button","submit","reset","checkbox","radio","file","hidden"].includes(t)) continue;
+      if (String(el.value || "").trim()) return true;
+    }
+
+    // textareas
+    for (const el of root.querySelectorAll("textarea")) {
+      if (String(el.value || "").trim()) return true;
+    }
+
+    // selects (non-default)
+    for (const sel of root.querySelectorAll("select")) {
+      const v = String(sel.value || "").trim();
+      if (v) return true;
+    }
+
+    // contenteditable / textbox-like
+    for (const ed of root.querySelectorAll('[contenteditable=""],[contenteditable="true"],[role="textbox"]')) {
+      if (String(ed.textContent || "").trim()) return true;
+    }
+
+    return false;
+  }
+
+  function updateClearButtons(){
+    const dirty = isDirty();
+    const btns = findClearButtons();
+    btns.forEach(b => { b.disabled = !dirty; });
+    window.__NG_CLEAR_DIRTY_STATUS__ = { dirty, clearBtnCount: btns.length, ts: new Date().toISOString() };
+  }
+
+  // Wrap clearUI so after clearing, button disables again
+  if (typeof window.clearUI === "function" && !window.__NG_CLEARUI_WRAPPED__) {
+    window.__NG_CLEARUI_WRAPPED__ = true;
+    const _old = window.clearUI;
+    window.clearUI = function(){
+      const r = _old.apply(this, arguments);
+      setTimeout(updateClearButtons, 0);
+      return r;
+    };
+  }
+
+  // Live updates on typing/changes
+  const root = getRoot();
+  root.addEventListener("input", updateClearButtons, true);
+  root.addEventListener("change", updateClearButtons, true);
+
+  // Initial
+  setTimeout(updateClearButtons, 0);
+  console.log("[NG_CLEAR_BTN_DIRTY_GUARD_V1] installed");
+})();
+ /* ===== NG_CLEAR_BTN_DIRTY_GUARD_V1 END ===== */
+</script>
 
 </body>
 </html>

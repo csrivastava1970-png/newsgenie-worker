@@ -1,5 +1,58 @@
 // src/index.js  (BOOT v3: echo + openai mode)
 // Uses OpenAI Responses API + Structured Outputs (json_schema)
+/* ===== NG_TIMEOUT_RETRY_V1 START ===== */
+function ngSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+async function fetchWithTimeout(url, init = {}, timeoutMs = 45000) {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(`timeout_${timeoutMs}`), timeoutMs);
+  try {
+    const res = await fetch(url, { ...init, signal: ac.signal });
+    return res;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function fetchWithRetry(url, init = {}, opts = {}) {
+  const {
+    retries = 2,
+    timeoutMs = 45000,
+    baseDelayMs = 600,
+    maxDelayMs = 4000,
+    retryOnStatuses = [429, 500, 502, 503, 504],
+  } = opts;
+
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const started = Date.now();
+    try {
+      const res = await fetchWithTimeout(url, init, timeoutMs);
+
+      if (retryOnStatuses.includes(res.status) && attempt < retries) {
+        const ra = Number(res.headers.get("retry-after") || 0);
+        const backoff = Math.min(maxDelayMs, baseDelayMs * Math.pow(2, attempt));
+        const wait = ra ? ra * 1000 : backoff;
+        console.log("[NG_RETRY]", { status: res.status, attempt, wait, dur_ms: Date.now()-started });
+        await ngSleep(wait);
+        continue;
+      }
+      return res;
+    } catch (e) {
+      lastErr = e;
+      const isAbort = (e && (e.name === "AbortError" || String(e).includes("timeout_")));
+      const canRetry = attempt < retries;
+      console.log("[NG_FETCH_ERR]", { attempt, canRetry, isAbort, msg: String(e) });
+
+      if (!canRetry) break;
+      const backoff = Math.min(maxDelayMs, baseDelayMs * Math.pow(2, attempt));
+      await ngSleep(backoff);
+    }
+  }
+  throw lastErr || new Error("fetchWithRetry_failed");
+}
+/* ===== NG_TIMEOUT_RETRY_V1 END ===== */
+
 
 const ENTRY_MARKER = "BOOTv3-src-indexjs-openai-V3V9";
 
@@ -92,6 +145,25 @@ function NG_json(obj, status) {
     headers: Object.assign({ "content-type": "application/json; charset=utf-8" }, NG_CORS_HEADERS)
   });
 }
+/* NG_HEALTH_V1_START */
+globalThis.__NG_BOOT_TS = globalThis.__NG_BOOT_TS || new Date().toISOString();
+globalThis.__NG_REQ_TOTAL = (globalThis.__NG_REQ_TOTAL || 0) + 1;
+
+if (url.pathname === "/api/health") {
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: NG_CORS_HEADERS });
+  return NG_json(
+    {
+      ok: true,
+      ts: new Date().toISOString(),
+      boot_ts: globalThis.__NG_BOOT_TS,
+      req_total: globalThis.__NG_REQ_TOTAL,
+      has_openai_key: !!(env && env.OPENAI_API_KEY),
+      head_hint: "139156a"
+    },
+    200
+  );
+}
+/* NG_HEALTH_V1_END */
 
 // In-memory latest transcript (dev)
 globalThis.__NG_TRANSCRIPT_LATEST = globalThis.__NG_TRANSCRIPT_LATEST || null;
@@ -188,6 +260,28 @@ if (__p === "/.well-known/appspecific/com.chrome.devtools.json" || __p.startsWit
 
       const body = await request.json().catch(() => ({}));
       const raw = (body && body.prompt != null) ? String(body.prompt) : "";
+      /* ===== NG_FASTFAIL_REQUIRED_V1 START ===== */
+      let inObj = null;
+      try {
+        const s = String(raw || "").trim();
+        if (s.startsWith("{")) inObj = JSON.parse(s);
+      } catch (e) {}
+
+      const need = [];
+      const topic = (inObj && (inObj.topic || inObj.Topic)) ? (inObj.topic || inObj.Topic) : "";
+      const what  = (inObj && (inObj.whatHappened || inObj.what_happened || inObj.WhatHappened))
+        ? (inObj.whatHappened || inObj.what_happened || inObj.WhatHappened)
+        : "";
+
+      if (!String(topic || "").trim()) need.push("topic");
+      if (!String(what  || "").trim()) need.push("whatHappened");
+      if (!String(raw   || "").trim()) need.push("prompt");
+
+      if (need.length) {
+        return __json({ ok:false, error:"Missing required fields", need, hint:"Fill Topic + What Happened (no retry, no OpenAI call)" }, 400);
+      }
+      /* ===== NG_FASTFAIL_REQUIRED_V1 END ===== */
+
 
       const V3_PREFIX = `You are NewsGenie DigiPack Generator V3 (Hindi newsroom).
 
@@ -250,11 +344,13 @@ FACT GUARD (non-negotiable):
       const model = (env && (env.OPENAI_MODEL || env.MODEL)) ? (env.OPENAI_MODEL || env.MODEL) : "gpt-4o";
       const key   = (env.OPENAI_API_KEY || env.OPENAI_KEY);
 
-      const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+     const resp = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+
         method: "POST",
         headers: { "content-type":"application/json", "authorization":"Bearer " + key },
         body: JSON.stringify({ model, temperature: 0.4, max_tokens: 2200, messages: [{ role:"user", content: prompt }] })
-});
+}, { timeoutMs: 45000, retries: 2 });
+
 
       const data = await resp.json().catch(() => ({}));
       let text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
@@ -354,11 +450,13 @@ ${raw}
 FAILED_OUTPUT:
 ${text}`;
 
-  const resp2 = await fetch("https://api.openai.com/v1/chat/completions", {
+  const resp2 = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+
     method: "POST",
     headers: { "content-type":"application/json", "authorization":"Bearer " + key },
     body: JSON.stringify({ model, temperature: 0.2, max_tokens: 2200, messages: [{ role:"user", content: FIX_PROMPT }] })
-});
+}, { timeoutMs: 45000, retries: 2 });
+
   const data2 = await resp2.json().catch(() => ({}));
   const text2 = (data2 && data2.choices && data2.choices[0] && data2.choices[0].message && data2.choices[0].message.content)
     ? String(data2.choices[0].message.content) : "";
@@ -422,11 +520,13 @@ ${note}
 INPUT_JSON:
 ${raw}`;
 
-    const resp3 = await fetch("https://api.openai.com/v1/chat/completions", {
+   const resp3 = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + key },
       body: JSON.stringify({ model, temperature: 0.2, max_tokens: 2600, messages: [{ role:"user", content: WEB_ONLY_PROMPT }] })
-    });
+  }, { timeoutMs: 45000, retries: 2 });
+
 
     const data3 = await resp3.json().catch(() => ({}));
     web3 = (data3 && data3.choices && data3.choices[0] && data3.choices[0].message && data3.choices[0].message.content)
@@ -448,11 +548,13 @@ No bullets. No headings. No word count.
 ARTICLE:
 ${web3}`;
 
-    const resp4 = await fetch("https://api.openai.com/v1/chat/completions", {
+    const resp4 = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + key },
       body: JSON.stringify({ model, temperature: 0.2, max_tokens: 2600, messages: [{ role:"user", content: EXPAND_PROMPT }] })
-    });
+   }, { timeoutMs: 45000, retries: 2 });
+
 
     const data4 = await resp4.json().catch(() => ({}));
     const web4 = (data4 && data4.choices && data4.choices[0] && data4.choices[0].message && data4.choices[0].message.content)
@@ -596,12 +698,14 @@ End after WHATSAPP.`;
         const model = (env && (env.OPENAI_MODEL || env.MODEL)) ? (env.OPENAI_MODEL || env.MODEL) : "gpt-4o";
         const key   = (env.OPENAI_API_KEY || env.OPENAI_KEY);
 
-        const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+        const resp = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+
           method: "POST",
           headers: { "content-type":"application/json", "authorization":"Bearer " + key },
           body: JSON.stringify({ model, temperature: 0.4, max_tokens: 2200, messages: [{ role:"user", content: prompt }] })
 
-        });
+       }, { timeoutMs: 45000, retries: 2 });
+
 
         const data = await resp.json().catch(() => ({}));
         const text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
