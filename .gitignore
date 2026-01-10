@@ -1,4 +1,7 @@
 
 # local backups
 backups/
+.wrangler/
+logs/
+
 
