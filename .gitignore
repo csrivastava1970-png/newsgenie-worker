@@ -6,3 +6,5 @@ logs/
 
 
 start_ng.cmd.bak
+backups/
+*.bak*
