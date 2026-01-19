@@ -6,6 +6,186 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NewsGenie Digital Producer</title>
 <link rel="icon" href="data:,">
+  <!-- NG_STD_UI_TOOLBAR_ROW_V2_START -->
+<style>
+  /* NG_STD_UI_TOOLBAR_ROW_V2
+     Goal: single-row toolbar (actions left, UI toggle right) — CSS-only, hang-free
+     Rules: NO DOM moving, NO MutationObserver, only CSS overrides.
+  */
+
+  /* 1) Layout: make page a simple grid so toolbar can be a row */
+  body{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-auto-rows: auto;
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: start;
+  }
+
+  /* Title full width */
+  h2{ grid-column: 1 / -1; grid-row: 1; }
+
+
+  /* 2) Actions row (left) */
+  #ng-dp-actions{
+  grid-column: 1 / 2;
+  grid-row: 2;
+
+    grid-column: 1 / 2;
+    align-self: center;
+
+    display: flex !important;
+    flex-wrap: nowrap !important;     /* override inline wrap */
+    gap: 8px !important;
+    align-items: center !important;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    min-width: 0;                    /* allow grid to size correctly */
+  }
+
+  body > #ng-dp-actions > button{
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* Hide horizontal scrollbar but keep scrolling */
+  #ng-dp-actions{ scrollbar-width: none; }              /* Firefox */
+  #ng-dp-actions::-webkit-scrollbar{ height: 0; }       /* Chrome/Edge */
+
+  /* 3) If toggle is inside some wrapper, flatten that wrapper (CSS-only) */
+ /* Flatten wrappers up to 4 levels so toggle becomes a grid item of body */
+body *:has(> #ng-std-ui-toggle-root){ display: contents !important; }
+body *:has(> * > #ng-std-ui-toggle-root){ display: contents !important; }
+body *:has(> * > * > #ng-std-ui-toggle-root){ display: contents !important; }
+body *:has(> * > * > * > #ng-std-ui-toggle-root){ display: contents !important; }
+
+
+  /* Toggle: force normal flow + place it on toolbar row (right) */
+  #ng-std-ui-toggle-root,
+  #ng-std-ui-toggle-root .ngpill{
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: auto !important;
+  }
+
+  #ng-std-ui-toggle-root{
+  grid-column: 2 / 3;
+  grid-row: 2;
+
+    grid-column: 2 / 3;
+    align-self: center;
+    justify-self: end;
+
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+
+    margin: 10px 0 !important;
+    white-space: nowrap !important;
+  }
+
+  #ng-std-ui-toggle-root .ngpill{
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  /* 4) Everything else should be full width below toolbar */
+  /* default: anything that becomes a grid item spans full width */
+body *{ grid-column: 1 / -1; }
+
+
+  /* 5) Responsive: on narrower screens, drop toggle below + allow actions wrap */
+ 
+/* NG_STD_UI_TOOLBAR_FIXED_V1_START — robust, DOM-depth independent */
+:root{
+  --ng_tb_edge: 12px;
+  --ng_tb_pad_top: 78px;           /* body push-down */
+  --ng_tb_toggle_reserve: 230px;   /* right space for toggle */
+}
+
+/* Push content down so fixed toolbar doesn't overlap */
+body{
+  padding-top: var(--ng_tb_pad_top) !important;
+}
+
+/* Actions bar (left) */
+#ng-dp-actions{
+  position: fixed !important;
+  left: var(--ng_tb_edge) !important;
+  top: var(--ng_tb_edge) !important;
+  right: calc(var(--ng_tb_edge) + var(--ng_tb_toggle_reserve)) !important;
+  z-index: 9999 !important;
+
+  margin: 0 !important;
+  padding: 6px 8px !important;
+  border: 1px solid rgba(0,0,0,0.10) !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.92) !important;
+  backdrop-filter: blur(6px);
+
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Toggle (right) */
+#ng-std-ui-toggle-root{
+  position: fixed !important;
+  right: var(--ng_tb_edge) !important;
+  top: var(--ng_tb_edge) !important;
+  z-index: 10000 !important;
+
+  margin: 0 !important;
+  padding: 6px 8px !important;
+  border: 1px solid rgba(0,0,0,0.10) !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.92) !important;
+  backdrop-filter: blur(6px);
+
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Hide scrollbar (still scrolls) */
+#ng-dp-actions{ scrollbar-width: none; }
+#ng-dp-actions::-webkit-scrollbar{ height: 0; }
+
+/* Small screens: stack toggle under actions */
+@media (max-width: 980px){
+  :root{
+    --ng_tb_toggle_reserve: 0px;
+    --ng_tb_pad_top: 126px;
+  }
+  #ng-dp-actions{
+    right: var(--ng_tb_edge) !important;
+  }
+  #ng-std-ui-toggle-root{
+    top: calc(var(--ng_tb_edge) + 56px) !important;
+  }
+}
+/* NG_STD_UI_TOOLBAR_FIXED_V1_END */
+
+
 
   <style>
     body { font-family: system-ui, Arial; margin: 16px; }
@@ -21,6 +201,7 @@
     .status { font-size: 13px; }
     .muted { font-size:12px; opacity:.75; margin-top:6px; }
 #btnBytesJSON { display: none !important; }
+/* OLD sticky toolbar (remove/disable)
 #ng-dp-actions{
   position: sticky;
   top: 10px;
@@ -30,14 +211,50 @@
   border-radius: 12px;
   border: 1px solid #e5e5e5;
 }
+*/
+
+/* Force placement: Row-1 Title, Row-2 Toolbar (Actions + Toggle) */
+h2{
+  grid-column: 1 / -1 !important;
+  grid-row: 1 !important;
+}
+
+#ng-dp-actions{
+  grid-column: 1 / 2 !important;
+  grid-row: 2 !important;
+}
+
+#ng-std-ui-toggle-root{
+  grid-column: 2 / 3 !important;
+  grid-row: 2 !important;
+  justify-self: end !important;
+  align-self: center !important;
+}
 
 
   </style>
 <style>
 #ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
+
+/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_START */
+body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) #bytesWrap {
+  display: none !important;
+}
+body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) #bytesWrap {
+  display: block !important;
+}
+/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_END */
+
+</style>
+<style id="ng-simple-hide-bytes-v1">
+  body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) .panel:has(#ng-sec-bytes){ display:none !important; }
+body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng-sec-bytes){ display:block !important; }
+
 </style>
 
 </head>
+<!-- NG_MARKER: 2026-01-06_IST_TEST_123 -->
+
 
 <body>
 
@@ -48,7 +265,8 @@
     <div class="row">
       <div>
         <label>Topic</label>
-        <input name="topic" id="topic" placeholder="E.g., à¤¸à¤‚à¤¸à¤¦ à¤ªà¥à¤°à¤¦à¥‚à¤·à¤£ à¤µà¤¿à¤µà¤¾à¤¦" required />
+        <input name="topic" id="topic" placeholder="E.g., संसद प्रदूषण विवाद" required />
+
       </div>
 
       <div>
@@ -62,7 +280,7 @@
 
       <div>
         <label>Angle (optional)</label>
-        <input name="angle" id="angle" placeholder="E.g., à¤µà¤¿à¤ªà¤•à¥à¤· à¤¬à¤¨à¤¾à¤® à¤¸à¤°à¤•à¤¾à¤°" />
+        
       </div>
     </div>
 <!-- ========================= -->
@@ -70,33 +288,34 @@
 <!-- ========================= -->
 <section style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-    <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
-   
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+  <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+    <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
+
+    <!-- NEW -->
+    <button type="button" id="btn-paste-transcript-json">Paste from Clipboard</button>
+    <button type="button" id="btn-import-transcript-json">Import file</button>
+    <input type="file" id="file-transcript-json" accept=".json,application/json,.txt" style="display:none;">
   </div>
+</div>
 
-  <details id="ng-transcript-manual-box" style="margin-top:10px;">
-  <summary style="cursor:pointer; font-weight:600;">
-    Manual Transcript (Fallback) — Paste Reverie JSON
-  </summary>
 
-  <div style="margin-top:8px;">
-    <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
-      Paste Reverie output JSON here (display_text या text). Load करने पर localStorage में save होगा।
-      (Auto mode: MP4 → BAT → “Reverie → Load” button)
-    </p>
+  <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
+    Reverie output JSON यहाँ पेस्ट करें (display_text या text)। Load करने पर localStorage में save भी होगा।
 
-    <textarea id="ta-transcript-json" rows="8"
-      style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
-      placeholder="Paste JSON here..."></textarea>
+  </p>
 
-    <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-      <button type="button" id="btn-load-transcript-json">Load</button>
-      <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
-      <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
-    </div>
+  <textarea id="ta-transcript-json" rows="8"
+    style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
+    placeholder='Paste JSON here...'></textarea>
+
+  <div style="display:flex; gap:8px; margin-top:10px;">
+    <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
+    <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
   </div>
-</details>
-
+</section>
 
     <div style="margin-top:10px;">
       <label>Story Type</label>
@@ -111,7 +330,8 @@
 
     <div style="margin-top:10px;">
       <label>What Happened (mandatory)</label>
-      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2â€“4 lines à¤®à¥‡à¤‚ à¤•à¥à¤¯à¤¾ à¤¹à¥à¤†?" required></textarea>
+      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
+
     </div>
 
     <div style="margin-top:10px;">
@@ -125,13 +345,17 @@
     </div>
 
     <!-- BYTES -->
-    <div class="panel">
-      <b>Bytes (Speaker + Designation)</b>
+<div class="panel" id="bytesWrap">
+  <b>Bytes (Speaker + Designation)</b>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;">
-        <div style="font-size:12px;opacity:.75;">
-          Multiple bytes à¤œà¥‹à¤¡à¤¼ à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚. Transcript AI generate à¤•à¤°à¥‡à¤—à¤¾.
-        </div>
+  <!-- hidden JSON sink for Final Bytes module -->
+  <textarea id="bytesJSONOut" style="display:none;"></textarea>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;">
+    <div style="font-size:12px;opacity:.75;">
+      Multiple bytes जोड़ सकते हैं. Transcript AI generate करेगा.
+    </div>
+
         <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
       </div>
 
@@ -139,16 +363,21 @@
     </div>
 
     <!-- VISUALS -->
-    <div class="panel" id="step-visuals">
-      <b>Visuals</b>
-      <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
+    <!-- NG_STD_VISUALS_WRAP_V1_START -->
+<div id="visualsWrap" data-ng-sec="visuals">
+  <div class="panel" id="step-visuals">
+    <b>Visuals</b>
+    <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
-      <div id="visuals-wrap"></div>
+    <div id="visuals-wrap"></div>
 
-      <div style="margin-top:8px;">
-        <button type="button" id="add-visual">+ Add Visual</button>
-      </div>
+    <div style="margin-top:8px;">
+      <button type="button" id="add-visual">+ Add Visual</button>
     </div>
+  </div>
+</div>
+<!-- NG_STD_VISUALS_WRAP_V1_END -->
+
 
     <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
       <button id="btnGenerate" type="button" class="primary" onclick="generateDigiPack(event)" disabled>
@@ -163,15 +392,51 @@
 <!-- Editorial Extraction : Suggestions ONLY -->
 <section id="editorial-extraction" style="margin-top:16px;">
   <h3 style="margin:0 0 8px 0;">Editorial Extraction</h3>
+<!-- NG_EE_LIMIT_UI_STEP1_START -->
+<div id="ee-limit-bar"
+     style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;padding:8px;border:1px solid #ddd;border-radius:10px;">
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span style="font-size:12px;font-weight:700;">Per-speaker limit</span>
+    <select id="ee-limit-select"
+            style="padding:6px 10px;border:1px solid #999;border-radius:8px;background:#fff;cursor:pointer;">
+      <option value="3" selected>3</option>
+      <option value="5">5</option>
+      <option value="8">8</option>
+      <option value="all">All</option>
+    </select>
+  </div>
+
+  <button type="button" id="ee-limit-apply"
+          style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#f7f7f7;">
+    Apply
+  </button>
+
+  <button type="button" id="ee-limit-reset"
+          style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#fff;">
+    Reset
+  </button>
+
+  <button type="button" id="ee-best3-each"
+          title="Auto-select best 3 items per speaker (wiring in step-2)"
+          style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#f7f7f7;">
+    Best 3 each speaker
+  </button>
+
+  <span id="ee-limit-status" style="font-size:12px;opacity:.75;"></span>
+</div>
+<!-- NG_EE_LIMIT_UI_STEP1_END -->
+
 
   <div id="ee-empty" style="opacity:.7;font-size:13px;padding:10px;border:1px dashed #bbb;border-radius:10px;">
-    NG_TRANSCRIPT à¤¸à¥‡ suggested bytes à¤¯à¤¹à¤¾à¤ à¤¦à¤¿à¤–à¥‡à¤‚à¤—à¥‡.
+    NG_TRANSCRIPT से suggested bytes यहाँ दिखेंगे.
+
   </div>
 
   <div id="ee-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;"></div>
 
   <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-    <button type="button" id="ee-push">Push selected to Bytes</button>
+    <button type="button" id="ee-push" ...>Promote to Final Bytes</button>
+
     <button type="button" id="ee-clear">Discard / Clear suggestions</button>
   </div>
 </section>
@@ -517,7 +782,8 @@ function byteRowTemplate(i) {
             type="text"
             name="byte_speaker[]"
             data-byte-field="speaker"
-            placeholder="E.g., à¤œà¤¯à¤°à¤¾à¤® à¤°à¤®à¥‡à¤¶"
+            placeholder="E.g., जयराम रमेश"
+
             autocomplete="off"
           />
         </div>
@@ -527,7 +793,8 @@ function byteRowTemplate(i) {
             type="text"
             name="byte_designation[]"
             data-byte-field="designation"
-            placeholder="à¤•à¤¾à¤‚à¤—à¥à¤°à¥‡à¤¸ à¤¨à¥‡à¤¤à¤¾"
+            placeholder="कांग्रेस नेता"
+
             autocomplete="off"
           />
         </div>
@@ -536,7 +803,8 @@ function byteRowTemplate(i) {
   <textarea
     name="byte_text[]"
     data-byte-field="text"
-    placeholder="à¤¯à¤¹à¤¾à¤ à¤¬à¤¾à¤‡à¤Ÿ à¤•à¤¾ actual quote à¤²à¤¿à¤–à¥‡à¤‚"
+    placeholder="यहाँ बाइट का actual quote लिखें"
+"
     rows="2"
     autocomplete="off"
     style="width:100%; resize:vertical;"
@@ -685,7 +953,8 @@ function initBytesUI() {
 
         <div style="margin-top:8px;">
           <label style="font-size:12px;opacity:.8;display:block;margin-bottom:4px;">What to show</label>
-          <input type="text" name="visual_what[]" placeholder="E.g., à¤¦à¥à¤•à¤¾à¤¨ à¤ªà¤° à¤›à¤¾à¤ªà¤¾, à¤¸à¥€à¤² à¤ªà¥ˆà¤•, à¤…à¤¸à¥à¤ªà¤¤à¤¾à¤², à¤²à¥ˆà¤¬, à¤¦à¤¸à¥à¤¤à¤¾à¤µà¥‡à¤œà¤¼"
+          placeholder="E.g., दुकान पर छापा, सील पैक, अस्पताल, लैब, दस्तावेज"
+
             style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" />
         </div>
 
@@ -760,11 +1029,12 @@ function initBytesUI() {
 
         if (what && !what.value.trim()) {
           what.value =
-            type === "ARCHIVE"  ? "à¤«à¤¾à¤‡à¤² à¤«à¥à¤Ÿà¥‡à¤œ / à¤ªà¥à¤°à¤¾à¤¨à¥€ à¤•à¥à¤²à¤¿à¤ª" :
-            type === "LOCATION" ? "à¤²à¥‹à¤•à¥‡à¤¶à¤¨ à¤¶à¥‰à¤Ÿ / à¤¸à¤¾à¤‡à¤¨à¤¬à¥‹à¤°à¥à¤¡ / à¤à¤°à¤¿à¤¯à¤¾ à¤µà¤¿à¤œà¥à¤…à¤²" :
-            type === "GRAPHIC"  ? "à¤Ÿà¤¾à¤‡à¤®à¤²à¤¾à¤‡à¤¨ / à¤¨à¤‚à¤¬à¤° / à¤®à¥ˆà¤ª à¤ªà¥à¤²à¥‡à¤Ÿ" :
-            type === "SCREEN"   ? "à¤µà¥‡à¤¬à¤¸à¤¾à¤‡à¤Ÿ/à¤¦à¤¸à¥à¤¤à¤¾à¤µà¥‡à¤œà¤¼ à¤¸à¥à¤•à¥à¤°à¥€à¤¨" :
-                                  "B-roll (à¤œà¤¾à¤‚à¤š/à¤°à¤¿à¤à¤•à¥à¤¶à¤¨/à¤¡à¤¿à¤Ÿà¥‡à¤² à¤¶à¥‰à¤Ÿ)";
+            type === "ARCHIVE"  ? "फाइल फुटेज / पुरानी क्लिप" :
+type === "LOCATION" ? "लोकेशन शॉट / साइनबोर्ड / एरिया विजुअल" :
+type === "GRAPHIC"  ? "टाइमलाइन / नंबर / मैप प्लेट" :
+type === "SCREEN"   ? "वेबसाइट/दस्तावेज़ स्क्रीन" :
+                        "B-roll (जांच/रिएक्शन/डिटेल शॉट)";
+
         }
         if (src && !src.value.trim()) src.value = "Reporter/Archive";
         return;
@@ -1546,10 +1816,10 @@ return best;
   }
 function ensureBytesJSONUI(){
 
-    var wrap = $("bytesWrap");   // <-- à¤…à¤—à¤° à¤†à¤ªà¤•à¥‡ HTML à¤®à¥‡à¤‚ id à¤…à¤²à¤— à¤¹à¥ˆ à¤¤à¥‹ à¤¯à¤¹à¥€à¤‚ à¤¬à¤¦à¤²à¥‡à¤‚
-    if (!wrap) return false;
+    var wrap = document.getElementById("bytesWrap"); // If your HTML uses a different id, change it here.
 
-    if ($("bytesJSONBox")) return true;
+    if (document.getElementById("bytesJSONBox")) return true;
+
 
     var box = document.createElement("div");
     box.id = "bytesJSONBox";
@@ -3594,11 +3864,8 @@ setCurrentId(drafts[i].id || drafts[i].uid || "");
   } catch(e) {}
 
 (function(){
- // DISABLED: NG_FORCE_DLTEXT_V2 (auto-download bug)
-window.__NG_FORCE_DLTEXT_V2 = true; return;
-if (window.__NG_FORCE_DLTEXT_V2) return;
-window.__NG_FORCE_DLTEXT_V2 = true;
-
+  if (window.__NG_FORCE_DLTEXT_V2) return;
+  window.__NG_FORCE_DLTEXT_V2 = true;
   window.__NG_FORCE_DLTEXT_HITS = 0;
 
   function S(v){ return (v==null) ? "" : String(v); }
@@ -6474,1408 +6741,3813 @@ function store(raw){
 })();
 </script>
 <!-- NG_ENSURE_DRAFT_HAS_DIGIPACK_V4_END -->
-<!-- NG_WEBARTICLE_CLEAN_V1_START -->
+
+<!-- NG_STORYVIEW_DEDUP_V1 -->
 <script>
 (function(){
-  if (!window.ensureDraftHasDigipack) {
-    console.warn("[NG_WEBARTICLE_CLEAN_V1] ensureDraftHasDigipack not found");
-    return;
-  }
-  var prev = window.ensureDraftHasDigipack;
-  window.ensureDraftHasDigipack = function(){
-    var dp = prev.apply(this, arguments);
-    try{
-      var g = dp && dp.blocks && dp.blocks.generated;
-      if (g && g.web_article){
-        g.web_article = String(g.web_article)
-          .replace(/^\s*#{1,6}\s*WEB[_\s-]*ARTICLE\s*\n+/i, "")
-          .replace(/^\s*WEB[_\s-]*ARTICLE\s*:\s*\n+/i, "")
-          .trim();
+  try{
+    if (window.__NG_STORYVIEW_DEDUP_V1) return;
+    window.__NG_STORYVIEW_DEDUP_V1 = true;
+
+    function dedup(tag){
+      try{
+        var roots = [];
+        var a = document.querySelector("#ng-storyview"); if (a) roots.push(a);
+        var b = document.querySelector("#storyview");    if (b) roots.push(b);
+        var c = document.querySelector("#storyView");    if (c) roots.push(c);
+        var more = document.querySelectorAll('div[id*="storyview" i],section[id*="storyview" i],aside[id*="storyview" i],main[id*="storyview" i]');
+        for (var i=0;i<more.length;i++) roots.push(more[i]);
+
+        // unique
+        var uniq = [];
+        for (var j=0;j<roots.length;j++){
+          if (uniq.indexOf(roots[j]) === -1) uniq.push(roots[j]);
+        }
+        if (uniq.length <= 1) return { tag: tag, found: uniq.length, changed: false };
+
+        function z(el){
+          var v = parseInt(getComputedStyle(el).zIndex, 10);
+          return isFinite(v) ? v : 0;
+        }
+        function area(el){
+          var r = el.getBoundingClientRect();
+          return Math.max(0,r.width) * Math.max(0,r.height);
+        }
+        function visible(el){
+          var cs = getComputedStyle(el);
+          return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
+        }
+        function score(el){
+          return (visible(el) ? 1e12 : 0) + (z(el)*1e6) + area(el);
+        }
+
+        uniq.sort(function(x,y){ return score(y) - score(x); });
+        var keep = uniq[0];
+
+        for (var k=0;k<uniq.length;k++){
+          var el = uniq[k];
+          if (el === keep) continue;
+          el.style.setProperty("display","none","important");
+          el.style.setProperty("visibility","hidden","important");
+          el.style.setProperty("pointer-events","none","important");
+          el.setAttribute("data-ng-hidden-dup-storyview","1");
+        }
+
+        var out = { tag: tag, found: uniq.length, kept_id: keep ? keep.id : "", changed: true };
+        console.log("[NG_STORYVIEW_DEDUP_V1]", out);
+        return out;
+      }catch(e){
+        console.warn("[NG_STORYVIEW_DEDUP_V1] dedup error", e);
       }
-    }catch(e){}
-    return dp;
-  };
-  console.log("[NG_WEBARTICLE_CLEAN_V1] installed ✓");
+    }
+
+    // Run on load
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function(){ dedup("domcontentloaded"); }, { once:true });
+    } else {
+      setTimeout(function(){ dedup("ready"); }, 50);
+    }
+
+    // Run when storyview open button is clicked (covers re-renders)
+    document.addEventListener("click", function(ev){
+      var t = ev.target;
+      if (!t) return;
+      var btn = (t.closest && t.closest("#btn-storyview-v9, #btn-open-storyview, button[id*='storyview'], [id*='storyview'][role='button']")) || null;
+      if (!btn) return;
+      setTimeout(function(){ dedup("storyview_click_60ms"); }, 60);
+      setTimeout(function(){ dedup("storyview_click_350ms"); }, 350);
+      setTimeout(function(){ dedup("storyview_click_900ms"); }, 900);
+    }, true);
+
+    // Manual trigger
+    window.NG_storyViewDedupNow = function(){ return dedup("manual"); };
+
+    console.log("[NG_STORYVIEW_DEDUP_V1] installed ✓");
+  }catch(e){
+    console.warn("[NG_STORYVIEW_DEDUP_V1] install error", e);
+  }
 })();
 </script>
-<!-- NG_WEBARTICLE_CLEAN_V1_END -->
-<!-- NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1_START -->
+<!-- /NG_STORYVIEW_DEDUP_V1 -->
+<!-- NG_AUTORUN_SEGMENTS_V2 -->
 <script>
 (function(){
-  if (window.__NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1) return;
-  window.__NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1 = true;
-return; // DISABLED: was causing auto-download on clicks
+  try{
+    if (window.__NG_AUTORUN_SEGMENTS_V2) return;
+    window.__NG_AUTORUN_SEGMENTS_V2 = true;
 
-  function fixMojibake(s){
-    s = (s==null) ? "" : String(s);
-    var reps = [
-      ["â€“","–"], ["â€”","—"], ["â€¢","•"],
-      ["â€˜","‘"], ["â€™","’"], ["â€œ","“"], ["â€�","”"],
-      ["Â",""], ["Ã—","×"]
-    ];
-    for (var i=0;i<reps.length;i++){
-      s = s.split(reps[i][0]).join(reps[i][1]);
+    function findStoryPanels(){
+      var panels = [];
+      var more = document.querySelectorAll('div[id*="storyview" i],section[id*="storyview" i],aside[id*="storyview" i],main[id*="storyview" i]');
+      for (var i=0;i<more.length;i++){
+        var el = more[i];
+        if (!el || !el.querySelector) continue;
+        if (!el.querySelector("textarea")) continue;
+        panels.push(el);
+      }
+      // prefer overlay panel if present
+      panels.sort(function(a,b){
+        var ao = /overlay/i.test(a.id||"") ? 1 : 0;
+        var bo = /overlay/i.test(b.id||"") ? 1 : 0;
+        return bo-ao;
+      });
+      return panels;
     }
-    return s;
+
+    function findTA(){
+      var panels = findStoryPanels();
+      for (var i=0;i<panels.length;i++){
+        var ta = panels[i].querySelector("textarea");
+        if (ta) return ta;
+      }
+      // fallback biggest textarea
+      var arr = Array.prototype.slice.call(document.querySelectorAll("textarea"));
+      arr.sort(function(a,b){ return (b.clientWidth*b.clientHeight)-(a.clientWidth*a.clientHeight); });
+      return arr[0] || null;
+    }
+
+    function normalizeRaw(raw){
+      raw = String(raw || "");
+      // remove trailing "\" artifacts if present
+      raw = raw.replace(/\r/g,"")
+               .replace(/[ \t]*\\\s*\n/g,"\n")
+               .replace(/\\n/g,"\n")
+               .replace(/[ \t]*\\$/gm,"");
+      return raw;
+    }
+
+    function run(tag){
+      try{
+        var raw0 = localStorage.getItem("NG_LAST_RAW") || "";
+        var raw  = normalizeRaw(raw0);
+        if (raw !== raw0) { try{ localStorage.setItem("NG_LAST_RAW", raw); }catch(e){} }
+
+        var ta  = findTA();
+        var seg = document.getElementById("ngSegBtnV2");
+
+        if (ta && raw.length > 200){
+          if (ta.value !== raw) ta.value = raw;
+          ta.dispatchEvent(new Event("input",  { bubbles:true }));
+          ta.dispatchEvent(new Event("change", { bubbles:true }));
+        }
+
+        if (seg) seg.click();
+
+        var out = { tag: tag, rawLen: raw.length, taFound: !!ta, taLen: ta ? ta.value.length : 0, segBtnFound: !!seg };
+        console.log("[NG_AUTORUN_SEGMENTS_V2]", out);
+        return out;
+      }catch(e){
+        console.warn("[NG_AUTORUN_SEGMENTS_V2] run error", e);
+      }
+    }
+
+    // run whenever StoryView open button is clicked
+    document.addEventListener("click", function(ev){
+      var t = ev.target;
+      if (!t) return;
+      var btn = (t.closest && t.closest("#btn-storyview-v9, #btn-open-storyview, button[id*='storyview']")) || null;
+      if (!btn) return;
+
+      // allow UI render time
+      setTimeout(function(){ run("storyview_click_80ms"); }, 80);
+      setTimeout(function(){ run("storyview_click_350ms"); }, 350);
+      setTimeout(function(){ run("storyview_click_900ms"); }, 900);
+    }, true);
+
+    // manual trigger
+    window.NG_autoSegmentsNow = function(){ return run("manual"); };
+
+    console.log("[NG_AUTORUN_SEGMENTS_V2] installed ✓");
+  }catch(e){
+    console.warn("[NG_AUTORUN_SEGMENTS_V2] install error", e);
+  }
+})();
+</script>
+<!-- /NG_AUTORUN_SEGMENTS_V2 -->
+  <!-- (बाकी existing scripts as-is रहने दें) -->
+
+ 
+
+
+
+</body>
+<!-- NG_PATCH_START: AUTORUN_KILL_V1 -->
+<script>
+(function AUTORUN_KILL_V1(){
+  if (window.__NG_AUTORUN_KILL_V1__) return;
+  window.__NG_AUTORUN_KILL_V1__ = true;
+
+  const _log = console.log.bind(console);
+  console.log = (...a) => {
+    try {
+      if (typeof a[0] === "string" && a[0].startsWith("[NG_AUTORUN_SEGMENTS_V2]")) return;
+    } catch {}
+    return _log(...a);
+  };
+
+  const _setTimeout = window.setTimeout.bind(window);
+  window.setTimeout = function(fn, delay, ...rest){
+    const d = Number(delay);
+    if (d === 80 || d === 350 || d === 900) {
+      let stack = "";
+      try { stack = (new Error()).stack || ""; } catch {}
+      if (/NG_AUTORUN_SEGMENTS_V2|AUTORUN_SEGMENTS/i.test(stack)) {
+        return 0;
+      }
+    }
+    return _setTimeout(fn, delay, ...rest);
+  };
+
+  _log("[AUTORUN_KILL_V1] installed");
+})();
+</script>
+<!-- NG_PATCH_END: AUTORUN_KILL_V1 -->
+<!-- NG_PATCH_START: NG_LIBRARY_DRAFT_PICKER_V1 -->
+<script>
+(function NG_LIBRARY_DRAFT_PICKER_V1(){
+  if (window.__NG_LIBRARY_DRAFT_PICKER_V1__) return;
+  window.__NG_LIBRARY_DRAFT_PICKER_V1__ = true;
+
+  const LS = {
+    drafts: "NG_DRAFTS",
+    selIdx: "NG_DIGIPACK_SELECTED_IDX",
+    curId:  "NG_DIGIPACK_CURRENT_ID"
+  };
+
+  const t = (el)=>((el && el.textContent)?el.textContent:"").trim();
+
+  function readDrafts(){
+    try {
+      const s = localStorage.getItem(LS.drafts);
+      const j = s ? JSON.parse(s) : [];
+      return Array.isArray(j) ? j : [];
+    } catch { return []; }
   }
 
-  function slugifyHindi(s){
-    s = (s==null) ? "" : String(s);
-    s = s.replace(/[^\u0900-\u097F0-9A-Za-z]+/g,"_").replace(/_+/g,"_").replace(/^_+|_+$/g,"");
-    return s.slice(0,60) || "draft";
+  function setLS(k,v){ try{ localStorage.setItem(k, String(v)); }catch{} }
+
+  function applyFormFallback(form){
+    if (!form || typeof form !== "object") return false;
+    const els = Array.from(document.querySelectorAll("input,textarea,select"));
+    const byKey = new Map();
+    for (const el of els){
+      const key = el.name || el.id;
+      if (!key) continue;
+      if (!byKey.has(key)) byKey.set(key, []);
+      byKey.get(key).push(el);
+    }
+    for (const key of Object.keys(form)){
+      const val = form[key];
+      const targets = byKey.get(key);
+      if (!targets) continue;
+      for (const el of targets){
+        const type = (el.type || "").toLowerCase();
+        try{
+          if (type === "checkbox") el.checked = !!val;
+          else if (type === "radio") el.checked = (String(el.value) === String(val));
+          else el.value = Array.isArray(val) ? (val[0] ?? "") : String(val ?? "");
+          el.dispatchEvent(new Event("input", {bubbles:true}));
+          el.dispatchEvent(new Event("change",{bubbles:true}));
+        }catch{}
+      }
+    }
+    return true;
   }
 
-  function dlUTF8(filename, text){
+  function applyForm(form){
+    try {
+      if (window.__NG_DASH__ && typeof window.__NG_DASH__.applyForm === "function") {
+        return window.__NG_DASH__.applyForm(form);
+      }
+    } catch {}
+    return applyFormFallback(form);
+  }
+
+  function loadByIdx(idx){
+    const drafts = readDrafts();
+    const i = Number(idx);
+    if (!Number.isFinite(i) || i < 0 || i >= drafts.length) return false;
+    const d = drafts[i] || {};
+    const ok = applyForm(d.form || {});
+    if (d.id) setLS(LS.curId, d.id);
+    setLS(LS.selIdx, i);
+    console.log("✅ DASH: Loaded draft", { idx:i, id:d.id, title:d.title, status:d.status, formApplied: !!ok });
+    return true;
+  }
+
+  function findLibraryBar(){
+    // find a container that has Download TXT and Download JSON buttons
+    const btns = Array.from(document.querySelectorAll("button"));
+    const bTxt = btns.find(b => /download\s*txt/i.test(t(b)));
+    if (!bTxt) return null;
+
+    let p = bTxt;
+    for (let k=0; k<10 && p; k++){
+      if (p.querySelectorAll){
+        const inside = Array.from(p.querySelectorAll("button")).map(x => t(x));
+        const hasTxt  = inside.some(s => /download\s*txt/i.test(s));
+        const hasJson = inside.some(s => /download\s*json/i.test(s));
+        if (hasTxt && hasJson) return p;
+      }
+      p = p.parentElement;
+    }
+    return bTxt.parentElement;
+  }
+
+  function ensureUI(){
+    const bar = findLibraryBar();
+    if (!bar) return;
+
+    if (bar.querySelector("#ngDraftPickerV1")) return;
+
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;";
+
+    const label = document.createElement("div");
+    label.textContent = "Draft:";
+    label.style.cssText = "font-size:12px; opacity:0.85;";
+
+    const sel = document.createElement("select");
+    sel.id = "ngDraftPickerV1";
+    sel.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#0b0d0f; color:#e8eaed;";
+
+    const btnLoad = document.createElement("button");
+    btnLoad.type = "button";
+    btnLoad.textContent = "Load";
+    btnLoad.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#171a1d; color:#e8eaed; cursor:pointer;";
+
+    const btnRef = document.createElement("button");
+    btnRef.type = "button";
+    btnRef.textContent = "Refresh List";
+    btnRef.style.cssText = btnLoad.style.cssText;
+
+    function fill(){
+      const drafts = readDrafts();
+      let cur = "";
+      try { cur = localStorage.getItem(LS.selIdx) || ""; } catch {}
+      sel.innerHTML = "";
+      drafts.forEach((d, i) => {
+        const opt = document.createElement("option");
+        const title = (d && d.title) ? String(d.title) : "Untitled";
+        const st = (d && d.status) ? String(d.status) : "draft";
+        opt.value = String(i);
+        opt.textContent = `${i}: ${title} [${st}]`;
+        if (String(i) === String(cur)) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      if (!drafts.length) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "(No drafts found)";
+        sel.appendChild(opt);
+      }
+    }
+
+    btnLoad.addEventListener("click", () => loadByIdx(sel.value), false);
+    sel.addEventListener("change", () => loadByIdx(sel.value), false);
+    btnRef.addEventListener("click", fill, false);
+
+    wrap.appendChild(label);
+    wrap.appendChild(sel);
+    wrap.appendChild(btnLoad);
+    wrap.appendChild(btnRef);
+
+    bar.appendChild(wrap);
+    fill();
+  }
+
+  ensureUI();
+  new MutationObserver(ensureUI).observe(document.documentElement, { childList:true, subtree:true });
+
+  console.log("[NG_LIBRARY_DRAFT_PICKER_V1] installed");
+})();
+</script>
+<!-- NG_PATCH_END: NG_LIBRARY_DRAFT_PICKER_V1 -->
+<!-- NG_PATCH_START: NG_STANDARD_UI_TOGGLE_V1 -->
+<style id="ng-std-ui-style-v1">
+  .ng-std-hidden { display: none !important; }
+  #ng-std-ui-toggle-root {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 2147483000;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    user-select: none;
+  }
+  #ng-std-ui-toggle-root .ngpill {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 8px;
+    border-radius: 999px;
+    background: rgba(20,20,20,0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+  #ng-std-ui-toggle-root .nglbl {
+    font-size: 12px;
+    color: rgba(255,255,255,0.82);
+    padding: 0 6px;
+  }
+  #ng-std-ui-toggle-root button {
+    border: 0;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.92);
+  }
+  #ng-std-ui-toggle-root button:hover { background: rgba(255,255,255,0.20); }
+  #ng-std-ui-toggle-root button.active {
+    background: rgba(255,255,255,0.92);
+    color: rgba(0,0,0,0.85);
+  }
+</style>
+
+<script id="ng-std-ui-toggle-v1">
+(function () {
+  const TAG = "NG_STANDARD_UI_TOGGLE_V1";
+  if (window.__NG_STANDARD_UI_TOGGLE_V1) {
+    console.log(`[${TAG}] already installed`);
+    return;
+  }
+
+  const KEY = "NG_STD_UI_MODE_V1";
+  const DEFAULT_MODE = "simple"; // change to "advanced" if you ever want default advanced
+  const HIDE_CLASS = "ng-std-hidden";
+  const ROOT_ID = "ng-std-ui-toggle-root";
+
+  const RX = {
+    transcript: /(load\s*transcript|transcript\s*json|reverie)/i,
+    bytes: /(copy\s*bytes\s*json|\bbytes\b|quotes\s*\/\s*sot|\bsot\b)/i,
+    visuals: /(\bvisuals\b|b-?roll|\bshot\b|\bsrt\b|web\s*,\s*video)/i,
+    logs: /(\blogs\b|debug\s*log|console\s*log)/i,
+    storyview: /(story\s*view)/i,
+  };
+
+  function log(...a){ console.log(`[${TAG}]`, ...a); }
+  function warn(...a){ console.warn(`[${TAG}]`, ...a); }
+
+  function getMode(){
+    const v = (localStorage.getItem(KEY) || "").toLowerCase();
+    return (v === "advanced" || v === "simple") ? v : DEFAULT_MODE;
+  }
+
+  function setMode(mode){
+    mode = String(mode || "").toLowerCase();
+    if (mode !== "simple" && mode !== "advanced") mode = DEFAULT_MODE;
+    localStorage.setItem(KEY, mode);
+    applyMode();
+  }
+
+  function safeText(el){
+    try {
+      return (el && el.textContent ? el.textContent : "").replace(/\s+/g, " ").trim();
+    } catch { return ""; }
+  }
+
+  function qsa(sel){
+    try { return Array.from(document.querySelectorAll(sel)); }
+    catch { return []; }
+  }
+
+  function pickBlock(el){
+    // choose a reasonably local container to hide
+    let cur = el;
+    for (let i = 0; i < 10 && cur && cur !== document.body; i++) {
+      if (cur.id === ROOT_ID) return null;
+      if (cur.closest && cur.closest("#" + ROOT_ID)) return null;
+
+      if (cur.matches && cur.matches("fieldset,section,details,article")) return cur;
+
+      // common “group” containers
+      if (cur.matches && cur.matches(".card,.panel,.box,.block,.group,.wrap,.container")) return cur;
+
+      // div with some identity and form controls inside
+      if (cur.tagName === "DIV" && (cur.id || cur.className)) {
+        const n = cur.querySelectorAll ? cur.querySelectorAll("input,textarea,select,button").length : 0;
+        if (n >= 1) return cur;
+      }
+      cur = cur.parentElement;
+    }
+    return el && el.parentElement ? el.parentElement : el;
+  }
+
+  function hideEl(el, reason){
+    if (!el) return;
+    if (el.id === ROOT_ID) return;
+    if (el.closest && el.closest("#" + ROOT_ID)) return;
+    if (el === document.body || el === document.documentElement) return;
+
+    el.classList.add(HIDE_CLASS);
+    el.setAttribute("data-ng-std-hidden", "1");
+    if (reason) el.setAttribute("data-ng-std-reason", reason);
+  }
+
+  function showEl(el){
+    if (!el) return;
+    el.classList.remove(HIDE_CLASS);
+    el.removeAttribute("data-ng-std-hidden");
+    el.removeAttribute("data-ng-std-reason");
+  }
+
+  function findHeaderHits(regex){
+    const sel = "h1,h2,h3,h4,h5,h6,legend,label,summary,button,p,small,strong";
+    return qsa(sel).filter(el => {
+      if (el.id === ROOT_ID) return false;
+      if (el.closest && el.closest("#" + ROOT_ID)) return false;
+      const t = safeText(el);
+      if (!t) return false;
+      // avoid matching huge blocks
+      if (t.length > 220) return false;
+      return regex.test(t);
+    });
+  }
+
+  function collectSimpleTargets(){
+    const targets = new Set();
+
+    function addBlockFrom(el, reason){
+      const b = pickBlock(el);
+      if (!b) return;
+      if (b === document.body || b === document.documentElement) return;
+      if (b.closest && b.closest("#" + ROOT_ID)) return;
+      b.__ngStdReason = reason;
+      targets.add(b);
+    }
+
+    // Transcript targets: headings + common ids/names
+    findHeaderHits(RX.transcript).forEach(el => addBlockFrom(el, "transcript"));
+    qsa('textarea[id*="reverie" i],textarea[name*="reverie" i],textarea[id*="transcript" i],textarea[name*="transcript" i]')
+      .forEach(el => addBlockFrom(el, "transcript"));
+
+    // Bytes targets: known field names + headings/buttons
+    qsa('input[name="byte_speaker[]"],input[name="byte_designation[]"],textarea[name="byte_text[]"],textarea[name="byte_text"],input[name="byte_time[]"],input[name="byte_time"]')
+      .forEach(el => addBlockFrom(el, "bytes"));
+    findHeaderHits(RX.bytes).forEach(el => addBlockFrom(el, "bytes"));
+
+    // Visuals targets: headings + name/id hints
+    findHeaderHits(RX.visuals).forEach(el => addBlockFrom(el, "visuals"));
+    qsa('textarea[id*="visual" i],textarea[name*="visual" i],input[id*="visual" i],input[name*="visual" i],textarea[id*="srt" i],textarea[name*="srt" i],textarea[id*="shot" i],textarea[name*="shot" i],textarea[id*="broll" i],textarea[name*="broll" i]')
+      .forEach(el => addBlockFrom(el, "visuals"));
+
+    // Logs targets: headings + id/class contains log/debug (pre/textarea/div)
+    findHeaderHits(RX.logs).forEach(el => addBlockFrom(el, "logs"));
+    qsa('pre[id*="log" i],pre[class*="log" i],textarea[id*="log" i],textarea[class*="log" i],div[id*="debug" i],div[class*="debug" i],div[id*="log" i],div[class*="log" i]')
+      .forEach(el => addBlockFrom(el, "logs"));
+
+    // Story View (Debug): hide buttons/links + any open panel-like node
+    qsa("button,a").filter(el => RX.storyview.test(safeText(el))).forEach(el => {
+      // hide the control itself (not the whole page)
+      targets.add(el);
+      el.__ngStdReason = "storyview_btn";
+    });
+
+    // attempt to catch the floating Story View panel when open
+    // heuristic: contains "Story View" + "Updated @" + "Close"
+    qsa('div,section,details').forEach(el => {
+      if (el.id === ROOT_ID) return;
+      if (el.closest && el.closest("#" + ROOT_ID)) return;
+      const t = safeText(el);
+      if (!t || t.length < 30 || t.length > 2500) return;
+      if (RX.storyview.test(t) && /updated\s*@/i.test(t) && /\bclose\b/i.test(t)) {
+        addBlockFrom(el, "storyview_panel");
+      }
+    });
+
+    return Array.from(targets);
+  }
+
+  function ensureToggleUI(){
+    if (document.getElementById(ROOT_ID)) return;
+
+    const root = document.createElement("div");
+    root.id = ROOT_ID;
+
+    root.innerHTML = `
+      <div class="ngpill">
+        <span class="nglbl">UI</span>
+        <button type="button" data-ng-mode="simple">Simple</button>
+        <button type="button" data-ng-mode="advanced">Advanced</button>
+      </div>
+    `;
+
+    root.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("button[data-ng-mode]") : null;
+      if (!btn) return;
+      setMode(btn.getAttribute("data-ng-mode"));
+    });
+
+    (document.body || document.documentElement).appendChild(root);
+  }
+
+  function paintActive(mode){
+    const root = document.getElementById(ROOT_ID);
+    if (!root) return;
+    qsa(`#${ROOT_ID} button[data-ng-mode]`).forEach(b => {
+      const m = b.getAttribute("data-ng-mode");
+      if (m === mode) b.classList.add("active");
+      else b.classList.remove("active");
+    });
+  }
+
+  function showAllPreviouslyHidden(){
+    qsa('[data-ng-std-hidden="1"]').forEach(showEl);
+  }
+
+  let pending = false;
+  function scheduleApply(){
+    if (pending) return;
+    pending = true;
+    setTimeout(() => { pending = false; applyMode(); }, 120);
+  }
+
+  function applyMode(){
+    ensureToggleUI();
+
+    const mode = getMode();
+    document.documentElement.setAttribute("data-ng-std-ui", mode);
+    paintActive(mode);
+
+    // First: restore everything we hid
+    showAllPreviouslyHidden();
+
+    if (mode === "simple") {
+      const t = collectSimpleTargets();
+      t.forEach(el => hideEl(el, el.__ngStdReason || ""));
+      log("mode=simple", "hiddenCount=", t.length);
+    } else {
+      log("mode=advanced", "simple targets visible");
+    }
+  }
+
+  // public helpers for console
+  window.__NG_STANDARD_UI_TOGGLE_V1 = {
+    tag: TAG,
+    key: KEY,
+    getMode,
+    setMode,
+    applyMode,
+    rescan: applyMode,
+    debugScan: () => {
+      const t = collectSimpleTargets();
+      log("debugScan targets:", t.map(x => ({
+        tag: x.tagName,
+        id: x.id || "",
+        cls: (x.className && String(x.className).slice(0, 120)) || "",
+        reason: x.__ngStdReason || ""
+      })));
+      return t;
+    }
+  };
+
+  // run now
+  function boot(){
+    try { applyMode(); }
+    catch (e) { warn("boot error", e); }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+
+  // keep it working for dynamically injected panels (Story View etc.)
+  try {
+    const mo = new MutationObserver(() => {
+      if (getMode() === "simple") scheduleApply();
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {
+    warn("MutationObserver failed", e);
+  }
+
+  log("installed ✓", { default: DEFAULT_MODE, key: KEY });
+})();
+</script>
+<!-- NG_PATCH_END: NG_STANDARD_UI_TOGGLE_V1 -->
+<!-- NG_PATCH_START: NG_STD_SECTION_IDS_V1 -->
+<style>
+  /* Enforce Simple mode purely by IDs (deterministic) */
+  html[data-ng-std-ui="simple"] #ng-sec-transcript,
+  html[data-ng-std-ui="simple"] #ng-sec-bytes,
+  html[data-ng-std-ui="simple"] #ng-sec-visuals,
+  html[data-ng-std-ui="simple"] #ng-sec-logs,
+  html[data-ng-std-ui="simple"] #ng-btn-storyview,
+  html[data-ng-std-ui="simple"] #ng-panel-storyview {
+    display: none !important;
+  }
+</style>
+
+<script>
+(function(){
+  const TAG = "NG_STD_SECTION_IDS_V1";
+  if (window.__NG_STD_SECTION_IDS_V1) return;
+
+  const RX = {
+    addByte: /add\s*byte/i,
+    addVisual: /add\s*visual/i,
+    reverie: /reverie/i,
+    reverieLine: /reverie\s*output\s*json/i,
+    pasteJson: /paste\s*json\s*here/i,
+    storyView: /story\s*view/i,
+    updatedAt: /updated\s*@/i,
+    close: /\bclose\b/i,
+    editorial: /editorial\s*extraction/i,
+    status: /\bstatus\b/i,
+    log: /^log$/i
+  };
+
+  const IDS = {
+    transcript: "ng-sec-transcript",
+    bytes: "ng-sec-bytes",
+    visuals: "ng-sec-visuals",
+    logs: "ng-sec-logs",
+    storyBtn: "ng-btn-storyview",
+    storyPanel: "ng-panel-storyview"
+  };
+
+  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
+  function qsa(sel){ try { return Array.from(document.querySelectorAll(sel)); } catch { return []; } }
+
+  function findByButton(rx){
+    const btns = qsa("button,[role='button'],a");
+    return btns.find(b => rx.test(norm(b.textContent)));
+  }
+
+  function findByText(rx){
+    const nodes = qsa("div,span,p,strong,b,small,label,h1,h2,h3,h4,h5,h6,summary,legend");
+    return nodes.find(n => {
+      const t = norm(n.textContent);
+      return t && t.length <= 200 && rx.test(t);
+    });
+  }
+
+  function pickCard(startEl, mustHaveRx){
+    if (!startEl) return null;
+    let cur = startEl;
+    for (let i=0; i<18 && cur && cur !== document.body; i++){
+      const t = norm(cur.textContent);
+      // avoid picking the whole page/root
+      const tooBig =
+        /newsgenie/i.test(t) ||
+        /what happened/i.test(t) ||
+        /sources\s*\/\s*references/i.test(t) ||
+        /background/i.test(t) ||
+        /generate\s*digi_pack/i.test(t);
+
+      if (!tooBig) {
+        if (!mustHaveRx || mustHaveRx.test(t)) {
+          // container-ish check
+          const btnCount = cur.querySelectorAll ? cur.querySelectorAll("button").length : 0;
+          const hasTitle = cur.querySelector && cur.querySelector("h1,h2,h3,h4,strong,b,div,span");
+          if (btnCount >= 1 || hasTitle) return cur;
+        }
+      }
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
+  function setId(el, id){
+    if (!el) return false;
+    if (el.id && el.id !== id) return false;     // don't clobber existing IDs
+    if (!el.id) el.id = id;
+    el.setAttribute("data-ng-sec", id);
+    return true;
+  }
+
+  function ensureIDs(){
+    // Bytes section: find "+ Add Byte" button -> pick card containing "Bytes"
+    const btnByte = findByButton(RX.addByte);
+    const cardByte = pickCard(btnByte, /bytes/i);
+    setId(cardByte, IDS.bytes);
+
+    // Visuals section: find "+ Add Visual" button -> pick card containing "Visuals"
+    const btnVis = findByButton(RX.addVisual);
+    const cardVis = pickCard(btnVis, /visuals/i);
+    setId(cardVis, IDS.visuals);
+
+    // Transcript/Reverie section: detect by text line or placeholder-like text
+    const t1 = findByText(RX.reverieLine) || findByText(RX.pasteJson) || findByText(RX.reverie);
+    const cardTr = pickCard(t1, RX.reverie);
+    setId(cardTr, IDS.transcript);
+
+    // Story View button id (separate)
+    const storyBtn = findByButton(RX.storyView);
+    if (storyBtn && !storyBtn.id) storyBtn.id = IDS.storyBtn;
+
+    // Logs / Editorial extraction section
+    const ed = findByText(RX.editorial) || findByText(RX.status) || findByText(RX.log);
+    const cardLog = pickCard(ed, /(editorial|status|log)/i);
+    setId(cardLog, IDS.logs);
+
+    // Story View floating panel when open (looks like: "Story View" + "Updated @" + "Close")
+    qsa("div,section,article").forEach(el => {
+      if (el.id === IDS.storyPanel) return;
+      const t = norm(el.textContent);
+      if (!t || t.length < 40 || t.length > 2500) return;
+      if (RX.storyView.test(t) && RX.updatedAt.test(t) && RX.close.test(t)) {
+        if (!el.id) el.id = IDS.storyPanel;
+      }
+    });
+  }
+
+  function boot(){
+    ensureIDs();
+    try {
+      new MutationObserver(() => ensureIDs())
+        .observe(document.documentElement, { childList:true, subtree:true });
+    } catch(e){}
+    console.log("[" + TAG + "] installed ✓");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once:true });
+  } else {
+    boot();
+  }
+
+  window.__NG_STD_SECTION_IDS_V1 = {
+    tag: TAG,
+    ensure: ensureIDs,
+    dump: () => ({
+      transcript: !!document.getElementById(IDS.transcript),
+      bytes: !!document.getElementById(IDS.bytes),
+      visuals: !!document.getElementById(IDS.visuals),
+      logs: !!document.getElementById(IDS.logs),
+      storyBtn: !!document.getElementById(IDS.storyBtn),
+      storyPanel: !!document.getElementById(IDS.storyPanel),
+    })
+  };
+})();
+</script>
+<!-- NG_PATCH_END: NG_STD_SECTION_IDS_V1 -->
+<!-- NG_PATCH_START: NG_STD_SECTION_IDS_FIX_V1 -->
+<script>
+(function(){
+  const TAG = "NG_STD_SECTION_IDS_FIX_V1";
+  if (window.__NG_STD_SECTION_IDS_FIX_V1) return;
+
+  const base = window.__NG_STD_SECTION_IDS_V1;
+  if (!base) {
+    console.warn("[" + TAG + "] base NG_STD_SECTION_IDS_V1 not found");
+    return;
+  }
+
+  const IDS = {
+    transcript: "ng-sec-transcript",
+    bytes: "ng-sec-bytes",
+    visuals: "ng-sec-visuals",
+    logs: "ng-sec-logs",
+    storyBtn: "ng-btn-storyview",
+    storyPanel: "ng-panel-storyview"
+  };
+
+  const RX = {
+    addByte: /add\s*byte/i,
+    addVisual: /add\s*visual/i,
+    storyView: /story\s*view/i,        // catches "Story View V9"
+    editorial: /editorial\s*extraction/i,
+    discard: /discard/i,
+    clearSug: /clear\s*suggestions/i,
+    pushToBytes: /push\s*selected\s*to\s*bytes/i,
+    status: /\bstatus\b/i,
+    logWord: /^log$/i
+  };
+
+  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
+  function qsa(sel){ try { return Array.from(document.querySelectorAll(sel)); } catch { return []; } }
+
+  function findClickable(rx){
+    // scan common clickable candidates (not only <button>)
+    const nodes = qsa("button,a,[role='button'],[onclick],div,span");
+    for (const el of nodes){
+      const t = norm(el.textContent);
+      if (!t || t.length > 80) continue;
+      if (rx.test(t)) return el;
+    }
+    return null;
+  }
+
+  function pickCardFrom(startEl){
+    if (!startEl) return null;
+    let cur = startEl;
+    for (let i=0; i<20 && cur && cur !== document.body; i++){
+      const t = norm(cur.textContent);
+
+      // avoid grabbing whole form/page
+      const tooBig =
+        /newsgenie/i.test(t) ||
+        /what happened/i.test(t) ||
+        /sources\s*\/\s*references/i.test(t) ||
+        /background/i.test(t) ||
+        /generate\s*digi_pack/i.test(t);
+
+      if (!tooBig && cur.querySelectorAll) {
+        // a section/card usually has at least 1 control
+        const controls = cur.querySelectorAll("input,textarea,select,button").length;
+        if (controls >= 1) return cur;
+      }
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
+  function setId(el, id){
+    if (!el) return false;
+    if (el.id && el.id !== id) return false;
+    if (!el.id) el.id = id;
+    el.setAttribute("data-ng-sec", id);
+    return true;
+  }
+
+  // FIXED ensure: stronger anchors for visuals/logs/storyBtn
+  function ensureFix(){
+    // Visuals: anchor = "+ Add Visual"
+    const addVis = findClickable(RX.addVisual);
+    const visCard = pickCardFrom(addVis);
+    setId(visCard, IDS.visuals);
+
+    // Logs: anchors = "Editorial Extraction" OR "Discard" OR "Clear suggestions" OR "Push selected to Bytes" OR "Status" OR "Log"
+    const logAnchor =
+      findClickable(RX.editorial) ||
+      findClickable(RX.discard) ||
+      findClickable(RX.clearSug) ||
+      findClickable(RX.pushToBytes) ||
+      findClickable(RX.status) ||
+      findClickable(RX.logWord);
+
+    const logCard = pickCardFrom(logAnchor);
+    setId(logCard, IDS.logs);
+
+    // Story View button: anchor = "Story View"
+    const sv = findClickable(RX.storyView);
+    if (sv) setId(sv, IDS.storyBtn);
+
+    // Story View floating panel (when open): already handled by base, but re-check quickly
+    qsa("div,section,article").forEach(el => {
+      const t = norm(el.textContent);
+      if (!t || t.length < 40 || t.length > 2500) return;
+      if (RX.storyView.test(t) && /updated\s*@/i.test(t) && /\bclose\b/i.test(t)) {
+        if (!el.id) el.id = IDS.storyPanel;
+      }
+    });
+  }
+
+  // wrap base.ensure() so FIX runs every time too
+  const origEnsure = base.ensure;
+  base.ensure = function(){
+    try { origEnsure && origEnsure(); } catch(e){}
+    try { ensureFix(); } catch(e){ console.warn("[" + TAG + "]", e); }
+  };
+
+  // run now + keep watching
+  base.ensure();
+  try {
+    new MutationObserver(() => base.ensure())
+      .observe(document.documentElement, { childList:true, subtree:true });
+  } catch(e){}
+
+  window.__NG_STD_SECTION_IDS_FIX_V1 = { tag: TAG };
+  console.log("[" + TAG + "] installed ✓");
+})();
+</script>
+<!-- NG_PATCH_END: NG_STD_SECTION_IDS_FIX_V1 -->
+<!-- NG_PATCH_START: NG_STD_STORYBTN_BIND_V2 -->
+<script>
+(function(){
+  const TAG = "NG_STD_STORYBTN_BIND_V2";
+  if (window.__NG_STD_STORYBTN_BIND_V2) return;
+
+  const TARGET_ID = "ng-btn-storyview";
+  const ATTR = "data-ng-storybtn";
+
+  const base = window.__NG_STD_SECTION_IDS_V1;
+
+  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
+  function isClickable(el){
+    if (!el || !el.tagName) return false;
+    const tag = el.tagName.toUpperCase();
+    if (tag === "BUTTON" || tag === "A" || tag === "SUMMARY" || tag === "LABEL") return true;
+    const role = el.getAttribute && el.getAttribute("role");
+    if (role && role.toLowerCase() === "button") return true;
+    if (el.hasAttribute && (el.hasAttribute("onclick") || el.hasAttribute("tabindex"))) return true;
+    return false;
+  }
+
+  function closestClickable(el){
+    let cur = el;
+    for (let i=0; i<18 && cur && cur !== document.body; i++){
+      if (isClickable(cur)) return cur;
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
+  function findByTextNode(){
+    const root = document.body || document.documentElement;
+    if (!root) return null;
+
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        const t = norm(node.nodeValue);
+        if (!t) return NodeFilter.FILTER_REJECT;
+        const low = t.toLowerCase();
+        // catch "Story View", "StoryView", "Story View V9" etc.
+        if (/(story\s*view|storyview)/i.test(low)) return NodeFilter.FILTER_ACCEPT;
+        return NodeFilter.FILTER_REJECT;
+      }
+    });
+
+    let n;
+    while ((n = tw.nextNode())) {
+      const parent = n.parentElement;
+      if (!parent) continue;
+
+      // prefer the smallest meaningful clickable ancestor
+      const clickEl = closestClickable(parent) || parent;
+      const txt = (norm(clickEl.textContent) + " " +
+                   norm(clickEl.getAttribute?.("aria-label")) + " " +
+                   norm(clickEl.getAttribute?.("title"))).toLowerCase();
+
+      if (!/(story\s*view|storyview)/i.test(txt)) {
+        // if ancestor lost the phrase, keep climbing a bit
+        const up = closestClickable(clickEl.parentElement);
+        if (up) return up;
+      }
+      return clickEl;
+    }
+    return null;
+  }
+
+  function bind(){
+    // already bound?
+    if (document.getElementById(TARGET_ID)) return true;
+
+    const el = findByTextNode();
+    if (!el) return false;
+
+    // Always mark attribute (deterministic selector)
+    try { el.setAttribute(ATTR, "1"); } catch(e){}
+
+    // Set ID only if safe (no existing id)
+    if (!el.id) {
+      el.id = TARGET_ID;
+    } else {
+      // don't clobber existing id; attribute is enough
+    }
+
+    // Patch dump() so storyBtn reflects attribute too
+    if (base && base.dump && !base.__dumpPatchedStoryBtnV2) {
+      const origDump = base.dump.bind(base);
+      base.dump = function(){
+        const d = origDump();
+        const byId = !!document.getElementById(TARGET_ID);
+        const byAttr = !!document.querySelector("[" + ATTR + "='1']");
+        d.storyBtn = byId || byAttr;
+        return d;
+      };
+      base.__dumpPatchedStoryBtnV2 = true;
+    }
+
+    console.log("[" + TAG + "] bound ✓", { tag: el.tagName, id: el.id || "(kept)", hasAttr: el.hasAttribute(ATTR) });
+    return true;
+  }
+
+  function boot(){
+    // try now and keep retrying (because StoryView control may appear only in Advanced)
+    bind();
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      if (bind() || tries > 120) clearInterval(timer);
+    }, 150);
+
+    try {
+      new MutationObserver(() => bind())
+        .observe(document.documentElement, { childList:true, subtree:true });
+    } catch(e){}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once:true });
+  } else {
+    boot();
+  }
+
+  window.__NG_STD_STORYBTN_BIND_V2 = { tag: TAG, bind };
+})();
+</script>
+<!-- NG_PATCH_END: NG_STD_STORYBTN_BIND_V2 -->
+
+
+<!-- NG_PATCH_START: LIBBAR_NO_OVERLAY_V2 -->
+<script>
+(function LIBBAR_NO_OVERLAY_V2(){
+  if (window.__NG_LIBBAR_NO_OVERLAY_V2__) return;
+  window.__NG_LIBBAR_NO_OVERLAY_V2__ = true;
+
+  const TAG = "[LIBBAR_NO_OVERLAY_V2]";
+
+  function t(el){ return ((el && el.textContent) ? el.textContent : "").trim(); }
+
+  function findLibraryBar(){
+    // find a container that has Download TXT and Download JSON buttons
+    const btns = Array.from(document.querySelectorAll("button"));
+    const bTxt = btns.find(b => /download\s*txt/i.test(t(b)));
+    if (!bTxt) return null;
+
+    let p = bTxt;
+    for (let i=0; i<10 && p; i++){
+      if (p.querySelectorAll){
+        const inside = Array.from(p.querySelectorAll("button")).map(x => t(x));
+        const hasTxt  = inside.some(s => /download\s*txt/i.test(s));
+        const hasJson = inside.some(s => /download\s*json/i.test(s));
+        if (hasTxt && hasJson) return p;
+      }
+      p = p.parentElement;
+    }
+    return bTxt.parentElement;
+  }
+
+  function isInside(el, parent){
+    try { return !!(el && parent && parent.contains(el)); } catch { return false; }
+  }
+
+  function toggleMainLibraryButton(excludeBar){
+    const all = Array.from(document.querySelectorAll("button"));
+    const cand = all.find(b => t(b) === "Library" && !isInside(b, excludeBar));
+    if (cand && typeof cand.click === "function") { cand.click(); return true; }
+    return false;
+  }
+
+  function ensureSpacer(bar){
+    let sp = document.getElementById("ngLibBarSpacer");
+    const h = Math.ceil((bar.getBoundingClientRect().height || 0));
+    if (!sp) {
+      sp = document.createElement("div");
+      sp.id = "ngLibBarSpacer";
+      sp.style.cssText = "width:100%; height:0px;";
+      (document.body || document.documentElement).prepend(sp);
+    }
+    sp.style.height = (h > 0 ? h : 56) + "px";
+  }
+
+  function removeSpacer(){
+    const sp = document.getElementById("ngLibBarSpacer");
+    if (sp) sp.remove();
+  }
+
+  function injectClose(bar){
+    if (bar.querySelector('button[data-ng-libbar-close="1"]')) return;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.textContent = "Close";
+    closeBtn.setAttribute("data-ng-libbar-close","1");
+    closeBtn.style.cssText =
+      "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; " +
+      "background:#171a1d; color:#e8eaed; cursor:pointer; margin-left:8px;";
+
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      bar.style.setProperty("display","none","important");
+      removeSpacer();
+      toggleMainLibraryButton(bar);
+      console.log("✅ LIBBAR CLOSED");
+    }, true);
+
+    bar.appendChild(closeBtn);
+  }
+
+  function makeNonOverlay(bar){
+    // Try to force STICKY (best)
+    bar.style.setProperty("position", "sticky", "important");
+    bar.style.setProperty("top", "0px", "important");
+    bar.style.setProperty("left", "0px", "important");
+    bar.style.setProperty("right", "0px", "important");
+    bar.style.setProperty("z-index", "9999", "important");
+    bar.style.setProperty("box-sizing", "border-box", "important");
+    bar.style.setProperty("background", "rgba(11,13,15,0.95)", "important");
+    bar.style.setProperty("backdrop-filter", "blur(6px)", "important");
+    bar.style.setProperty("padding", "8px", "important");
+    bar.style.setProperty("border-radius", "14px", "important");
+    bar.style.setProperty("margin", "8px", "important");
+    bar.style.setProperty("transform", "translateZ(0)", "important");
+
+    injectClose(bar);
+
+    // If some script still keeps it FIXED, add spacer so it never covers content
+    setTimeout(() => {
+      try {
+        const pos = getComputedStyle(bar).position;
+        if (pos === "fixed") ensureSpacer(bar);
+        else removeSpacer();
+      } catch {}
+    }, 0);
+  }
+
+  function apply(){
+    const bar = findLibraryBar();
+    if (!bar) return;
+    makeNonOverlay(bar);
+  }
+
+  apply();
+  new MutationObserver(apply).observe(document.documentElement, { childList:true, subtree:true });
+  // extra safety: if other scripts re-override after a delay
+  setInterval(apply, 500);
+
+  console.log(TAG, "installed");
+})();
+</script>
+<!-- NG_PATCH_END: LIBBAR_NO_OVERLAY_V2 -->
+
+
+
+<!-- NG_PATCH_START: STORYVIEW_SWAP_FIX_V7CLEAN -->
+<script>
+(function STORYVIEW_SWAP_FIX_V7CLEAN(){
+  if (window.__NG_SV_FIX_V7CLEAN_INSTALLED__) return;
+  window.__NG_SV_FIX_V7CLEAN_INSTALLED__ = true;
+
+  const SEG_IDS = ["ngSegBtnV2", "ng-seg-copy"];
+
+  function killSegments(){
+    for (const id of SEG_IDS) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+  }
+
+  function ensureStoryBtn(){
+    const b = document.getElementById("btn-storyview-v9");
+    if (!b) return null;
+    b.type = "button";
+    b.style.setProperty("pointer-events", "auto", "important");
+    b.style.setProperty("z-index", "2147483647", "important");
+    return b;
+  }
+
+  function safeGetLS(key){
+    try { return localStorage.getItem(key); } catch { return null; }
+  }
+
+  function collectStoryText(){
+    const keys = [
+      "NG_DRAFTS",
+      "NG_DRAFTS_V2",
+      "NG_LASTPACK_CAPTURE_V1",
+      "NG_LASTPACK",
+      "NG_TRANSCRIPT",
+      "NG_TRANSCRIPT_JSON",
+      "NG_LAST_API_DIGIPACK",
+      "NG_DIGIPACK_LAST"
+    ];
+
+    const found = [];
+    for (const k of keys) {
+      const v = safeGetLS(k);
+      if (v && String(v).length) found.push({ k, len: String(v).length, v });
+    }
+
+    try {
+      const extra = [];
+      for (let i=0; i<localStorage.length && extra.length<6; i++){
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (/draft|digipack|storyview|transcript/i.test(k) && !keys.includes(k)){
+          const v = safeGetLS(k);
+          if (v && String(v).length) extra.push({ k, len: String(v).length, v });
+        }
+      }
+      found.push(...extra);
+    } catch {}
+
+    const main = found.slice().sort((a,b)=>b.len-a.len)[0];
+    const header = [
+      "NewsGenie Story View (FIX) — fallback modal",
+      "Time: " + new Date().toISOString(),
+      "Found keys: " + (found.map(x => `${x.k}(${x.len})`).join(", ") || "NONE"),
+      "",
+      main ? `Showing: ${main.k} (len=${main.len})` : "No saved story/draft data found in localStorage."
+    ].join("\n");
+
+    return header + "\n\n" + (main ? String(main.v) : "");
+  }
+
+  function restoreLibraryBestEffort(){
+    const ids = ["btn-open-library", "btn-open-lib", "btn-library", "btnOpenLibrary", "btn-open-library-v2"];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el && typeof el.click === "function") { el.click(); return true; }
+    }
+    const b = [...document.querySelectorAll("button")].find(x => /library/i.test((x.textContent||"").trim()));
+    if (b && typeof b.click === "function") { b.click(); return true; }
+    return false;
+  }
+
+  function ensureModal(){
+    let m = document.getElementById("ngSvFixModal");
+    if (m) return m;
+
+    m = document.createElement("div");
+    m.id = "ngSvFixModal";
+    m.style.cssText = [
+      "position:fixed",
+      "inset:0",
+      "display:none",
+      "background:rgba(0,0,0,0.55)",
+      "z-index:2147483646"
+    ].join(";");
+
+    const panel = document.createElement("div");
+    panel.style.cssText = [
+      "position:absolute",
+      "left:24px",
+      "right:24px",
+      "top:24px",
+      "bottom:24px",
+      "background:#101214",
+      "color:#e8eaed",
+      "border-radius:14px",
+      "box-shadow:0 10px 30px rgba(0,0,0,0.6)",
+      "padding:12px",
+      "overflow:hidden",
+      "font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial"
+    ].join(";");
+
+    const bar = document.createElement("div");
+    bar.style.cssText = "display:flex; gap:8px; align-items:center; justify-content:space-between; padding:6px 4px 10px 4px;";
+
+    const title = document.createElement("div");
+    title.textContent = "Story View (FIX)";
+    title.style.cssText = "font-weight:700; font-size:14px;";
+
+    const btns = document.createElement("div");
+    btns.style.cssText = "display:flex; gap:8px; align-items:center;";
+
+    const mkBtn = (txt) => {
+      const b = document.createElement("button");
+      b.textContent = txt;
+      b.type = "button";
+      b.style.cssText = "padding:6px 10px; border-radius:10px; border:1px solid #2b2f33; background:#171a1d; color:#e8eaed; cursor:pointer;";
+      return b;
+    };
+
+    const bRefresh = mkBtn("Refresh");
+    const bCopy    = mkBtn("Copy");
+    const bClose   = mkBtn("Close");
+
+    btns.appendChild(bRefresh);
+    btns.appendChild(bCopy);
+    btns.appendChild(bClose);
+
+    bar.appendChild(title);
+    bar.appendChild(btns);
+
+    const pre = document.createElement("pre");
+    pre.id = "ngSvFixBody";
+    pre.style.cssText = [
+      "white-space:pre-wrap",
+      "word-break:break-word",
+      "margin:0",
+      "height:calc(100% - 44px)",
+      "overflow:auto",
+      "padding:10px",
+      "border-radius:12px",
+      "background:#0b0d0f",
+      "border:1px solid #2b2f33",
+      "font-size:12px",
+      "line-height:1.35"
+    ].join(";");
+
+    panel.appendChild(bar);
+    panel.appendChild(pre);
+    m.appendChild(panel);
+
+    (document.body || document.documentElement).appendChild(m);
+
+    const fill = () => { pre.textContent = collectStoryText(); };
+
+    bRefresh.onclick = () => { fill(); console.log("✅ FIX REFRESH"); };
+
+    bCopy.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(pre.textContent || "");
+        console.log("✅ FIX COPIED");
+      } catch(e) {
+        const ta = document.createElement("textarea");
+        ta.value = pre.textContent || "";
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        console.log("✅ FIX COPIED (fallback)");
+      }
+    };
+
+    bClose.onclick = () => {
+      try { m.style.setProperty("display","none","important"); } catch {}
+      try { m.remove(); } catch {}
+      console.log("✅ FIX CLOSED (removed)");
+      restoreLibraryBestEffort();
+    };
+
+    m.addEventListener("click", (e) => { if (e.target === m) bClose.onclick(); });
+
+    fill();
+    console.log("[SV_FIX_V7] ngSvFixModal created");
+    return m;
+  }
+
+  function openModal(){
+    const m = ensureModal();
+    m.style.setProperty("display", "block", "important");
+    m.style.setProperty("visibility", "visible", "important");
+    m.style.setProperty("opacity", "1", "important");
+    return true;
+  }
+
+  function isStoryViewHit(ev){
+    const b = ensureStoryBtn();
+    if (!b) return false;
+
+    const path = ev.composedPath ? ev.composedPath() : [];
+    if (ev.target === b || path.includes(b)) return true;
+
+    const r = b.getBoundingClientRect();
+    const x = ev.clientX, y = ev.clientY;
+    return (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom);
+  }
+
+  // V7 one-shot + click-block
+  let __ng_sv_lastHit = 0;
+
+  function onSVPointer(ev){
+    if (!ev || !ev.isTrusted) return;
+    if (!isStoryViewHit(ev)) return;
+
+    const t = Date.now();
+    if (t - __ng_sv_lastHit < 600) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      return;
+    }
+    __ng_sv_lastHit = t;
+
+    killSegments();
+    ensureStoryBtn();
+    openModal();
+    console.log("✅ FIX OPEN (V7)");
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+  }
+
+  function onSVClickBlock(ev){
+    if (!ev || !ev.isTrusted) return;
+    if (Date.now() - __ng_sv_lastHit > 800) return;
+    if (!isStoryViewHit(ev)) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+  }
+
+  // IMPORTANT: install EARLY by placing this block right after <body>
+  window.addEventListener("pointerdown", onSVPointer, true);
+  window.addEventListener("click", onSVClickBlock, true);
+
+  // Keep stable after refresh / reinserts
+  const mo = new MutationObserver(() => { killSegments(); ensureStoryBtn(); });
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+
+  killSegments();
+  ensureStoryBtn();
+  console.log("[SV_FIX_V7] installed");
+})();
+</script> 
+<!-- NG_PATCH_END: STORYVIEW_SWAP_FIX_V7CLEAN -->
+<script>
+/* NG_REVERIE_BUTTONS_V1 */
+(function () {
+  if (window.__NG_REVERIE_BUTTONS_V1__) return;
+  window.__NG_REVERIE_BUTTONS_V1__ = true;
+
+  const byId = (id) => document.getElementById(id);
+
+  function setHint(msg) {
+    const el = byId("transcript-load-hint");
+    if (el) el.textContent = msg || "";
+  }
+
+  function setTA(txt) {
+    const ta = byId("ta-transcript-json");
+    if (!ta) return false;
+    ta.value = String(txt || "");
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
+    ta.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+  }
+
+  function clickLoad() {
+    const btn = byId("btn-load-transcript-json");
+    if (btn) btn.click();
+  }
+
+  async function onPaste() {
+    const ta = byId("ta-transcript-json");
+    if (!ta) {
+      console.warn("[NG_REVERIE_BUTTONS_V1] textarea missing");
+      return;
+    }
+
+    if (!(window.isSecureContext && navigator.clipboard && navigator.clipboard.readText)) {
+      console.warn("[NG_REVERIE_BUTTONS_V1] Clipboard API unavailable. (Use https/localhost; permission needed)");
+      ta.focus();
+      setHint("Clipboard unavailable — paste manually.");
+      return;
+    }
+
+    try {
+      const txt = await navigator.clipboard.readText();
+      if (!txt || !txt.trim()) {
+        setHint("Clipboard empty.");
+        return;
+      }
+      setTA(txt);
+      setHint("Pasted ✓  (Loading…)");
+      clickLoad();
+    } catch (e) {
+      console.warn("[NG_REVERIE_BUTTONS_V1] clipboard read failed", e);
+      setHint("Clipboard read failed — paste manually.");
+      ta.focus();
+    }
+  }
+
+  function onImportClick() {
+    const fin = byId("file-transcript-json");
+    if (fin) fin.click();
+  }
+
+  function onFileChange(ev) {
+    const fin = ev && ev.target;
+    const file = fin && fin.files && fin.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      const txt = String(reader.result || "");
+      setTA(txt);
+      setHint("File loaded ✓  (Loading…)");
+      clickLoad();
+      fin.value = "";
+    };
+    reader.onerror = function () {
+      console.warn("[NG_REVERIE_BUTTONS_V1] file read failed");
+      setHint("File read failed.");
+      fin.value = "";
+    };
+    reader.readAsText(file);
+  }
+
+  function install() {
+    const btnPaste = byId("btn-paste-transcript-json");
+    const btnImport = byId("btn-import-transcript-json");
+    const fin = byId("file-transcript-json");
+
+    if (btnPaste && !btnPaste.dataset.ngWired) {
+      btnPaste.addEventListener("click", onPaste);
+      btnPaste.dataset.ngWired = "1";
+    }
+    if (btnImport && !btnImport.dataset.ngWired) {
+      btnImport.addEventListener("click", onImportClick);
+      btnImport.dataset.ngWired = "1";
+    }
+    if (fin && !fin.dataset.ngWired) {
+      fin.addEventListener("change", onFileChange);
+      fin.dataset.ngWired = "1";
+    }
+
+    console.log("[NG_REVERIE_BUTTONS_V1] installed ✓", {
+      paste: !!btnPaste,
+      import: !!btnImport,
+      file: !!fin,
+      ta: !!byId("ta-transcript-json"),
+      loadBtn: !!byId("btn-load-transcript-json")
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", install);
+  } else {
+    install();
+  }
+})();
+</script>
+<script>
+/* NG_UI_HEALTHCHECK_V1 */
+window.__NG_UI_HEALTHCHECK__ = function () {
+  const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+  const byId = (id) => document.getElementById(id);
+
+  const ids = [
+    "btn-generate",
+    "btn-save-draft",
+    "btn-open-library",
+    "btn-mark-published",
+    "btn-new-story",
+
+    "ng-reverie-block",
+    "btn-load-transcript-json",
+    "btn-clear-transcript-json",
+    "btn-paste-transcript-json",
+    "btn-import-transcript-json",
+    "file-transcript-json",
+    "ta-transcript-json",
+    "transcript-load-hint"
+  ];
+
+  const out = {
+    ok: true,
+    ts: new Date().toISOString(),
+    dom: {},
+    duplicates: {},
+    buttons: {},
+    localStorage: {},
+    patches: Array.isArray(window.__NG_PATCHES__) ? window.__NG_PATCHES__.slice() : [],
+    notes: []
+  };
+
+  // DOM + duplicate id counts
+  ids.forEach((id) => {
+    const nodes = qsa(`[id="${id}"]`);
+    out.duplicates[id] = nodes.length;
+    out.dom[id] = { present: nodes.length > 0, count: nodes.length };
+
+    const el = nodes[0];
+    if (el && el.tagName === "BUTTON") {
+      out.buttons[id] = {
+        disabled: !!el.disabled,
+        wired: (el.dataset && el.dataset.ngWired) ? "yes" : "",
+        text: (el.textContent || "").trim().slice(0, 40)
+      };
+    }
+  });
+
+  // localStorage check
+  const lsKeys = ["NG_TRANSCRIPT", "NG_REVERIE_TEXT", "NG_DRAFTS", "NG_LASTPACK"];
+  lsKeys.forEach((k) => {
+    const v = localStorage.getItem(k);
+    if (v == null) {
+      out.localStorage[k] = { present: false };
+      return;
+    }
+    let isJSON = false, parsed = null;
+    try { parsed = JSON.parse(v); isJSON = true; } catch (e) {}
+
+    const row = { present: true, bytes: String(v).length, isJSON };
+
+    if (k === "NG_TRANSCRIPT") {
+      // NG_TRANSCRIPT may be string OR JSON depending on your bridge
+      if (isJSON && parsed && typeof parsed === "object") {
+        const t = parsed.transcript || parsed.display_text || parsed.text || "";
+        if (typeof t === "string" && t) {
+          row.transcriptLen = t.length;
+          row.transcriptStart = t.slice(0, 40);
+        }
+        row.keys = Object.keys(parsed).slice(0, 20);
+      } else {
+        const t = String(v || "");
+        row.transcriptLen = t.length;
+        row.transcriptStart = t.slice(0, 40);
+      }
+    }
+
+    out.localStorage[k] = row;
+  });
+
+  // minimal required ids
+  ["btn-load-transcript-json", "ta-transcript-json"].forEach((id) => {
+    if (!byId(id)) out.ok = false;
+  });
+
+  // duplicates warning
+  Object.entries(out.duplicates).forEach(([id, count]) => {
+    if (count > 1) out.notes.push(`Duplicate id="${id}" x${count}`);
+  });
+
+  console.log("[NG_UI_HEALTHCHECK]", out);
+  try {
+    console.table(Object.entries(out.buttons).map(([id, v]) => ({
+      id, disabled: v.disabled, wired: v.wired, text: v.text
+    })));
+  } catch (e) {}
+
+  return out;
+};
+</script>
+<script>
+/* NG_SAVEDRAFT_LASTPACK_BRIDGE_V1 */
+(function () {
+  if (window.__NG_SAVEDRAFT_LASTPACK_BRIDGE_V1__) return;
+  window.__NG_SAVEDRAFT_LASTPACK_BRIDGE_V1__ = true;
+
+  const byId = (id) => document.getElementById(id);
+
+  function pickLastResp() {
+    const keys = [
+      "NG_LAST_DIGIPACK_RESP_V3",
+      "NG_LAST_DIGIPACK_RESP",
+      "NG_LASTPACK"
+    ];
+    for (const k of keys) {
+      let v = "";
+      try { v = localStorage.getItem(k) || ""; } catch (e) {}
+      if (String(v).trim()) return { key: k, val: String(v) };
+    }
+    return null;
+  }
+
+  function normalizeToJSONText(v) {
+    const s = String(v || "").trim();
+    if (!s) return "";
+    if (s[0] === "{" || s[0] === "[") return s;
+    return JSON.stringify({ ok: true, raw: s });
+  }
+
+  function mirrorForSaveDraft() {
+    const pick = pickLastResp();
+    if (!pick) {
+      console.warn("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] no last response found");
+      return;
+    }
+    const jsonText = normalizeToJSONText(pick.val);
+    if (!jsonText) {
+      console.warn("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] empty last response");
+      return;
+    }
+
+    try {
+      localStorage.setItem("NG_LASTPACK", jsonText);
+      localStorage.setItem("NG_LASTPACK_CAPTURE", jsonText);
+      localStorage.setItem("NG_LASTPACK_TS", new Date().toISOString());
+    } catch (e) {
+      console.error("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] localStorage set failed", e);
+      return;
+    }
+
+    console.log("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] mirrored", {
+      from: pick.key,
+      len: jsonText.length
+    });
+  }
+
+  function install() {
+    const btn = byId("btn-save-draft");
+    if (!btn) {
+      console.warn("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] btn-save-draft not found");
+      return;
+    }
+    btn.addEventListener("click", mirrorForSaveDraft, true);
+    console.log("[NG_SAVEDRAFT_LASTPACK_BRIDGE_V1] armed ✓");
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install);
+  else install();
+})();
+</script>
+<script>
+/* NG_AUTORESTORE_LAST_DRAFT_V1 */
+(function () {
+  if (window.__NG_AUTORESTORE_LAST_DRAFT_V1__) return;
+  window.__NG_AUTORESTORE_LAST_DRAFT_V1__ = true;
+
+  const byId = (id) => document.getElementById(id);
+
+  function setHint(msg) {
+    const el = byId("transcript-load-hint");
+    if (el) el.textContent = msg || "";
+  }
+
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  function readDrafts() {
+    const keys = ["NG_DIGIPACK_DRAFTS_V1", "NG_DIGIPACK_DRAFTS"];
+    for (const k of keys) {
+      const v = lsGet(k);
+      if (!v) continue;
+      try {
+        const arr = JSON.parse(v);
+        if (Array.isArray(arr) && arr.length) return { key: k, arr };
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  function getCurrentSel() {
+    const id = (lsGet("NG_DIGIPACK_CURRENT_ID") || lsGet("NG_DIGIPACK_CURRENT_ID_V1") || "").trim();
+    const idxStr = (lsGet("NG_DIGIPACK_SELECTED_IDX") || lsGet("NG_DIGIPACK_SELECTED_IDX_V1") || "").trim();
+    const idxNum = Number(idxStr);
+    return { id, idx: Number.isFinite(idxNum) ? idxNum : null };
+  }
+
+  function pickDraft(drafts, sel) {
+    if (!drafts || !drafts.length) return null;
+
+    if (sel && sel.id) {
+      const hit = drafts.find(d => String((d && d.id) || "") === sel.id);
+      if (hit) return hit;
+    }
+    if (sel && sel.idx != null && sel.idx >= 0 && sel.idx < drafts.length) {
+      return drafts[sel.idx];
+    }
+    return drafts[0] || null;
+  }
+
+  function getAny(obj, keys) {
+    for (const k of keys) {
+      if (obj && obj[k] != null && String(obj[k]).trim() !== "") return obj[k];
+    }
+    return "";
+  }
+
+  function setField(id, val) {
+    const el = byId(id);
+    if (!el) return false;
+
+    // Don’t overwrite if user already typed something after refresh
+    if (String(el.value || "").trim()) return true;
+
+    el.value = (val == null) ? "" : String(val);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+  }
+
+  function restoreOnce() {
+    const draftsObj = readDrafts();
+    if (!draftsObj) {
+      setHint("Drafts not found in localStorage.");
+      return { ok: false, reason: "no_drafts" };
+    }
+
+    const sel = getCurrentSel();
+    const draft = pickDraft(draftsObj.arr, sel);
+    if (!draft) {
+      setHint("No draft to restore.");
+      return { ok: false, reason: "no_pick" };
+    }
+
+    const topic = getAny(draft, ["topic", "headline", "title"]);
+    const platform = getAny(draft, ["platform"]);
+    const angle = getAny(draft, ["angle"]);
+    const storyType = getAny(draft, ["storyType", "story_type", "type"]);
+    const whatHappened = getAny(draft, ["whatHappened", "what_happened"]);
+    const sources = getAny(draft, ["sources", "source", "references", "refs"]);
+    const background = getAny(draft, ["background", "context"]);
+
+    const filled = {
+      topic: setField("topic", topic),
+      platform: setField("platform", platform),
+      angle: setField("angle", angle),
+      storyType: setField("storyType", storyType),
+      whatHappened: setField("whatHappened", whatHappened),
+      sources: setField("sources", sources),
+      background: setField("background", background)
+    };
+
+    setHint(`Draft restored: ${draft.id || "(no id)"}`);
+    console.log("[NG_AUTORESTORE_LAST_DRAFT_V1] restored ✓", { sel, draftId: draft.id, filled, from: draftsObj.key });
+    return { ok: true, sel, draftId: draft.id, filled, from: draftsObj.key };
+  }
+
+  function install() {
+    let tries = 0;
+    const maxTries = 12;
+
+    const tick = () => {
+      tries++;
+      const hasCore = !!(byId("topic") && byId("whatHappened") && byId("sources") && byId("storyType"));
+      if (hasCore) {
+        restoreOnce();
+        return;
+      }
+      if (tries >= maxTries) {
+        console.warn("[NG_AUTORESTORE_LAST_DRAFT_V1] fields not ready after retries");
+        return;
+      }
+      setTimeout(tick, 150);
+    };
+
+    setTimeout(tick, 150);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install);
+  else install();
+})();
+</script>
+<!-- NG_HEALTH_PILL_V1_START -->
+<div id="ngHealthPill" style="position:fixed;right:10px;bottom:10px;z-index:999999;font:12px/1.2 Arial,sans-serif;padding:6px 10px;border-radius:999px;border:1px solid #999;background:#f4f4f4;box-shadow:0 2px 10px rgba(0,0,0,.08);">
+HEALTH: …
+</div>
+<script>
+(function(){
+  var pill = document.getElementById("ngHealthPill");
+  function set(ok, txt){
+    pill.textContent = txt;
+    pill.style.background = ok ? "#eaffea" : "#ffecec";
+    pill.style.borderColor = ok ? "#2a9d3a" : "#cc2b2b";
+  }
+  async function poll(){
     try{
-      // UTF-8 BOM => Windows Notepad mojibake stops
-      var bom = "\uFEFF";
-      var blob = new Blob([bom + text], {type:"text/plain;charset=utf-8"});
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function(){
-        try{ URL.revokeObjectURL(a.href); }catch(e){}
-        try{ a.remove(); }catch(e){}
-      }, 0);
+      var r = await fetch("/api/health", { cache:"no-store" });
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      var j = await r.json();
+      set(true, "HEALTH: OK • " + (j.boot_ts || ""));
+    }catch(e){
+      set(false, "HEALTH: DOWN");
+    }
+    setTimeout(poll, 2000);
+  }
+  poll();
+})();
+</script>
+<!-- NG_HEALTH_PILL_V1_END -->
+<!-- NG_CRASH_GUARD_V1_START -->
+<div id="ngCrashOverlay" style="display:none;position:fixed;inset:0;z-index:999998;background:rgba(0,0,0,.6);">
+  <div style="position:absolute;left:50%;top:14%;transform:translateX(-50%);width:min(760px,92vw);background:#fff;border:1px solid #ddd;border-radius:14px;padding:12px 12px;font:14px/1.35 Arial,sans-serif;">
+    <b>NewsGenie Crash Guard</b>
+    <div style="margin-top:8px;">UI में error आया है। नीचे diagnostics copy करके भेज दें।</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+      <button id="ngCrashReload" style="padding:8px 10px;border:1px solid #999;border-radius:10px;background:#fff;cursor:pointer;">Reload</button>
+      <button id="ngCrashCopy" style="padding:8px 10px;border:1px solid #999;border-radius:10px;background:#fff;cursor:pointer;">Copy Diagnostics</button>
+      <button id="ngCrashHide" style="padding:8px 10px;border:1px solid #999;border-radius:10px;background:#fff;cursor:pointer;">Hide</button>
+    </div>
+    <pre id="ngCrashPre" style="margin-top:10px;background:#f7f7f7;padding:10px;border-radius:10px;overflow:auto;max-height:280px;">{}</pre>
+  </div>
+</div>
+
+<script>
+(function(){
+  var ov = document.getElementById("ngCrashOverlay");
+  var pre = document.getElementById("ngCrashPre");
+  var btnR = document.getElementById("ngCrashReload");
+  var btnC = document.getElementById("ngCrashCopy");
+  var btnH = document.getElementById("ngCrashHide");
+
+  function nowISO(){ return new Date().toISOString(); }
+  function safeStr(x){
+    try { return (x && x.stack) ? String(x.stack) : String(x); } catch(e){ return "unknown"; }
+  }
+  function getArr(k){ try { return JSON.parse(localStorage.getItem(k)||"[]"); } catch(e){ return []; } }
+  function setArr(k,a){ try { localStorage.setItem(k, JSON.stringify(a.slice(-50))); } catch(e){} }
+
+  var KEY = "NG_LAST_ERRORS_V1";
+  var errs = getArr(KEY);
+
+  function showOverlay(payload){
+    try{
+      ov.style.display = "block";
+      pre.textContent = JSON.stringify(payload, null, 2);
+      localStorage.setItem("NG_LAST_DIAG_V1", pre.textContent);
+    }catch(e){}
+  }
+
+  function record(kind, errLike){
+    var e = { ts: nowISO(), kind: kind, msg: safeStr(errLike) };
+    errs.push(e); errs = errs.slice(-50);
+    setArr(KEY, errs);
+    showOverlay({
+      ts: nowISO(),
+      url: location.href,
+      ua: navigator.userAgent,
+      lastErrors: errs
+    });
+  }
+
+  window.addEventListener("error", function(ev){
+    record("error", ev.error || ev.message || "error");
+  });
+
+  window.addEventListener("unhandledrejection", function(ev){
+    record("unhandledrejection", ev.reason || "promise");
+  });
+
+  // restore last diag (useful next day)
+  try{
+    var saved = localStorage.getItem("NG_LAST_DIAG_V1");
+    if(saved && saved.length > 10) pre.textContent = saved;
+  }catch(e){}
+
+  btnR.onclick = function(){ location.reload(); };
+  btnH.onclick = function(){ ov.style.display = "none"; };
+  btnC.onclick = async function(){
+    var txt = pre.textContent || "";
+    try { await navigator.clipboard.writeText(txt); alert("Diagnostics copied"); }
+    catch(e){ alert("Copy failed"); }
+  };
+})();
+</script>
+<!-- NG_CRASH_GUARD_V1_END -->
+<script>
+/* ===== NG_UI_FREEZE_GUARD_V1 START ===== */
+(function(){
+  const _fetch = window.fetch.bind(window);
+
+  const GUARD = window.__NG_GUARD__ = {
+    inflight: 0,
+    lastErr: null,
+    hardTimer: null,
+    timeoutMs: 60000,
+    retryOnce: true,
+    btnIds: ["btn-generate","btnGenerate","btn-bytes","btnBytes","btn-visuals","btnVisuals"],
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function setButtonsDisabled(disabled){
+    GUARD.btnIds.forEach(id => { const b=$(id); if(b) b.disabled = !!disabled; });
+  }
+
+  function armHardUnfreeze(){
+    clearTimeout(GUARD.hardTimer);
+    GUARD.hardTimer = setTimeout(() => {
+      if (GUARD.inflight > 0) {
+        console.warn("[NG_UI_GUARD] hard-unfreeze", { inflight: GUARD.inflight, lastErr: GUARD.lastErr });
+        GUARD.inflight = 0;
+        setButtonsDisabled(false);
+      }
+    }, GUARD.timeoutMs + 2000);
+  }
+
+  function combineSignals(sigA, sigB){
+    if (!sigA) return sigB;
+    if (!sigB) return sigA;
+    const ac = new AbortController();
+    const onAbort = () => ac.abort(sigA.reason || sigB.reason || "aborted");
+    sigA.addEventListener("abort", onAbort, { once:true });
+    sigB.addEventListener("abort", onAbort, { once:true });
+    return ac.signal;
+  }
+
+  async function guardedFetch(input, init = {}) {
+    const url = (typeof input === "string") ? input : (input && input.url) || "";
+    const isNG = /\/api\/(digi-pack|bytes|visuals)\b/i.test(url);
+
+    if (!isNG) return _fetch(input, init);
+
+    if (GUARD.inflight > 0) throw new Error("NG_BUSY_inflight");
+
+    GUARD.inflight++;
+    setButtonsDisabled(true);
+    armHardUnfreeze();
+
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort("ui_timeout"), GUARD.timeoutMs);
+    const mergedSignal = combineSignals(init.signal, ac.signal);
+
+    const doOnce = async () => _fetch(input, { ...init, signal: mergedSignal });
+
+    try {
+      let res = await doOnce();
+      if (GUARD.retryOnce && (res.status === 429 || res.status >= 500)) {
+        console.warn("[NG_UI_GUARD] retry once", { url, status: res.status });
+        await new Promise(r => setTimeout(r, 800));
+        res = await doOnce();
+      }
+      return res;
+    } catch (e) {
+      GUARD.lastErr = e;
+      console.error("[NG_UI_GUARD] fetch fail", e);
+      throw e;
+    } finally {
+      clearTimeout(t);
+      GUARD.inflight = Math.max(0, GUARD.inflight - 1);
+      if (GUARD.inflight === 0) setButtonsDisabled(false);
+    }
+  }
+
+  window.fetch = guardedFetch;
+
+  window.__NG_GUARD_STATUS__ = () => ({
+    inflight: GUARD.inflight,
+    lastErr: GUARD.lastErr ? String(GUARD.lastErr) : null,
+    timeoutMs: GUARD.timeoutMs
+  });
+
+  window.addEventListener("unhandledrejection", () => { setButtonsDisabled(false); GUARD.inflight = 0; });
+  window.addEventListener("error", () => { setButtonsDisabled(false); GUARD.inflight = 0; });
+
+  console.log("[NG_UI_FREEZE_GUARD_V1] installed", window.__NG_GUARD_STATUS__());
+})();
+ /* ===== NG_UI_FREEZE_GUARD_V1 END ===== */
+</script>
+
+
+<script>
+/* ===== NG_CLEARUI_FIX_V2 START ===== */
+window.clearUI = function clearUI(){
+  try {
+    const form = document.getElementById("digi-pack-form");
+    const root = form || document.body;
+
+    let clearedInputs = 0, clearedTextareas = 0, resetSelects = 0;
+
+    // Clear inputs (including inputs without type attribute)
+    root.querySelectorAll("input").forEach(el => {
+if (el.id === "file-transcript-json") return;
+
+
+
+      const t = String(el.type || "").toLowerCase(); // default becomes "text" in browser, but keep safe
+      if (["button","submit","reset","checkbox","radio","file","hidden"].includes(t)) return;
+
+      // If input is missing type, browser reports "text" anyway; we still clear
+      el.value = "";
+      clearedInputs++;
+
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    // Clear all textareas
+    root.querySelectorAll("textarea").forEach(el => {
+if (el.id === "ta-transcript-json") return;
+
+      el.value = "";
+      clearedTextareas++;
+
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    // Reset selects
+    root.querySelectorAll("select").forEach(sel => {
+      if (sel.options && sel.options.length) {
+        sel.selectedIndex = 0;
+        resetSelects++;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+
+    console.log("[NG_CLEARUI_FIX_V2] cleared", { clearedInputs, clearedTextareas, resetSelects });
+  } catch (e) {
+    console.error("[NG_CLEARUI_FIX_V2] failed", e);
+  }
+};
+/* ===== NG_CLEARUI_FIX_V2 END ===== */
+</script>
+
+<script>
+/* ===== NG_CLEAR_BTN_DIRTY_GUARD_V1 START ===== */
+(function(){
+  function getRoot(){
+    return document.getElementById("digi-pack-form") || document.body;
+  }
+
+  function findClearButtons(){
+    // 1) Best: button that calls clearUI
+    let btns = Array.from(document.querySelectorAll('button[onclick*="clearUI"]'));
+    if (btns.length) return btns;
+
+    // 2) Fallback: text/id contains clear/क्लियर
+    btns = Array.from(document.querySelectorAll("button")).filter(b => {
+      const t = (b.textContent || "").trim();
+      const id = (b.id || "");
+      return /clear/i.test(id) || /clear|क्लियर/i.test(t);
+    });
+    return btns;
+  }
+
+  function isDirty(){
+    const root = getRoot();
+
+    // inputs
+    for (const el of root.querySelectorAll("input")) {
+      const t = String(el.type || "").toLowerCase();
+      if (["button","submit","reset","checkbox","radio","file","hidden"].includes(t)) continue;
+      if (String(el.value || "").trim()) return true;
+    }
+
+    // textareas
+    for (const el of root.querySelectorAll("textarea")) {
+      if (String(el.value || "").trim()) return true;
+    }
+
+    // selects (non-default)
+    for (const sel of root.querySelectorAll("select")) {
+      const v = String(sel.value || "").trim();
+      if (v) return true;
+    }
+
+    // contenteditable / textbox-like
+    for (const ed of root.querySelectorAll('[contenteditable=""],[contenteditable="true"],[role="textbox"]')) {
+      if (String(ed.textContent || "").trim()) return true;
+    }
+
+    return false;
+  }
+
+  function updateClearButtons(){
+    const dirty = isDirty();
+    const btns = findClearButtons();
+    btns.forEach(b => { b.disabled = !dirty; });
+    window.__NG_CLEAR_DIRTY_STATUS__ = { dirty, clearBtnCount: btns.length, ts: new Date().toISOString() };
+  }
+
+  // Wrap clearUI so after clearing, button disables again
+  if (typeof window.clearUI === "function" && !window.__NG_CLEARUI_WRAPPED__) {
+    window.__NG_CLEARUI_WRAPPED__ = true;
+    const _old = window.clearUI;
+    window.clearUI = function(){
+      const r = _old.apply(this, arguments);
+      setTimeout(updateClearButtons, 0);
+      return r;
+    };
+  }
+
+  // Live updates on typing/changes
+  const root = getRoot();
+  root.addEventListener("input", updateClearButtons, true);
+  root.addEventListener("change", updateClearButtons, true);
+
+  // Initial
+  setTimeout(updateClearButtons, 0);
+  console.log("[NG_CLEAR_BTN_DIRTY_GUARD_V1] installed");
+})();
+ /* ===== NG_CLEAR_BTN_DIRTY_GUARD_V1 END ===== */
+</script>
+<style>
+/* ===== NG_TRANSCRIPT_READABLE_V1 START ===== */
+#file-transcript-json{
+  display:block;
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box;
+  margin: 6px 0 10px 0;
+}
+
+#ta-transcript-json{
+  display:block;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:100% !important;
+  flex: 1 1 100% !important;     /* in case parent is flex */
+  box-sizing:border-box;
+
+  height: 280px !important;
+  min-height: 220px;
+
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 10px 12px;
+
+  white-space: pre-wrap;
+  overflow: auto;
+  resize: vertical;
+}
+/* ===== NG_TRANSCRIPT_READABLE_V1 END ===== */
+</style>
+<script>
+/* ===== NG_TRANSCRIPT_PERSIST_V1 START ===== */
+(function(){
+  const KEY = "NG_TRANSCRIPT_CACHE_V1";
+  const taId = "ta-transcript-json";
+  const fileId = "file-transcript-json";
+
+  function getTA(){ return document.getElementById(taId); }
+  function saveNow(text){
+    try{
+      const payload = { ts: new Date().toISOString(), text: String(text||"") };
+      localStorage.setItem(KEY, JSON.stringify(payload));
       return true;
     }catch(e){
-      console.warn("[NG_DLTEXT_UTF8] failed", e);
+      console.warn("[NG_TRANSCRIPT_PERSIST_V1] save failed", e);
       return false;
     }
   }
-
-  function isDownloadTxtBtn(t){
-    if (!t) return false;
-    var b = t.closest ? t.closest("button,a,[role='button']") : null;
-    var id = ((b && b.id) ? b.id : (t.id||"")).toLowerCase();
-    var txt = (((b && b.textContent) ? b.textContent : t.textContent) || "").toLowerCase();
-    return (id.indexOf("download")>=0 && id.indexOf("txt")>=0) || (txt.indexOf("download txt")>=0);
-  }
-
-  window.addEventListener("click", function(e){
+  function loadCache(){
     try{
-      if (!isDownloadTxtBtn(e.target)) return;
-
-      // block existing handler
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      e.stopPropagation();
-      e.cancelBubble = true;
-
-      // get text via existing makeTXT (if it returns a string)
-      var out = "";
-      if (typeof window.makeTXT === "function") out = window.makeTXT();
-      else if (typeof window.NG_makeTXT === "function") out = window.NG_makeTXT();
-
-      // fallback minimal (should rarely be needed)
-      if (typeof out !== "string" || !out) {
-        var dp = (typeof window.ensureDraftHasDigipack === "function") ? window.ensureDraftHasDigipack() : null;
-        var g = dp && dp.blocks && dp.blocks.generated ? dp.blocks.generated : {};
-        out = [
-          "DIGIPACK (SEGMENTS)\n--------------------------------",
-          "HEADLINE: " + (g.headline||""),
-          "\nKEY POINTS\n--------------------------------",
-          (g.key_points||[]).map(function(x){return "- " + x;}).join("\n"),
-          "\nWEB ARTICLE\n--------------------------------",
-          (g.web_article||""),
-          "\nVO LINES\n--------------------------------",
-          (g.lines||[]).map(function(x){return "• " + x;}).join("\n")
-        ].join("\n");
-      }
-
-      out = fixMojibake(out);
-
-      var headline = "";
-      try{
-        var dp2 = (typeof window.ensureDraftHasDigipack === "function") ? window.ensureDraftHasDigipack() : null;
-        headline = dp2 && dp2.blocks && dp2.blocks.generated ? (dp2.blocks.generated.headline||"") : "";
-      }catch(_){}
-
-      var fname = "SEGMENTED__" + Date.now() + "__" + slugifyHindi(headline) + ".txt";
-      dlUTF8(fname, out);
-
-      console.log("[NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1] downloaded", {fname: fname, len: out.length});
-    } catch(err){
-      console.warn("[NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1] error", err);
-    }
-  }, true);
-
-  console.log("[NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1] ready");
-})();
-</script>
-<!-- NG_DLTEXT_UTF8_MOJIBAKE_FIX_V1_END -->
-<!-- NG_TXT_DOWNLOAD_NORMALIZE_V1_START -->
-<script>
-(function(){
-  if (window.__NG_TXT_DOWNLOAD_NORMALIZE_V1) return;
-  window.__NG_TXT_DOWNLOAD_NORMALIZE_V1 = true;
-
-  function fixMojibake(s){
-    s = (s==null) ? "" : String(s);
-    var reps = [
-      ["â€“","–"], ["â€”","—"], ["â€¦","…"],
-      ["â€¢","•"],
-      ["â€˜","‘"], ["â€™","’"],
-      ["â€œ","“"], ["â€�","”"],
-      ["Â",""]
-    ];
-    for (var i=0;i<reps.length;i++){
-      s = s.split(reps[i][0]).join(reps[i][1]);
-    }
-    return s;
-  }
-
-  // 1) Wrap makeTXT (अगर आपका downloader makeTXT से text लेता है)
-  if (typeof window.makeTXT === "function" && !window.__NG_makeTXT_wrapped){
-    window.__NG_makeTXT_wrapped = true;
-    var _origMakeTXT = window.makeTXT;
-    window.makeTXT = function(){
-      var out = _origMakeTXT.apply(this, arguments);
-      if (typeof out === "string") out = fixMojibake(out);
-      return out;
-    };
-    console.log("[NG_TXT_DOWNLOAD_NORMALIZE_V1] makeTXT wrapped");
-  }
-
-  // 2) Wrap Blob (अगर आपका downloader Blob से txt file बना रहा है)
-  //    => किसी भी text/plain download में BOM + mojibake-fix लागू
-  if (typeof window.Blob === "function" && !window.__NG_BLOB_wrapped){
-    window.__NG_BLOB_wrapped = true;
-
-    var OrigBlob = window.Blob;
-    function NGBlob(parts, opts){
-      try{
-        var type = (opts && opts.type) ? String(opts.type).toLowerCase() : "";
-        var isText = type.indexOf("text/plain") >= 0;
-
-        if (isText && Array.isArray(parts) && parts.length){
-          var newParts = parts.slice(0);
-
-          // normalize all string parts
-          for (var i=0;i<newParts.length;i++){
-            if (typeof newParts[i] === "string") newParts[i] = fixMojibake(newParts[i]);
-          }
-
-          // ensure UTF-8 BOM for Windows Notepad
-          if (typeof newParts[0] === "string" && newParts[0].charAt(0) !== "\uFEFF"){
-            newParts[0] = "\uFEFF" + newParts[0];
-          }
-
-          parts = newParts;
-        }
-      }catch(e){}
-      return new OrigBlob(parts, opts);
-    }
-    NGBlob.prototype = OrigBlob.prototype;
-
-    // keep static props (best-effort)
-    try{
-      for (var k in OrigBlob){
-        if (Object.prototype.hasOwnProperty.call(OrigBlob,k)) NGBlob[k] = OrigBlob[k];
-      }
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return null;
+      const obj = JSON.parse(raw);
+      if(obj && typeof obj.text === "string") return obj;
     }catch(e){}
-
-    window.Blob = NGBlob;
-    console.log("[NG_TXT_DOWNLOAD_NORMALIZE_V1] Blob wrapped");
+    return null;
   }
 
-})();
-</script>
-<!-- NG_TXT_DOWNLOAD_NORMALIZE_V1_END -->
-<!-- NG_SAVEDRAFT_V9_LOCK_V1_START -->
-<script>
-(function(){
-  if (window.__NG_SAVEDRAFT_V9_LOCK_V1) return;
-  window.__NG_SAVEDRAFT_V9_LOCK_V1 = true;
-
-  // make other logs happy (best-effort)
-  window.__NG_SAVE_CAPTURE_V2 = true;
-  window.__NG_DIGIPACK_SAVE_PATCHED = true;
-
-  var PRIMARY_KEY = "NG_DIGIPACK_DRAFTS_V1";
-  var LEGACY_KEY  = "NG_DRAFTS";
-  var SEL_IDX_KEY = "NG_DIGIPACK_SELECTED_IDX_V1";
-  var SEL_ID_KEY  = "NG_DIGIPACK_SELECTED_ID_V1";
-
-  function jparse(s, fb){ try { return JSON.parse(s); } catch(e){ return fb; } }
-  function lget(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
-  function lset(k,v){ try { localStorage.setItem(k, v); } catch(e){} }
-  function isObj(x){ return x && typeof x === "object" && !Array.isArray(x); }
-  function isArr(x){ return Array.isArray(x); }
-  function str(x){ return (x==null) ? "" : String(x); }
-
-  function poke(){
-    try{ lset("__NG_POKE__", String(Date.now())); localStorage.removeItem("__NG_POKE__"); }catch(e){}
+  // Debounced autosave on typing/paste
+  let tmr = null;
+  function armAutosave(){
+    const ta = getTA();
+    if(!ta) return;
+    ta.addEventListener("input", () => {
+      clearTimeout(tmr);
+      tmr = setTimeout(() => saveNow(ta.value), 400);
+    }, { passive:true });
   }
 
-  function readDrafts(){
-    var arr = jparse(lget(PRIMARY_KEY)||"[]", []);
-    if (arr && arr.length) return { key: PRIMARY_KEY, arr: arr };
-    arr = jparse(lget(LEGACY_KEY)||"[]", []);
-    if (arr && arr.length) return { key: LEGACY_KEY, arr: arr };
-    return { key: PRIMARY_KEY, arr: [] };
+  // If file import exists, hook change → save after a short delay
+  function hookFile(){
+    const fi = document.getElementById(fileId);
+    if(!fi) return;
+    fi.addEventListener("change", () => {
+      setTimeout(() => {
+        const ta = getTA();
+        if(ta && ta.value) saveNow(ta.value);
+      }, 250);
+    });
   }
 
-  function getDraftId(d, i){
-    return String((d && (d.id || d.uid || d.key || d._id || d.draft_id)) || ("i:"+i));
-  }
-
-  function pickIdx(pack){
-    var drafts = pack.arr || [];
-    if (!drafts.length) return -1;
-
-    var selId = lget(SEL_ID_KEY);
-    if (selId){
-      for (var i=0;i<drafts.length;i++){
-        if (getDraftId(drafts[i], i) === selId) return i;
-      }
-    }
-    var idx = parseInt(lget(SEL_IDX_KEY), 10);
-    if (!(idx >= 0 && idx < drafts.length)) idx = drafts.length - 1; // last
-    return idx;
-  }
-
-  function looksSaveBtn(t){
-    if (!t) return false;
-    var b = t.closest ? t.closest("button,a,[role='button']") : null;
-    var id = ((b && b.id) ? b.id : (t.id||"")).toLowerCase();
-    var txt = (((b && b.textContent) ? b.textContent : t.textContent) || "").toLowerCase();
-    return (id.indexOf("save")>=0 && id.indexOf("draft")>=0) || (txt.indexOf("save draft")>=0);
-  }
-
-  function looksPublishBtn(t){
-    if (!t) return false;
-    var b = t.closest ? t.closest("button,a,[role='button']") : null;
-    var id = ((b && b.id) ? b.id : (t.id||"")).toLowerCase();
-    var txt = (((b && b.textContent) ? b.textContent : t.textContent) || "").toLowerCase();
-    return (id.indexOf("published")>=0) || (txt.indexOf("mark published")>=0);
-  }
-
-  function normalizeToV9(d){
-    // ensure dp.blocks.generated exists (use your V4 function)
-    var dp = null;
-    if (typeof window.ensureDraftHasDigipack === "function") {
-      dp = window.ensureDraftHasDigipack(d);
-    }
-    dp = dp || (d && d.dp) || { blocks: {} };
-    if (!isObj(dp.blocks)) dp.blocks = {};
-    var g = dp.blocks.generated || {};
-    if (!isObj(g)) g = {};
-
-    // V9 fields
-    d.story = isObj(d.story) ? d.story : {};
-    d.story.view_version = 9;
-    d.story.storyview_version = 9;
-
-    // store raw in a parse-friendly shape (so future loads always work)
-    d.story.digipack = isObj(d.story.digipack) ? d.story.digipack : {};
+  async function tryFetchLatest(){
+    // Optional: pull latest transcript from worker memory if available
     try{
-      d.story.digipack.raw = JSON.stringify({ blocks: { generated: g } });
+      const res = await fetch("/api/transcript/latest", { method:"GET" });
+      if(!res.ok) return null;
+      const j = await res.json().catch(()=>null);
+      const txt = j && (j.text || (j.latest && j.latest.text));
+      return (typeof txt === "string" && txt.trim()) ? txt : null;
     }catch(e){
-      d.story.digipack.raw = "";
-    }
-
-    d.storyview_v9 = {
-      version: 9,
-      ts: new Date().toISOString(),
-      headline: str(g.headline || d.headline || (d.form && d.form.headline) || d.title || ""),
-      key_points: isArr(g.key_points) ? g.key_points : [],
-      lines: isArr(g.lines) ? g.lines : [],
-      web_article: str(g.web_article || ""),
-      video: str(g.video || "")
-    };
-
-    // extra aliases (in case your UI checks different keys)
-    d.story_view_version = 9;
-    d.storyViewVersion = 9;
-    d.story_view = "v9";
-    d.storyView = "V9";
-
-    // keep dp back on draft
-    d.dp = dp;
-    return { dp: dp, g: g };
-  }
-
-  function afterAction(tag){
-    try{
-      var pack = readDrafts();
-      if (!pack.arr.length) {
-        console.warn("[NG_SAVEDRAFT_V9_LOCK] no drafts", tag);
-        return;
-      }
-      var idx = pickIdx(pack);
-      if (!(idx >= 0 && idx < pack.arr.length)) idx = pack.arr.length - 1;
-
-      var d = pack.arr[idx] || pack.arr[pack.arr.length - 1];
-      if (!d) return;
-
-      var out = normalizeToV9(d);
-
-      // selection sync
-      var id = getDraftId(d, idx);
-      lset(SEL_ID_KEY, id);
-      lset(SEL_IDX_KEY, String(idx));
-
-      // persist to both stores
-      pack.arr[idx] = d;
-      lset(pack.key, JSON.stringify(pack.arr));
-      lset(PRIMARY_KEY, JSON.stringify(pack.arr));
-      lset(LEGACY_KEY, JSON.stringify(pack.arr));
-
-      poke();
-
-      console.log("[NG_SAVEDRAFT_V9_LOCK] ok", {
-        tag: tag, idx: idx, id: id,
-        webLen: (out.g && out.g.web_article) ? String(out.g.web_article).length : 0
-      });
-    }catch(err){
-      console.warn("[NG_SAVEDRAFT_V9_LOCK] fail", err);
+      return null;
     }
   }
 
-  // Capture-phase: let existing handler run, then normalize
-  window.addEventListener("click", function(e){
-    var t = e && e.target;
-    if (!t) return;
+  async function restoreOnLoad(){
+    const ta = getTA();
+    if(!ta) return;
 
-    if (looksSaveBtn(t)){
-      setTimeout(function(){ afterAction("save_draft"); }, 80);
-      setTimeout(function(){ afterAction("save_draft_late"); }, 220);
+    // 1) server latest (if any)
+    const latest = await tryFetchLatest();
+    if(latest){
+      ta.value = latest;
+      saveNow(latest);
+      console.log("[NG_TRANSCRIPT_PERSIST_V1] restored from /api/transcript/latest", latest.length);
       return;
     }
 
-    if (looksPublishBtn(t)){
-      setTimeout(function(){ afterAction("mark_published"); }, 80);
-      setTimeout(function(){ afterAction("mark_published_late"); }, 220);
-      return;
+    // 2) local cache
+    const c = loadCache();
+    if(c && c.text && !ta.value){
+      ta.value = c.text;
+      console.log("[NG_TRANSCRIPT_PERSIST_V1] restored from localStorage", c.text.length, c.ts);
     }
-  }, true);
-
-  console.log("[NG_SAVEDRAFT_V9_LOCK_V1] installed ✓");
-})();
-</script>
-<!-- NG_SAVEDRAFT_V9_LOCK_V1_END -->
-<!-- NG_FORCE_STORYVIEW_V9_AUTO_V1_START -->
-<script>
-(function(){
-  if (window.__NG_FORCE_STORYVIEW_V9_AUTO_V1) return;
-  window.__NG_FORCE_STORYVIEW_V9_AUTO_V1 = true;
-
-  var PRIMARY_KEY = "NG_DIGIPACK_DRAFTS_V1";
-  var LEGACY_KEY  = "NG_DRAFTS";
-  var SEL_IDX_KEY = "NG_DIGIPACK_SELECTED_IDX_V1";
-  var SEL_ID_KEY  = "NG_DIGIPACK_SELECTED_ID_V1";
-
-  function jparse(s, fb){ try { return JSON.parse(s); } catch(e){ return fb; } }
-  function lget(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
-  function lset(k,v){ try { localStorage.setItem(k, v); } catch(e){} }
-  function isObj(x){ return x && typeof x === "object" && !Array.isArray(x); }
-  function isArr(x){ return Array.isArray(x); }
-  function str(x){ return (x==null) ? "" : String(x); }
-
-  function fixMojibake(s){
-    s = (s==null) ? "" : String(s);
-    var reps = [
-      ["â€“","–"], ["â€”","—"], ["â€¦","…"], ["â€¢","•"],
-      ["â€˜","‘"], ["â€™","’"], ["â€œ","“"], ["â€�","”"],
-      ["Â",""]
-    ];
-    for (var i=0;i<reps.length;i++) s = s.split(reps[i][0]).join(reps[i][1]);
-    return s;
   }
 
-  function readDrafts(){
-    var a = jparse(lget(PRIMARY_KEY)||"[]", []);
-    if (Array.isArray(a) && a.length) return { key: PRIMARY_KEY, arr: a };
-    a = jparse(lget(LEGACY_KEY)||"[]", []);
-    if (Array.isArray(a) && a.length) return { key: LEGACY_KEY, arr: a };
-    return { key: PRIMARY_KEY, arr: [] };
-  }
-
-  function getDraftId(d,i){
-    return String((d && (d.id || d.uid || d.key || d._id || d.draft_id)) || ("i:"+i));
-  }
-
-  function pickSelected(pack){
-    var drafts = pack.arr || [];
-    if (!drafts.length) return { idx:-1, draft:null };
-
-    var selId = lget(SEL_ID_KEY);
-    if (selId){
-      for (var i=0;i<drafts.length;i++){
-        if (getDraftId(drafts[i], i) === selId) return { idx:i, draft:drafts[i] };
-      }
-    }
-    var idx = parseInt(lget(SEL_IDX_KEY),10);
-    if (!(idx>=0 && idx<drafts.length)) idx = drafts.length-1; // auto last
-    return { idx: idx, draft: drafts[idx] };
-  }
-
-  function tryParseAnyJSON(text){
-    var t = str(text).trim();
-    if (!t) return null;
-    // plain json
-    if (t[0]==="{" || t[0]==="["){
-      var o1 = jparse(t, null);
-      if (o1) return o1;
-    }
-    // extract inner {...}
-    var a = t.indexOf("{");
-    var b = t.lastIndexOf("}");
-    if (a>=0 && b>a){
-      var sub = t.slice(a, b+1);
-      var o2 = jparse(sub, null);
-      if (o2) return o2;
-    }
-    return null;
-  }
-
-  function normalizeGenerated(g){
-    if (typeof g === "string") g = jparse(g, {});
-    if (!isObj(g)) g = {};
-    var out = {
-      headline: str(g.headline || g.title || ""),
-      key_points: isArr(g.key_points) ? g.key_points : (isArr(g.KEY_POINTS)?g.KEY_POINTS:[]),
-      lines: isArr(g.lines) ? g.lines : (isArr(g.LINES)?g.LINES:[]),
-      web_article: str(g.web_article || g.webArticle || g.article || g.web || g.body || g.copy || ""),
-      video: str(g.video || g.video_script || g.videoScript || g.social_video || "")
-    };
-    out.web_article = fixMojibake(out.web_article)
-      .replace(/^\s*#{1,6}\s*WEB[_\s-]*ARTICLE\s*\n+/i, "")
-      .replace(/^\s*WEB[_\s-]*ARTICLE\s*:\s*\n+/i, "")
-      .trim();
-    return out;
-  }
-
-  function extractGeneratedFromRaw(d){
-    // strongest source: story.digipack.raw
-    var raw = d && d.story && d.story.digipack && d.story.digipack.raw;
-    var parsed = tryParseAnyJSON(raw);
-    if (parsed){
-      // common shapes
-      if (parsed.blocks && parsed.blocks.generated) return normalizeGenerated(parsed.blocks.generated);
-      if (parsed.dp && parsed.dp.blocks && parsed.dp.blocks.generated) return normalizeGenerated(parsed.dp.blocks.generated);
-      // deep-ish: if blocks.generated_text exists
-      if (parsed.blocks && parsed.blocks.generated_text) return normalizeGenerated(parsed.blocks.generated_text);
-      // fallback: try best fields
-      return normalizeGenerated(parsed);
-    }
-    // fallback: dp.blocks.generated
-    if (d && d.dp && d.dp.blocks && d.dp.blocks.generated) return normalizeGenerated(d.dp.blocks.generated);
-    // last resort: call ensureDraftHasDigipack
-    if (typeof window.ensureDraftHasDigipack === "function"){
-      var dp = window.ensureDraftHasDigipack(d);
-      if (dp && dp.blocks && dp.blocks.generated) return normalizeGenerated(dp.blocks.generated);
-    }
-    return normalizeGenerated({});
-  }
-
-  function forceV9OnSelected(tag){
-    var pack = readDrafts();
-    if (!pack.arr.length) return;
-
-    var picked = pickSelected(pack);
-    var idx = picked.idx;
-    var d = picked.draft;
-    if (!d) return;
-
-    // build V9 snapshot from existing raw
-    var g = extractGeneratedFromRaw(d);
-
-    d.story = isObj(d.story) ? d.story : {};
-    d.story.view_version = 9;
-    d.story.storyview_version = 9;
-
-    // ensure raw exists (don’t destroy existing)
-    d.story.digipack = isObj(d.story.digipack) ? d.story.digipack : {};
-    if (!str(d.story.digipack.raw).trim()){
-      try{ d.story.digipack.raw = JSON.stringify({ blocks:{ generated:g } }); }catch(e){ d.story.digipack.raw = ""; }
-    }
-
-    d.storyview_v9 = {
-      version: 9,
-      ts: new Date().toISOString(),
-      headline: g.headline || str(d.headline || (d.form && d.form.headline) || d.title || ""),
-      key_points: g.key_points || [],
-      lines: g.lines || [],
-      web_article: g.web_article || "",
-      video: g.video || ""
-    };
-
-    // extra aliases (कई जगह UI अलग key देखता है)
-    d.story_view_version = 9;
-    d.storyViewVersion = 9;
-    d.storyview = d.storyview_v9;      // V8 fallback bypass
-    d.story_view = d.storyview_v9;     // alt
-
-    // selection keys hard sync
-    var id = getDraftId(d, idx);
-    lset(SEL_ID_KEY, id);
-    lset(SEL_IDX_KEY, String(idx));
-
-    // persist both stores
-    pack.arr[idx] = d;
-    lset(pack.key, JSON.stringify(pack.arr));
-    lset(PRIMARY_KEY, JSON.stringify(pack.arr));
-    lset(LEGACY_KEY, JSON.stringify(pack.arr));
-
-    console.log("[NG_FORCE_STORYVIEW_V9_AUTO] ok", { tag: tag, idx: idx, id: id, raw_len: str(d.story.digipack.raw).length, web_len: str(d.storyview_v9.web_article).length });
-  }
-
-  // run once on load (helps when reopening library)
-  setTimeout(function(){ forceV9OnSelected("boot"); }, 120);
-
-  // run after ANY click that might change draft/selection (save/publish/library/preview/segments)
-  var timer = null;
-  window.addEventListener("click", function(e){
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(function(){
-      forceV9OnSelected("click");
-      // one more late pass (some handlers save async)
-      setTimeout(function(){ forceV9OnSelected("click_late"); }, 180);
-    }, 80);
-  }, true);
-
-  // expose manual command
-  window.NG_forceV9Now = function(){ forceV9OnSelected("manual"); return true; };
-
-  console.log("[NG_FORCE_STORYVIEW_V9_AUTO_V1] installed ✓");
-})();
-</script>
-<!-- NG_SAVEDRAFT_V9_LOCK_V1_END -->
-
-<!-- NG_FORCE_STORYVIEW_V9_AUTO_V1_START -->
-<script>
-/* NG_FORCE_STORYVIEW_V9_AUTO_V1 */
-
-// ✅ Guard: StoryView should NOT auto-open unless explicitly forced
-(function(){
-  var forceSV =
-    (localStorage.getItem("NG_FORCE_STORYVIEW") === "1") ||
-    /[?&]storyview=1\b/.test(location.search);
-
-  if (!forceSV) {
-    console.log("[NG_FORCE_STORYVIEW_V9_AUTO_V1] skipped (no force)");
-    return;
-  }
-
-  /* === existing NG_FORCE_STORYVIEW_V9_AUTO_V1 code continues below === */
-
-
-(function(){
-  if (window.__NG_V9_NORMALIZE_ALL_DRAFTS_V1) return;
-  window.__NG_V9_NORMALIZE_ALL_DRAFTS_V1 = true;
-
-  var PRIMARY="NG_DIGIPACK_DRAFTS_V1";
-  var LEGACY ="NG_DRAFTS";
-  var SEL_IDX_KEY="NG_DIGIPACK_SELECTED_IDX_V1";
-  var SEL_ID_KEY ="NG_DIGIPACK_SELECTED_ID_V1";
-
-  function jparse(s, fb){ try{return JSON.parse(s);}catch(e){return fb;} }
-  function lget(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
-  function lset(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
-  function isObj(x){ return x && typeof x==="object" && !Array.isArray(x); }
-  function isArr(x){ return Array.isArray(x); }
-  function str(x){ return (x==null) ? "" : String(x); }
-
-  function fixMojibake(s){
-    s = (s==null) ? "" : String(s);
-    var reps = [["â€“","–"],["â€”","—"],["â€¦","…"],["â€¢","•"],["Â",""]];
-    for (var i=0;i<reps.length;i++) s = s.split(reps[i][0]).join(reps[i][1]);
-    return s;
-  }
-
-  function tryParseAnyJSON(text){
-    var t = str(text).trim();
-    if (!t) return null;
-    if (t[0]==="{" || t[0]==="["){
-      var o1 = jparse(t,null); if (o1) return o1;
-    }
-    var a=t.indexOf("{"), b=t.lastIndexOf("}");
-    if (a>=0 && b>a){
-      var sub=t.slice(a,b+1);
-      var o2=jparse(sub,null); if (o2) return o2;
-    }
-    return null;
-  }
-
-  function normalizeGenerated(g){
-    if (typeof g==="string") g=jparse(g,{});
-    if (!isObj(g)) g={};
-    var out={
-      headline: str(g.headline||g.title||""),
-      key_points: isArr(g.key_points)?g.key_points:(isArr(g.KEY_POINTS)?g.KEY_POINTS:[]),
-      lines: isArr(g.lines)?g.lines:(isArr(g.LINES)?g.LINES:[]),
-      web_article: str(g.web_article||g.webArticle||g.article||g.web||g.body||g.copy||""),
-      video: str(g.video||g.video_script||g.videoScript||"")
-    };
-    out.web_article = fixMojibake(out.web_article)
-      .replace(/^\s*#{1,6}\s*WEB[_\s-]*ARTICLE\s*\n+/i,"")
-      .replace(/^\s*WEB[_\s-]*ARTICLE\s*:\s*\n+/i,"")
-      .trim();
-    return out;
-  }
-
-  function extractGenerated(d){
-    var raw = d && d.story && d.story.digipack && d.story.digipack.raw;
-    var parsed = tryParseAnyJSON(raw);
-    if (parsed){
-      if (parsed.blocks && parsed.blocks.generated) return normalizeGenerated(parsed.blocks.generated);
-      if (parsed.dp && parsed.dp.blocks && parsed.dp.blocks.generated) return normalizeGenerated(parsed.dp.blocks.generated);
-      if (parsed.blocks && parsed.blocks.generated_text) return normalizeGenerated(parsed.blocks.generated_text);
-      return normalizeGenerated(parsed);
-    }
-    if (d && d.dp && d.dp.blocks && d.dp.blocks.generated) return normalizeGenerated(d.dp.blocks.generated);
-    if (typeof window.ensureDraftHasDigipack==="function"){
-      var dp = window.ensureDraftHasDigipack(d);
-      if (dp && dp.blocks && dp.blocks.generated) return normalizeGenerated(dp.blocks.generated);
-    }
-    return normalizeGenerated({});
-  }
-
-  function getDraftId(d,i){
-    return String((d && (d.id||d.uid||d.key||d._id||d.draft_id)) || ("i:"+i));
-  }
-
-  function readPrimary(){
-    var a = jparse(lget(PRIMARY)||"[]", []);
-    return Array.isArray(a) ? a : [];
-  }
-
-  function normalizeAll(tag){
-    var drafts = readPrimary();
-    if (!drafts.length){
-      drafts = jparse(lget(LEGACY)||"[]", []);
-      if (!Array.isArray(drafts)) drafts = [];
-    }
-    if (!drafts.length){
-      console.warn("[NG_V9_NORMALIZE_ALL] no drafts", tag);
-      return {ok:false, n:0};
-    }
-
-    var changed = 0;
-    for (var i=0;i<drafts.length;i++){
-      var d = drafts[i];
-      if (!d) continue;
-
-      // already v9?
-      if (d.storyview_v9 && d.storyview_v9.version===9) continue;
-
-      var g = extractGenerated(d);
-
-      d.story = isObj(d.story) ? d.story : {};
-      d.story.view_version = 9;
-      d.story.storyview_version = 9;
-      d.story.digipack = isObj(d.story.digipack) ? d.story.digipack : {};
-      // keep raw as-is; only fill if empty
-      if (!str(d.story.digipack.raw).trim()){
-        try{ d.story.digipack.raw = JSON.stringify({blocks:{generated:g}}); }catch(e){ d.story.digipack.raw=""; }
-      }
-
-      d.storyview_v9 = {
-        version: 9,
-        ts: new Date().toISOString(),
-        headline: g.headline || str(d.headline || (d.form && d.form.headline) || d.title || ""),
-        key_points: g.key_points || [],
-        lines: g.lines || [],
-        web_article: g.web_article || "",
-        video: g.video || ""
-      };
-
-      // aliases (StoryView पुराने keys से भी पढ़ ले तो भी V9 मिले)
-      d.storyview = d.storyview_v9;
-      d.story_view = d.storyview_v9;
-      d.story_view_version = 9;
-      d.storyViewVersion = 9;
-
-      drafts[i] = d;
-      changed++;
-    }
-
-    // selection sync (keeps library stable)
-    var idx = parseInt(lget(SEL_IDX_KEY),10);
-    if (!(idx>=0 && idx<drafts.length)) idx = drafts.length-1;
-    lset(SEL_IDX_KEY, String(idx));
-    lset(SEL_ID_KEY, getDraftId(drafts[idx], idx));
-
-    // write BOTH stores so Source NG_DRAFTS भी V9 ही पढ़े
-    lset(PRIMARY, JSON.stringify(drafts));
-    lset(LEGACY,  JSON.stringify(drafts));
-
-    console.log("[NG_V9_NORMALIZE_ALL] ok", {tag: tag, total: drafts.length, changed: changed, sel_idx: idx});
-    return {ok:true, n: drafts.length, changed: changed};
-  }
-
-  // run at boot + after clicks (throttled)
-  var t = null;
-  setTimeout(function(){ normalizeAll("boot"); }, 120);
-
-  window.addEventListener("click", function(){
-    if (t) clearTimeout(t);
-    t = setTimeout(function(){ normalizeAll("click"); }, 180);
-  }, true);
-
-  window.NG_normAllV9 = function(){ return normalizeAll("manual"); };
-
-  console.log("[NG_V9_NORMALIZE_ALL_DRAFTS_V1] installed ✓");
-})();
-</script>
-<!-- NG_V9_NORMALIZE_ALL_DRAFTS_V1_END -->
-<!-- NG_STORYVIEW_LABEL_V9_V1_START -->
-<script>
-(function(){
-  if (window.__NG_STORYVIEW_LABEL_V9_V1) return;
-  window.__NG_STORYVIEW_LABEL_V9_V1 = true;
-
-  function fixLabel(){
-    try{
-      // find the Story View header area (best-effort)
-      var els = document.querySelectorAll("h1,h2,h3,div,span");
-      for (var i=0;i<els.length;i++){
-        var el = els[i];
-        var t = (el && el.textContent) ? el.textContent : "";
-        if (!t) continue;
-        if (t.indexOf("Story View")>=0 && t.indexOf("V8")>=0){
-          el.textContent = t.replace(/V8[^)]*\)/, "V9)");
-          return true;
-        }
-      }
-    }catch(e){}
-    return false;
-  }
-
-  // run a few times after clicks (panel opens async)
-  window.addEventListener("click", function(){
-    setTimeout(fixLabel, 60);
-    setTimeout(fixLabel, 180);
-    setTimeout(fixLabel, 420);
-  }, true);
-
-  console.log("[NG_STORYVIEW_LABEL_V9_V1] installed ✓");
-})();
-</script>
-<!-- NG_STORYVIEW_LABEL_V9_V1_END -->
-<!-- NG_SANITIZE_LINES_V1_START -->
-<script>
-(function(){
-  if (window.__NG_SANITIZE_LINES_V1) return;
-  window.__NG_SANITIZE_LINES_V1 = true;
-
-  function toStr(x){ return (x==null) ? "" : String(x); }
-
-  function sanitizeLines(arr){
-    if (!Array.isArray(arr)) return [];
-    var out = [];
-    for (var i=0;i<arr.length;i++){
-      var s = toStr(arr[i]).replace(/\r/g,"").trim();
-      if (!s) continue;
-
-      // If a markdown section header appears anywhere inside this item, keep only before it and stop.
-      var m = s.match(/(^|\n)\s*#{1,6}\s+/);
-      if (m){
-        s = s.split(m[0])[0].trim();
-        if (s) out.push(s);
-        break;
-      }
-
-      // If "YOUTUBE/SOCIAL" markers appear inside the same line-item, cut and stop.
-      var cutAt = s.search(/\n\s*(?:###\s*)?(?:YOUTUBE|SOCIAL)\b/i);
-      if (cutAt >= 0){
-        var kept = s.slice(0, cutAt).trim();
-        if (kept) out.push(kept);
-        break;
-      }
-
-      // remove leading bullets if any
-      s = s.replace(/^\s*[•\-\*]\s+/,"");
-      out.push(s);
-    }
-    return out;
-  }
-
-  function cutAfterYouTubeBlock(text){
-    var s = toStr(text).replace(/\r/g,"");
-    // if youtube section appended, drop it
-    var idx = s.search(/\n\s*#{1,6}\s*YOUTUBE\b/i);
-    if (idx >= 0) s = s.slice(0, idx);
-    return s.trim();
-  }
-
-  if (typeof window.ensureDraftHasDigipack !== "function") {
-    console.warn("[NG_SANITIZE_LINES_V1] ensureDraftHasDigipack not found");
-    return;
-  }
-
-  var prev = window.ensureDraftHasDigipack;
-  window.ensureDraftHasDigipack = function(){
-    var dp = prev.apply(this, arguments);
-    try{
-      var g = dp && dp.blocks && dp.blocks.generated;
-      if (g){
-        g.lines = sanitizeLines(g.lines);
-        if (g.web_article) g.web_article = cutAfterYouTubeBlock(g.web_article);
-      }
-    }catch(e){}
-    return dp;
+  window.__NG_TRANSCRIPT_PERSIST_STATUS__ = () => {
+    const c = loadCache();
+    return { key: KEY, cachedLen: c?.text?.length||0, cachedTs: c?.ts||null };
   };
 
-  console.log("[NG_SANITIZE_LINES_V1] installed ✓");
-})();
-</script>
-<!-- NG_SANITIZE_LINES_V1_END -->
-<!-- NG_STORYVIEW_OPAQUE_MODAL_V1_START -->
-<script>
-(function(){
-  if (window.__NG_STORYVIEW_OPAQUE_MODAL_V1) return;
-  window.__NG_STORYVIEW_OPAQUE_MODAL_V1 = true;
-
-  var BACKDROP_ID = "ngStoryViewBackdropV1";
-
-  function ensureBackdrop(){
-    var bd = document.getElementById(BACKDROP_ID);
-    if (bd) return bd;
-    bd = document.createElement("div");
-    bd.id = BACKDROP_ID;
-    bd.style.position = "fixed";
-    bd.style.left = "0";
-    bd.style.top = "0";
-    bd.style.right = "0";
-    bd.style.bottom = "0";
-    bd.style.background = "rgba(0,0,0,0.55)";
-    bd.style.zIndex = "2147483646";
-    bd.style.display = "none";
-    bd.style.pointerEvents = "auto";
-    document.body.appendChild(bd);
-    return bd;
-  }
-
-  function findStoryViewPanel(){
-    // Find any element containing "Story View Updated" or "Story View"
-    var nodes = document.querySelectorAll("div,section,article,main,aside");
-    for (var i=0;i<nodes.length;i++){
-      var el = nodes[i];
-      var t = el && el.textContent ? el.textContent : "";
-      if (!t) continue;
-      if (t.indexOf("Story View Updated") >= 0 || t.indexOf("Story View") >= 0){
-        // climb up to a reasonable container
-        var cur = el;
-        for (var k=0;k<6 && cur && cur !== document.body; k++){
-          var r = cur.getBoundingClientRect ? cur.getBoundingClientRect() : null;
-          if (r && r.width > 260 && r.height > 180) return cur;
-          cur = cur.parentElement;
-        }
-        return el;
-      }
-    }
-    return null;
-  }
-
-  function isVisible(el){
-    if (!el) return false;
-    var cs = window.getComputedStyle(el);
-    if (!cs) return false;
-    if (cs.display === "none" || cs.visibility === "hidden") return false;
-    var r = el.getBoundingClientRect();
-    return r.width > 10 && r.height > 10;
-  }
-
-  function stylePanel(panel){
-    if (!panel) return;
-    panel.style.position = "fixed";
-    panel.style.left = "24px";
-    panel.style.right = "24px";
-    panel.style.top = "24px";
-    panel.style.bottom = "24px";
-    panel.style.zIndex = "2147483647";
-    panel.style.background = "#ffffff";
-    panel.style.opacity = "1";
-    panel.style.backdropFilter = "none";
-    panel.style.borderRadius = "14px";
-    panel.style.boxShadow = "0 18px 60px rgba(0,0,0,0.35)";
-    panel.style.overflow = "auto";
-    panel.style.pointerEvents = "auto";
-  }
-
-  function tryFix(tag){
-    try{
-      var bd = ensureBackdrop();
-      var panel = findStoryViewPanel();
-      if (panel && isVisible(panel)){
-        stylePanel(panel);
-        bd.style.display = "block";
-        console.log("[NG_STORYVIEW_OPAQUE_MODAL_V1] fixed", tag);
-      } else {
-        bd.style.display = "none";
-      }
-    }catch(e){}
-  }
-
-  // click anywhere: if story view opens async, fix after short delays
-  window.addEventListener("click", function(){
-    setTimeout(function(){ tryFix("click_80"); }, 80);
-    setTimeout(function(){ tryFix("click_220"); }, 220);
-    setTimeout(function(){ tryFix("click_500"); }, 500);
-  }, true);
-
-  // boot
-  setTimeout(function(){ tryFix("boot_200"); }, 200);
-
-  console.log("[NG_STORYVIEW_OPAQUE_MODAL_V1] installed");
-})();
-</script>
-<!-- NG_STORYVIEW_OPAQUE_MODAL_V1_END -->
-<!-- NG_STORYVIEW_PRETTY_RENDER_V1_START -->
-<script>
-(function(){
-  if (window.__NG_STORYVIEW_PRETTY_RENDER_V1) return;
-  window.__NG_STORYVIEW_PRETTY_RENDER_V1 = true;
-
-  var PRIMARY="NG_DIGIPACK_DRAFTS_V1";
-  var LEGACY ="NG_DRAFTS";
-  var SEL_IDX_KEY="NG_DIGIPACK_SELECTED_IDX_V1";
-  var SEL_ID_KEY ="NG_DIGIPACK_SELECTED_ID_V1";
-  var PRETTY_ID="ngStoryViewPrettyV1";
-
-  function lget(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
-  function jparse(s, fb){ try{return JSON.parse(s);}catch(e){return fb;} }
-  function str(x){ return (x==null) ? "" : String(x); }
-  function isArr(x){ return Array.isArray(x); }
-  function isObj(x){ return x && typeof x==="object" && !Array.isArray(x); }
-
-  function copyText(txt){
-    txt = str(txt);
-    try{
-      if (navigator && navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(txt).catch(function(){});
-        return true;
-      }
-    }catch(e){}
-    try{
-      var ta = document.createElement("textarea");
-      ta.value = txt;
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-      return true;
-    }catch(e){}
-    return false;
-  }
-
-  function getDraftId(d,i){
-    return String((d && (d.id||d.uid||d.key||d._id||d.draft_id)) || ("i:"+i));
-  }
-
-  function readDrafts(){
-    var a = jparse(lget(PRIMARY)||"[]", []);
-    if (Array.isArray(a) && a.length) return {key:PRIMARY, arr:a};
-    a = jparse(lget(LEGACY)||"[]", []);
-    if (Array.isArray(a) && a.length) return {key:LEGACY, arr:a};
-    return {key:PRIMARY, arr:[]};
-  }
-
-  function pickSelected(pack){
-    var ds = pack.arr || [];
-    if (!ds.length) return {idx:-1, d:null};
-    var selId = lget(SEL_ID_KEY);
-    if (selId){
-      for (var i=0;i<ds.length;i++){
-        if (getDraftId(ds[i], i) === selId) return {idx:i, d:ds[i]};
-      }
-    }
-    var idx = parseInt(lget(SEL_IDX_KEY),10);
-    if (!(idx>=0 && idx<ds.length)) idx = ds.length-1;
-    return {idx:idx, d:ds[idx]};
-  }
-
-  function getV9Data(d){
-    // prefer storyview_v9
-    if (d && d.storyview_v9 && d.storyview_v9.version===9) return d.storyview_v9;
-
-    // fallback: dp.blocks.generated
-    var g = null;
-    try{
-      if (d && d.dp && d.dp.blocks && d.dp.blocks.generated) g = d.dp.blocks.generated;
-    }catch(e){}
-    if (!isObj(g) && typeof window.ensureDraftHasDigipack==="function"){
-      try{
-        var dp = window.ensureDraftHasDigipack(d);
-        if (dp && dp.blocks && dp.blocks.generated) g = dp.blocks.generated;
-      }catch(e){}
-    }
-    g = isObj(g) ? g : {};
-
-    return {
-      version: 9,
-      headline: str(g.headline || d.title || ""),
-      dek: str(g.dek || g.summary || ""),
-      key_points: isArr(g.key_points) ? g.key_points : [],
-      web_article: str(g.web_article || ""),
-      video: str(g.video || ""),
-      lines: isArr(g.lines) ? g.lines : []
-    };
-  }
-
-  function findCloseBtn(){
-    var els = document.querySelectorAll("button,a,[role='button'],input[type='button']");
-    for (var i=0;i<els.length;i++){
-      var el = els[i];
-      var t = (el.textContent || el.value || "").trim().toLowerCase();
-      if (t === "close") return el;
-    }
-    return null;
-  }
-
-  function findStoryPanel(){
-    var btn = findCloseBtn();
-    if (!btn) return null;
-    var cur = btn;
-    for (var i=0;i<12 && cur && cur !== document.body; i++){
-      cur = cur.parentElement;
-      if (!cur) break;
-      var t = cur.textContent || "";
-      // panel में Headline/Key Points जैसे शब्द आते हैं
-      if (t.indexOf("Headline")>=0 && t.indexOf("Key Points")>=0) return cur;
-    }
-    return null;
-  }
-
-  function hideMessy(panel){
-    if (!panel) return;
-    // hide the “labels stuck together” area + raw JSON dumps
-    var kids = panel.querySelectorAll("div,pre,code,p,span");
-    for (var i=0;i<kids.length;i++){
-      var el = kids[i];
-      var t = (el.textContent||"");
-      if (!t) continue;
-
-      // stuck header line
-      if (t.indexOf("STORYHeadlineCopyDekCopyKey PointsCopyWeb ArticleCopyVideoCopy")>=0){
-        el.style.display = "none";
-      }
-
-      // raw json dump patterns
-      if (t.indexOf('{"generated"')>=0 || t.indexOf('\\"generated\\"')>=0 || t.indexOf('$.story.digipack.raw')>=0){
-        el.style.display = "none";
-      }
-      // very long json-ish line starting with {"video"
-      if (t.trim().charAt(0)==="{" && (t.indexOf('\\"')>=0 || t.indexOf('":')>=0) && t.length > 400){
-        el.style.display = "none";
-      }
-    }
-  }
-
-  function renderPretty(panel, v9){
-    if (!panel) return;
-
-    // remove existing pretty (avoid duplicates)
-    var old = panel.querySelector("#"+PRETTY_ID);
-    if (old) old.remove();
-
-    var wrap = document.createElement("div");
-    wrap.id = PRETTY_ID;
-    wrap.style.padding = "14px";
-    wrap.style.marginTop = "10px";
-    wrap.style.border = "1px solid rgba(0,0,0,0.08)";
-    wrap.style.borderRadius = "12px";
-    wrap.style.background = "#fff";
-    wrap.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    wrap.style.lineHeight = "1.45";
-
-    function section(title, body, isList){
-      var box = document.createElement("div");
-      box.style.margin = "12px 0";
-      var h = document.createElement("div");
-      h.style.display="flex";
-      h.style.alignItems="center";
-      h.style.justifyContent="space-between";
-      h.style.gap="12px";
-
-      var ttl = document.createElement("div");
-      ttl.textContent = title;
-      ttl.style.fontWeight="700";
-      ttl.style.fontSize="14px";
-
-      var btn = document.createElement("button");
-      btn.textContent = "Copy";
-      btn.style.padding="6px 10px";
-      btn.style.border="1px solid rgba(0,0,0,0.15)";
-      btn.style.borderRadius="10px";
-      btn.style.cursor="pointer";
-      btn.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); copyText(isList ? body.join("\n") : body); };
-
-      h.appendChild(ttl);
-      h.appendChild(btn);
-
-      var content = document.createElement("div");
-      content.style.marginTop="8px";
-      content.style.whiteSpace="pre-wrap";
-      content.style.fontSize="14px";
-
-      if (isList){
-        var ul = document.createElement("ul");
-        ul.style.margin="0";
-        ul.style.paddingLeft="18px";
-        for (var i=0;i<body.length;i++){
-          var li = document.createElement("li");
-          li.textContent = str(body[i]);
-          ul.appendChild(li);
-        }
-        content.appendChild(ul);
-      } else {
-        content.textContent = str(body).trim();
-      }
-
-      box.appendChild(h);
-      box.appendChild(content);
-      return box;
-    }
-
-    wrap.appendChild(section("Headline", v9.headline || "", false));
-    if (v9.dek) wrap.appendChild(section("Dek", v9.dek, false));
-    wrap.appendChild(section("Key Points", (v9.key_points||[]), true));
-    wrap.appendChild(section("Web Article", v9.web_article || "", false));
-    wrap.appendChild(section("Video", v9.video || "", false));
-
-    // Lines: numbered
-    var lines = (v9.lines||[]).map(function(x){ return str(x).trim(); }).filter(Boolean);
-    var linesBox = document.createElement("div");
-    linesBox.style.margin="12px 0";
-    var h2 = document.createElement("div");
-    h2.style.display="flex";
-    h2.style.alignItems="center";
-    h2.style.justifyContent="space-between";
-    var t2 = document.createElement("div");
-    t2.textContent="VO Lines";
-    t2.style.fontWeight="700";
-    t2.style.fontSize="14px";
-    var b2 = document.createElement("button");
-    b2.textContent="Copy";
-    b2.style.padding="6px 10px";
-    b2.style.border="1px solid rgba(0,0,0,0.15)";
-    b2.style.borderRadius="10px";
-    b2.style.cursor="pointer";
-    b2.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); copyText(lines.join("\n")); };
-    h2.appendChild(t2); h2.appendChild(b2);
-    var pre = document.createElement("div");
-    pre.style.marginTop="8px";
-    pre.style.whiteSpace="pre-wrap";
-    pre.style.fontSize="14px";
-    pre.textContent = lines.map(function(s,i){ return (i+1)+") "+s; }).join("\n");
-    linesBox.appendChild(h2);
-    linesBox.appendChild(pre);
-    wrap.appendChild(linesBox);
-
-    // insert pretty view near top
-    panel.insertBefore(wrap, panel.firstChild);
-
-    // hide messy/raw parts
-    hideMessy(panel);
-  }
-
-  function apply(tag){
-    try{
-      // keep your existing V9 locks fresh
-      if (typeof window.NG_forceV9Now==="function") window.NG_forceV9Now();
-      if (typeof window.NG_normAllV9==="function") window.NG_normAllV9();
-
-      var panel = findStoryPanel();
-      if (!panel) return;
-
-      var pack = readDrafts();
-      var picked = pickSelected(pack);
-      if (!picked.d) return;
-
-      var v9 = getV9Data(picked.d);
-      renderPretty(panel, v9);
-
-      // light CSS fix: stop text/labels from sticking (best effort)
-      panel.style.whiteSpace = "normal";
-      panel.style.color = "#111";
-      panel.style.background = "#fff";
-      panel.style.opacity = "1";
-
-      console.log("[NG_STORYVIEW_PRETTY_RENDER_V1] applied", tag);
-    }catch(e){
-      console.warn("[NG_STORYVIEW_PRETTY_RENDER_V1] error", e);
-    }
-  }
-
-  // run after clicks (open/refresh async)
-  window.addEventListener("click", function(){
-    setTimeout(function(){ apply("click_120"); }, 120);
-    setTimeout(function(){ apply("click_320"); }, 320);
-  }, true);
-
-  // also watch DOM updates
-  var mo = new MutationObserver(function(){
-    setTimeout(function(){ apply("mo_220"); }, 220);
+  document.addEventListener("DOMContentLoaded", () => {
+    armAutosave();
+    hookFile();
+    restoreOnLoad();
+    console.log("[NG_TRANSCRIPT_PERSIST_V1] installed");
   });
-  try{ mo.observe(document.body, {childList:true, subtree:true}); }catch(e){}
-
-  setTimeout(function(){ apply("boot_250"); }, 250);
-  console.log("[NG_STORYVIEW_PRETTY_RENDER_V1] installed ✓");
 })();
-
-/* NG_TRANSCRIPT_AUTOPULL_V1 */
+ /* ===== NG_TRANSCRIPT_PERSIST_V1 END ===== */
+</script>
+<script>
+/* ===== NG_EDITORIAL_EXTRACTION_BIND_V1 START ===== */
 (function(){
-  if (window.NG_TRANSCRIPT_AUTOPULL_V1) return;
-  window.NG_TRANSCRIPT_AUTOPULL_V1 = true;
+  if (window.__NG_EE_BIND_V1__) return;
+  window.__NG_EE_BIND_V1__ = true;
 
-  function pickText(payload){
-    if (!payload) return "";
-    // Reverie/other formats
-    return String(
-      payload.display_text ||
-      payload.text ||
-      payload.transcript ||
-      payload.raw ||
-      ""
+  const IDS = {
+    list: "ee-list",
+    empty: "ee-empty",
+    push: "ee-push",
+    clear: "ee-clear",
+    taTranscript: "ta-transcript-json"
+  };
+
+  function $(id){ return document.getElementById(id); }
+
+  function getTranscriptText(){
+    const ta = $(IDS.taTranscript);
+    const v = (ta && typeof ta.value === "string") ? ta.value : "";
+    if (v.trim()) return v;
+
+    // fallback: localStorage cache from NG_TRANSCRIPT_PERSIST_V1
+    try{
+      const raw = localStorage.getItem("NG_TRANSCRIPT_CACHE_V1");
+      if (raw){
+        const obj = JSON.parse(raw);
+        if (obj && typeof obj.text === "string") return obj.text;
+      }
+    }catch(e){}
+    return "";
+  }
+
+  // Simple local heuristic extractor (no API, no tokens)
+  function extractSuggestions(text, max=12){
+  const raw = String(text || "").replace(/\r/g, "\n").trim();
+  if (!raw) return [];
+
+  // 1) lines + sentence-ish split (works if punctuation exists)
+  const lines = raw.split(/\n+/).map(s => s.trim()).filter(Boolean);
+
+  let pieces = [];
+  for (const line of lines) {
+    // split by danda/!/? if present; else keep line
+    const segs = line.split(/[।!?]+/g).map(s => s.trim()).filter(Boolean);
+    if (segs.length > 1) pieces.push(...segs);
+    else pieces.push(line);
+  }
+
+  pieces = pieces.map(s => s.replace(/\s+/g, " ").trim()).filter(Boolean);
+
+  // allow wider length range
+  let cand = pieces.filter(s => s.length >= 12 && s.length <= 220);
+
+  // 2) Fallback: if still nothing, make fixed-size chunks from whole text
+  if (!cand.length) {
+    const txt = raw.replace(/\s+/g, " ").trim();
+    const chunkLen = 110;
+
+    let start = 0;
+    while (start < txt.length && cand.length < max) {
+      let end = Math.min(txt.length, start + chunkLen);
+
+      // break on space near end to keep words intact
+      let brk = txt.lastIndexOf(" ", end);
+      if (brk <= start + 40) brk = end; // avoid too-small chunks
+
+      const chunk = txt.slice(start, brk).trim();
+      if (chunk) cand.push(chunk);
+
+      start = brk;
+    }
+  }
+
+  // de-dup + cap
+  const seen = new Set();
+  const out = [];
+  for (const s of cand) {
+    const key = s.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(s);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+
+  function setEmptyVisible(on){
+    const empty = $(IDS.empty);
+    if (empty) empty.style.display = on ? "block" : "none";
+  }
+
+  function setPushEnabled(){
+    const push = $(IDS.push);
+    const list = $(IDS.list);
+    if (!push || !list) return;
+    const anyChecked = !!list.querySelector('input[type="checkbox"]:checked');
+    push.disabled = !anyChecked;
+  }
+
+  function renderList(items){
+    const list = $(IDS.list);
+    if (!list) return;
+
+    list.innerHTML = "";
+    if (!items || !items.length){
+      setEmptyVisible(true);
+      setPushEnabled();
+      return;
+    }
+
+    setEmptyVisible(false);
+
+    items.forEach((txt, i) => {
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.gap = "8px";
+      row.style.alignItems = "flex-start";
+      row.style.padding = "6px 0";
+      row.style.borderBottom = "1px dashed #ddd";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.style.marginTop = "3px";
+      cb.addEventListener("change", setPushEnabled);
+
+      const span = document.createElement("div");
+      span.textContent = txt;
+      span.style.flex = "1";
+
+      row.appendChild(cb);
+      row.appendChild(span);
+      list.appendChild(row);
+    });
+
+    setPushEnabled();
+  }
+
+  function ensureExtractButton(){
+    const list = $(IDS.list);
+    if (!list) return null;
+
+    // place button just above list
+    let btn = document.getElementById("ee-extract");
+    if (btn) return btn;
+
+    btn = document.createElement("button");
+    btn.id = "ee-extract";
+    btn.type = "button";
+    btn.textContent = "Extract from Transcript";
+    btn.style.margin = "8px 0";
+    btn.style.padding = "8px 10px";
+    btn.style.border = "1px solid #999";
+    btn.style.borderRadius = "8px";
+    btn.style.cursor = "pointer";
+    btn.style.background = "#f7f7f7";
+
+    btn.addEventListener("click", () => {
+      const tr = getTranscriptText();
+      const items = extractSuggestions(tr, 12);
+      renderList(items);
+      window.__NG_EE_LAST__ = { ts: new Date().toISOString(), transcriptLen: tr.length, items: items.length };
+      console.log("[NG_EE] extracted", window.__NG_EE_LAST__);
+    });
+
+    list.parentNode.insertBefore(btn, list);
+    return btn;
+  }
+
+  function findBytesTextarea(){
+    // try common ids first
+    const candIds = ["ta-bytes","bytes","bytesText","ng-bytes","taBytes"];
+    for (const id of candIds){
+      const el = document.getElementById(id);
+      if (el && el.tagName === "TEXTAREA") return el;
+    }
+    // fallback: panel containing "Bytes (Speaker + Designation)"
+    const panel = [...document.querySelectorAll(".panel, fieldset, section, div")]
+      .find(x => /Bytes\s*\(Speaker/i.test(x.textContent || ""));
+    if (!panel) return null;
+    return panel.querySelector("textarea");
+  }
+
+  function bindButtons(){
+    const push = $(IDS.push);
+    const clear = $(IDS.clear);
+    const list = $(IDS.list);
+
+    if (clear && !clear.__ngBound){
+      clear.__ngBound = true;
+      clear.addEventListener("click", () => {
+        if (list) list.innerHTML = "";
+        setEmptyVisible(true);
+        if (push) push.disabled = true;
+        window.__NG_EE_LAST__ = { ts: new Date().toISOString(), cleared: true };
+        console.log("[NG_EE] cleared");
+      });
+    }
+
+    if (push && !push.__ngBound){
+      push.__ngBound = true;
+      push.addEventListener("click", () => {
+        const list = $(IDS.list);
+        if (!list) return;
+
+        const picked = [...list.querySelectorAll('input[type="checkbox"]')]
+          .map((cb) => ({ cb, text: cb?.parentElement?.querySelector("div")?.textContent || "" }))
+          .filter(x => x.cb.checked && x.text.trim())
+          .map(x => x.text.trim());
+
+        if (!picked.length) { push.disabled = true; return; }
+
+        const ta = findBytesTextarea();
+        const payload = picked.map((s,i)=>`${i+1}) ${s}`).join("\n");
+
+        if (ta){
+          const pre = (ta.value || "").trim();
+          ta.value = (pre ? (pre + "\n\n") : "") + "SUGGESTED_BYTES:\n" + payload + "\n";
+          ta.dispatchEvent(new Event("input", { bubbles:true }));
+          ta.dispatchEvent(new Event("change", { bubbles:true }));
+          console.log("[NG_EE] pushed to bytes textarea", { count: picked.length });
+        } else {
+          if (typeof copy === "function") copy(payload);
+          console.log("[NG_EE] bytes textarea not found; copied to clipboard", { count: picked.length });
+        }
+
+        push.disabled = true;
+      });
+    }
+
+    setPushEnabled();
+  }
+
+  function init(){
+    ensureExtractButton();
+    bindButtons();
+
+    // auto-extract once if transcript already present
+    const tr = getTranscriptText();
+    if (tr && tr.trim().length > 50){
+      const items = extractSuggestions(tr, 12);
+      renderList(items);
+      window.__NG_EE_LAST__ = { ts: new Date().toISOString(), auto: true, transcriptLen: tr.length, items: items.length };
+      console.log("[NG_EE] auto-extracted", window.__NG_EE_LAST__);
+    } else {
+      setEmptyVisible(true);
+    }
+  }
+
+  window.__NG_EE_STATUS__ = () => {
+    const list = $(IDS.list);
+    const tr = getTranscriptText();
+    const checked = list ? list.querySelectorAll('input[type="checkbox"]:checked').length : 0;
+    const total = list ? list.querySelectorAll('input[type="checkbox"]').length : 0;
+    return { transcriptLen: tr.length, itemsTotal: total, itemsChecked: checked, last: window.__NG_EE_LAST__ || null };
+  };
+
+  document.addEventListener("DOMContentLoaded", init);
+  console.log("[NG_EDITORIAL_EXTRACTION_BIND_V1] installed");
+})();
+ /* ===== NG_EDITORIAL_EXTRACTION_BIND_V1 END ===== */
+</script>
+<script>
+(() => {
+  // Wait-until-ready installer (so it won't silently exit)
+  if (window.__NG_BYTES_FINAL_V2_BOOT__) return;
+  window.__NG_BYTES_FINAL_V2_BOOT__ = true;
+
+  const norm = (s) => String(s ?? "").replace(/\s+/g, " ").trim();
+
+  function findBytesWrap() {
+    return (
+      document.getElementById("bytesWrap") ||
+      document.querySelector('#ng-sec-bytes, [data-ng-sec="bytes"]') ||
+      (() => {
+        const h = Array.from(document.querySelectorAll("b,h3,h4,div,span"))
+          .find(el => /Bytes\s*\(Speaker/i.test(el.textContent || ""));
+        return h?.closest(".panel") || h?.parentElement || null;
+      })()
     );
   }
 
-  window.NG_fetchLatestTranscript = async function(){
-    try{
-      const r = await fetch("/api/transcript/latest", { cache: "no-store" });
-      const j = await r.json();
+  function findBytesOutTA() {
+    return document.getElementById("bytesJSONOut");
+  }
 
-      if (!j || !j.ok) {
-        console.error("[NG_AUTOPULL] No transcript yet", j);
-        return j;
-      }
+  function findEeList() {
+    return (
+      document.getElementById("ee-list") ||
+      document.querySelector("[data-ng-ee-list]") ||
+      document.querySelector("#ng-sec-ee, #ng-sec-editorial-extraction, #editorialExtraction") ||
+      null
+    );
+  }
 
-      const payload = j.payload || {};
-      const txt = pickText(payload) || JSON.stringify(payload);
-
-      // persist for safety
-      try {
-        localStorage.setItem("NG_TRANSCRIPT_LAST", txt);
-        localStorage.setItem("NG_TRANSCRIPT_LAST_TS", j.ts || new Date().toISOString());
-      } catch(e){}
-
-      // ingest into your pipeline
-      if (typeof window.NG_ingestTranscript === "function") {
-        window.NG_ingestTranscript(txt);
-        console.error("[NG_AUTOPULL] Ingested via NG_ingestTranscript", { ts: j.ts, len: txt.length });
-      } else if (typeof window.NG_setEditorialSuggestions === "function") {
-        // fallback: if you only have suggestion setter
-        window.NG_setEditorialSuggestions(txt);
-        console.error("[NG_AUTOPULL] Sent to NG_setEditorialSuggestions", { ts: j.ts, len: txt.length });
-      } else {
-        console.error("[NG_AUTOPULL] No ingest hook found. Saved to localStorage only.", { ts: j.ts, len: txt.length });
-      }
-
-      return { ok:true, ts: j.ts, len: txt.length };
-    } catch(err){
-      console.error("[NG_AUTOPULL] Error", err);
-      return { ok:false, error: String(err && err.message || err) };
-    }
+  function bootInstall() {
+  const __ngFail = (why, extra) => {
+    try { console.warn("[NG_BYTES_FINAL_V2][bootInstall fail]", why, extra || ""); } catch(e) {}
+    return false;
   };
+
+  try {
+    const dbg = {
+      hasWrap: !!document.getElementById("bytesWrap"),
+      hasOut:  !!document.getElementById("bytesJSONOut"),
+      wrapTag: document.getElementById("bytesWrap")?.tagName,
+      outTag:  document.getElementById("bytesJSONOut")?.tagName,
+      outType: document.getElementById("bytesJSONOut")?.type
+    };
+    console.log("[NG_BYTES_FINAL_V2][bootInstall dbg]", dbg);
+  } catch (e) {}
+
+    if (window.__NG_BYTES_FINAL_V2__) return;
+    const bytesWrap = findBytesWrap();
+    const bytesOutTA = findBytesOutTA();
+    if (!bytesWrap || !bytesOutTA) return false;
+
+    window.__NG_BYTES_FINAL_V2__ = true;
+
+    // ---- store (array OR {bytes:[]}) ----
+    function loadStore() {
+      const raw = String(bytesOutTA.value || "").trim();
+      if (!raw) return { mode: "array", arr: [], obj: null };
+      try {
+        const p = JSON.parse(raw);
+        if (Array.isArray(p)) return { mode: "array", arr: p, obj: null };
+        if (p && typeof p === "object") {
+          if (!Array.isArray(p.bytes)) p.bytes = [];
+          return { mode: "obj", arr: p.bytes, obj: p };
+        }
+      } catch {}
+      return { mode: "array", arr: [], obj: null };
+    }
+
+    function saveStore(mode, arr, obj) {
+      const out = (mode === "obj" && obj) ? (obj.bytes = arr, obj) : arr;
+      bytesOutTA.value = JSON.stringify(out, null, 2);
+      bytesOutTA.dispatchEvent(new Event("input", { bubbles: true }));
+      bytesOutTA.dispatchEvent(new Event("change", { bubbles: true }));
+      try { localStorage.setItem("NG_BYTES", JSON.stringify(out)); } catch {}
+    }
+
+    function extractJsonish(str) {
+  const s = norm(str);
+  if (!/^[\[{]/.test(s) || !s.includes('"text"')) return null;
+  try {
+    const p = JSON.parse(s);
+    const o = Array.isArray(p) ? p[0] : p;
+    if (!o || typeof o !== "object") return null;
+    return {
+      speaker: norm(o.speaker || o.name || ""),
+      designation: norm(o.designation || o.desig || ""),
+      one_line: norm(o.text || o.one_line || o.quote || "")
+    };
+  } catch { return null; }
+}
+
+function cleanObj(x) {
+  // string case: could be "{...}" OR "[{...}]"
+  if (typeof x === "string") {
+    const ex = extractJsonish(x);
+    if (ex && ex.one_line) return ex;
+    return { speaker: "", designation: "", one_line: norm(x) };
+  }
+
+  // array case inside store (rare)
+  if (Array.isArray(x)) {
+    const o = x[0];
+    if (o && typeof o === "object") {
+      return {
+        speaker: norm(o.speaker || o.name || ""),
+        designation: norm(o.designation || o.desig || ""),
+        one_line: norm(o.text || o.one_line || o.quote || "")
+      };
+    }
+    return { speaker: "", designation: "", one_line: norm(String(x)) };
+  }
+
+  // object case
+  const speaker = norm(x?.speaker || x?.name || "");
+  const designation = norm(x?.designation || x?.desig || "");
+  const one_line = norm(x?.one_line || x?.text || x?.quote || x?.line || "");
+  return { speaker, designation, one_line };
+}
+
+
+    function keyOf(o) {
+      const c = cleanObj(o);
+      return norm(`${c.speaker}||${c.designation}||${c.one_line}`).toLowerCase();
+    }
+
+    // ---- renderer: single clean box inside Bytes panel ----
+    let box = document.getElementById("ng-final-bytes-clean");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "ng-final-bytes-clean";
+      box.style.cssText = "margin:10px 0;padding:10px;border:1px solid #ddd;border-radius:12px;background:#fff";
+      bytesWrap.appendChild(box);
+    }
+
+    function renderFinal() {
+      const st = loadStore();
+      const arr = (st.arr || []).map(cleanObj);
+      box.innerHTML =
+        `<div style="font-weight:700;margin-bottom:6px;">Final Bytes • ${arr.length}</div>` +
+        (arr.length ? arr.map((b,i) => `
+          <div style="margin:8px 0;padding:10px;border:1px solid #eee;border-radius:12px;">
+            <div style="font-weight:700;">${norm(b.speaker || "(speaker?)")} ${b.designation ? "(" + norm(b.designation) + ")" : ""}</div>
+            <div style="margin-top:6px;">${norm(b.one_line || "")}</div>
+          </div>
+        `).join("") : `<div style="opacity:.7;">(No bytes yet)</div>`);
+    }
+
+    // ---- EE selection → bytes store ----
+    function parseSuggestion(t) {
+  t = norm(t);
+
+  // Handle "{...}" OR "[{...}]" coming from Reverie/EE
+  if (/^[\[{]/.test(t) && t.includes('"text"')) {
+    try {
+      const p = JSON.parse(t);
+      const o = Array.isArray(p) ? p[0] : p;
+      return {
+        speaker: norm(o?.speaker || o?.name || ""),
+        designation: norm(o?.designation || o?.desig || ""),
+        one_line: norm(o?.text || o?.one_line || o?.quote || "")
+      };
+    } catch {}
+  }
+
+  let m = t.match(/^(.{2,80}?)(?:\s*\((.{2,160}?)\)|\s*,\s*(.{2,160}?))\s*:\s*(.+)$/);
+  if (m) return { speaker: norm(m[1]), designation: norm(m[2] || m[3]), one_line: norm(m[4]) };
+
+  m = t.match(/^(.{2,80}?)\s*:\s*(.+)$/);
+  if (m) return { speaker: norm(m[1]), designation: "", one_line: norm(m[2]) };
+
+  return { speaker: "", designation: "", one_line: t };
+}
+
+    function getSelectedEeItems() {
+      const list = findEeList();
+      if (!list) return [];
+      const checked = Array.from(list.querySelectorAll('input[type="checkbox"]:checked'));
+      return checked.map(cb => {
+        const row = cb.closest("div,li") || cb.parentElement;
+        const txt = norm(cb.dataset?.text || row?.innerText || row?.textContent || "");
+        return parseSuggestion(txt);
+      }).filter(x => x.one_line);
+    }
+
+    const eePushBtn =
+      document.getElementById("ee-push") ||
+      Array.from(document.querySelectorAll("button")).find(b => /push selected/i.test(norm(b.textContent).toLowerCase())) ||
+      null;
+
+    if (eePushBtn && !eePushBtn.__NG_FINAL_V2__) {
+      eePushBtn.__NG_FINAL_V2__ = true;
+      eePushBtn.addEventListener("click", () => {
+        const items = getSelectedEeItems();
+        if (!items.length) return;
+
+        const st = loadStore();
+        const arr = (st.arr || []).map(cleanObj);
+        const seen = new Set(arr.map(keyOf));
+        let added = 0;
+
+        items.map(cleanObj).forEach(it => {
+          const k = keyOf(it);
+          if (!k.replace(/\|/g,"").trim()) return;
+          if (seen.has(k)) return;
+          arr.push(it); seen.add(k); added++;
+        });
+
+        saveStore(st.mode, arr, st.obj);
+        renderFinal();
+// Clear visible Text/Quote box if it got JSON dumped
+const visTA = Array.from(bytesWrap.querySelectorAll("textarea"))
+  .find(z => z !== bytesOutTA && z.offsetParent !== null);
+if (visTA && /^[\[{]/.test(norm(visTA.value)) && visTA.value.includes('"text"')) visTA.value = "";
+
+        console.log("[NG_BYTES_FINAL_V2] pushed", { selected: items.length, added, total: arr.length });
+      }, true);
+    }
+
+    const showBtn = Array.from(bytesWrap.querySelectorAll("button"))
+      .find(b => norm(b.textContent).toLowerCase() === "show") || null;
+
+    if (showBtn && !showBtn.__NG_FINAL_V2__) {
+      showBtn.__NG_FINAL_V2__ = true;
+      showBtn.addEventListener("click", () => renderFinal(), true);
+    }
+
+    renderFinal();
+    console.log("[NG_BYTES_FINAL_V2] installed ✅", { hasBytesOut: true, hasBytesWrap: true });
+    return true;
+  }
+
+ // Poll until bytesWrap + bytesJSONOut exist, then attempt install
+let tries = 0;
+const MAX_TRIES = 120; // 24 seconds @200ms
+
+const t = setInterval(() => {
+  tries++;
+
+  const hasWrap = !!document.getElementById("bytesWrap");
+  const hasOut  = !!document.getElementById("bytesJSONOut");
+
+  let ok = false;
+
+  // Only call bootInstall when required nodes exist
+  if (hasWrap && hasOut) {
+    try {
+      ok = !!bootInstall();
+    } catch (e) {
+      console.warn("[NG_BYTES_FINAL_V2] bootInstall threw", e);
+      ok = false;
+    }
+  }
+
+  if (ok) {
+    clearInterval(t);
+    return;
+  }
+
+  if (tries >= MAX_TRIES) {
+    clearInterval(t);
+    if (!hasWrap || !hasOut) {
+      console.warn("[NG_BYTES_FINAL_V2] not installed (missing nodes)", { hasWrap, hasOut });
+    } else {
+      console.warn("[NG_BYTES_FINAL_V2] not installed (bootInstall returned false even though nodes exist)", { hasWrap, hasOut });
+    }
+  }
+}, 200);
+
+// Try once on DOM ready + load (safe)
+document.addEventListener("DOMContentLoaded", () => {
+  try { bootInstall(); } catch (e) {}
+});
+window.addEventListener("load", () => {
+  try { bootInstall(); } catch (e) {}
+});
 })();
 
 </script>
-<!-- NG_STORYVIEW_PRETTY_RENDER_V1_END -->
-<script src="/ng_transcript_autopull_v1.js"></script>
-<script src="/ng_console_silencer_v1.js"></script>
-<script src="/ng_transcript_fetch_button_v1.js"></script>
-<!-- NG_UI_MOJIBAKE_FIX_V1_START -->
 <script>
-(function(){
-  if (window.__NG_UI_MOJIBAKE_FIX_V1) return;
-  window.__NG_UI_MOJIBAKE_FIX_V1 = true;
+(() => {
+  if (window.__NG_EE_NORM_V1__) return;
+  window.__NG_EE_NORM_V1__ = true;
 
-  function looksBad(s){ return /Ã.|Â.|â.|à¤|à¥/.test(String(s||"")); }
-  function decodeOnce(s){
-    s = String(s||"");
-    try{
-      var bytes = new Uint8Array(s.length);
-      for (var i=0;i<s.length;i++) bytes[i] = s.charCodeAt(i) & 255;
-      return new TextDecoder("utf-8").decode(bytes);
-    }catch(e){ return s; }
+  const norm = (s) => String(s ?? "").replace(/\s+/g, " ").trim();
+
+  function findEeList() {
+    return (
+      document.getElementById("ee-list") ||
+      document.querySelector("[data-ng-ee-list]") ||
+      document.querySelector("#ng-sec-ee, #ng-sec-editorial-extraction, #editorialExtraction") ||
+      null
+    );
   }
-  function fix(s){
-    s = String(s||"");
-    var cur = s;
-    for (var k=0;k<3;k++){
-      if (!looksBad(cur)) break;
-      var nxt = decodeOnce(cur);
-      if (!nxt || nxt === cur) break;
-      cur = nxt;
+
+  function pickRowForCb(cb, list) {
+    // Try common row containers first
+    let row = cb.closest("[data-ee-row], .ee-row, .ee-item, li");
+    if (row) return row;
+
+    // Fallback: climb until the container is inside list and doesn't contain multiple checkboxes
+    row = cb.parentElement;
+    while (row && row !== list) {
+      const c = row.querySelectorAll?.('input[type="checkbox"]').length || 0;
+      if (c === 1) return row;
+      row = row.parentElement;
     }
-    return cur;
+    return cb.parentElement || null;
   }
 
-  function run(){
-    var skip = {SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1,OPTION:1};
-    var tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-    var n, c=0;
-    while((n = tw.nextNode())){
-      var p = n.parentNode;
-      if (!p || skip[p.nodeName]) continue;
-      var t = n.nodeValue;
-      if (t && looksBad(t)){
-        var f = fix(t);
-        if (f && f !== t){ n.nodeValue = f; c++; }
+  function normalizeOnce() {
+    const list = findEeList();
+    if (!list) return;
+
+    const cbs = Array.from(list.querySelectorAll('input[type="checkbox"]'));
+    if (!cbs.length) return;
+
+    cbs.forEach(cb => {
+      const row = pickRowForCb(cb, list);
+      if (!row || row.dataset.ngEeNorm === "1") return;
+
+      // Capture readable text BEFORE we rewrite row DOM
+function eeCleanText(raw) {
+  const s = norm(raw);
+  if (!/^[\[{]/.test(s) || !s.includes('"text"')) return s;
+  try {
+    const p = JSON.parse(s);
+    const o = Array.isArray(p) ? p[0] : p;
+    return norm(o?.text || s);
+  } catch {
+    return s;
+  }
+}
+function eeCleanText(raw) {
+  const s0 = String(raw ?? "");
+  const s = s0.replace(/\s+/g, " ").trim();
+
+  // Fast exit
+  if (!s.includes('"text"')) return s;
+
+  // Try to extract a JSON substring from inside mixed text
+  const iObj = s.indexOf("{");
+  const iArr = s.indexOf("[");
+  let i = -1;
+  if (iObj >= 0 && iArr >= 0) i = Math.min(iObj, iArr);
+  else i = (iObj >= 0 ? iObj : iArr);
+
+  if (i >= 0) {
+    const jsonish = s.slice(i).trim();
+    // First try JSON.parse
+    try {
+      const p = JSON.parse(jsonish);
+      const o = Array.isArray(p) ? p[0] : p;
+      const t = String(o?.text ?? "").replace(/\s+/g, " ").trim();
+      if (t) return t;
+    } catch {}
+  }
+
+  // Fallback: regex extract "text":"...."
+  const m = s.match(/"text"\s*:\s*"([^"]+)"/);
+  if (m && m[1]) {
+    return m[1].replace(/\\n/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  return s;
+}
+
+     const rawText = eeCleanText(row.innerText || row.textContent || "");
+
+
+      if (!rawText) return;
+
+      // Store clean text for your push logic
+      cb.dataset.text = rawText;
+
+      // Rewrite row to: [checkbox] [single span text]
+      const span = document.createElement("span");
+      span.className = "ng-ee-text";
+// Force-clean: if rawText still contains JSONish, extract "text"
+let showText = rawText;
+if (showText.includes('"text"')) {
+  try {
+    const i = Math.min(
+      showText.indexOf("{") >= 0 ? showText.indexOf("{") : 1e9,
+      showText.indexOf("[") >= 0 ? showText.indexOf("[") : 1e9
+    );
+    if (i < 1e9) {
+      const p = JSON.parse(showText.slice(i).trim());
+      const o = Array.isArray(p) ? p[0] : p;
+      if (o && o.text) showText = String(o.text).replace(/\s+/g, " ").trim();
+    }
+  } catch {}
+}
+span.textContent = showText;
+
+      span.style.cssText = "display:block;white-space:normal;word-break:break-word;line-height:1.35;";
+
+      // Keep checkbox state intact
+      cb.checked = !!cb.checked;
+
+      row.replaceChildren(cb, span);
+      row.style.cssText = "display:flex;gap:10px;align-items:flex-start;margin:8px 0;";
+      row.dataset.ngEeNorm = "1";
+
+      if (cb.disabled) row.style.opacity = "0.6";
+    });
+  }
+
+  // Run now
+  normalizeOnce();
+
+  // Keep fixing when EE list updates (after Extract)
+  const obs = new MutationObserver(() => {
+    // small debounce
+    clearTimeout(window.__NG_EE_NORM_T__);
+    window.__NG_EE_NORM_T__ = setTimeout(normalizeOnce, 50);
+  });
+
+  const list0 = findEeList();
+  if (list0) obs.observe(list0, { childList: true, subtree: true });
+
+  // Also retry in case EE list appears later
+  let tries = 0;
+  const t = setInterval(() => {
+    tries++;
+    normalizeOnce();
+    if (findEeList() || tries > 80) clearInterval(t);
+  }, 200);
+
+  console.log("[NG_EE_NORM_V1] installed ✅");
+})();
+</script>
+<script>
+(() => {
+  if (window.__NG_EE_COLLAPSE_V1__) return;
+  window.__NG_EE_COLLAPSE_V1__ = true;
+
+  const norm = (s) => String(s ?? "").replace(/\s+/g, " ").trim();
+
+  function findEeList() {
+    return (
+      document.getElementById("ee-list") ||
+      document.querySelector("[data-ng-ee-list]") ||
+      document.querySelector("#ng-sec-ee, #ng-sec-editorial-extraction, #editorialExtraction") ||
+      null
+    );
+  }
+
+  function getEeRows(list) {
+    const cbs = Array.from(list.querySelectorAll('input[type="checkbox"]'));
+    const rows = [];
+    const seen = new Set();
+    for (const cb of cbs) {
+      const row = cb.closest("div,li") || cb.parentElement;
+      if (!row) continue;
+      if (seen.has(row)) continue;
+      seen.add(row);
+      // prefer dataset.text set by your EE normalizer (if present)
+      const txt = norm(cb.dataset?.text || row.innerText || row.textContent || "");
+      rows.push({ cb, row, txt });
+    }
+    return rows;
+  }
+
+  function scoreText(t) {
+    // simple heuristic: medium length + punctuation
+    const w = norm(t).split(" ").filter(Boolean).length;
+    let s = 0;
+    if (w >= 8 && w <= 24) s += 3;
+    if (w >= 5 && w <= 30) s += 1;
+    if (w > 45) s -= 3;
+    if (w < 4) s -= 2;
+    if (/[।!?]/.test(t)) s += 1;
+    return s;
+  }
+
+  function install() {
+    const list = findEeList();
+    if (!list) return false;
+
+    const host = list.parentElement || list;
+    if (!host) return false;
+
+    // avoid duplicating toolbar
+    let bar = host.querySelector("#ng-ee-toolbar-v1");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "ng-ee-toolbar-v1";
+      bar.style.cssText = "display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px;border:1px solid #ddd;border-radius:10px;background:#fff;";
+      bar.innerHTML = `
+        <span style="font-weight:700;">EE View:</span>
+        <button type="button" id="ng-ee-show8" style="padding:6px 10px;border:1px solid #999;border-radius:999px;background:#fff;cursor:pointer;">Show 8</button>
+        <button type="button" id="ng-ee-showall" style="padding:6px 10px;border:1px solid #999;border-radius:999px;background:#fff;cursor:pointer;">Show All</button>
+        <button type="button" id="ng-ee-best3" style="padding:6px 10px;border:1px solid #999;border-radius:999px;background:#fff;cursor:pointer;">Select Best 3</button>
+        <button type="button" id="ng-ee-clear" style="padding:6px 10px;border:1px solid #999;border-radius:999px;background:#fff;cursor:pointer;">Clear</button>
+        <input id="ng-ee-filter" placeholder="Filter text…" style="padding:6px 10px;border:1px solid #bbb;border-radius:999px;min-width:220px;"/>
+        <span id="ng-ee-count" style="opacity:.75;"></span>
+      `;
+      host.insertBefore(bar, list);
+    }
+
+    let limit = 8;
+    let mode = "limit"; // limit | all
+    let filter = "";
+
+    function apply() {
+      const rows = getEeRows(list);
+      const f = norm(filter).toLowerCase();
+
+      // filter first
+      const visible = [];
+      rows.forEach((r) => {
+        const hit = !f || r.txt.toLowerCase().includes(f);
+        if (!hit) {
+          r.row.style.display = "none";
+          return;
+        }
+        visible.push(r);
+      });
+
+      // collapse (only on filtered list)
+      visible.forEach((r, i) => {
+        r.row.style.display = (mode === "all" || i < limit) ? "" : "none";
+      });
+
+      const shown = visible.filter((r, i) => (mode === "all" || i < limit)).length;
+      const countEl = bar.querySelector("#ng-ee-count");
+      if (countEl) countEl.textContent = `Showing ${shown}/${visible.length} (filtered), total ${rows.length}`;
+    }
+
+    bar.querySelector("#ng-ee-show8").onclick = () => { mode = "limit"; limit = 8; apply(); };
+    bar.querySelector("#ng-ee-showall").onclick = () => { mode = "all"; apply(); };
+    bar.querySelector("#ng-ee-clear").onclick = () => {
+      const rows = getEeRows(list);
+      rows.forEach(r => { if (!r.cb.disabled) r.cb.checked = false; });
+      apply();
+    };
+
+    bar.querySelector("#ng-ee-best3").onclick = () => {
+  const f = norm(filter).toLowerCase();
+
+  // Directly use the real checkboxes inside EE list (more reliable)
+  const cbs = Array.from(list.querySelectorAll('input[type="checkbox"]'))
+    .filter(cb => !cb.disabled)
+    .filter(cb => cb.offsetParent !== null); // visible only
+
+  // Build candidates with best available text
+  const cand = cbs.map(cb => {
+    const row = cb.closest("div,li") || cb.parentElement;
+    const txt = norm(cb.dataset?.text || row?.innerText || row?.textContent || "");
+    return { cb, txt, sc: scoreText(txt) };
+  }).filter(x => x.txt);
+
+  // If a text filter exists, apply it here too
+  const cand2 = f ? cand.filter(x => x.txt.toLowerCase().includes(f)) : cand;
+
+  // Clear previous checks (optional but makes it predictable)
+  cand2.forEach(x => { x.cb.checked = false; });
+
+  // Pick top 3 by score
+  cand2.sort((a,b) => b.sc - a.sc);
+  cand2.slice(0,3).forEach(x => { x.cb.checked = true; });
+
+  apply();
+};
+
+
+    const inp = bar.querySelector("#ng-ee-filter");
+    inp.oninput = () => {
+  const v = norm(inp.value);
+
+  // अगर user सिर्फ number लिखे (जैसे 3, 8, 12) तो उसे Show-N मानो
+  if (/^\d{1,2}$/.test(v)) {
+    mode = "limit";
+    limit = Math.max(1, Math.min(50, parseInt(v, 10)));
+    filter = "";
+    // input खाली कर दें ताकि user confuse न हो
+    inp.value = "";
+    apply();
+    return;
+  }
+
+  // वरना normal text filter
+  filter = v;
+  mode = "all";
+  apply();
+};
+
+    // run once + watch updates
+    apply();
+    const obs = new MutationObserver(() => setTimeout(apply, 50));
+    obs.observe(list, { childList:true, subtree:true });
+
+    console.log("[NG_EE_COLLAPSE_V1] installed ✅");
+    return true;
+  }
+
+  // wait for EE to exist
+  let tries = 0;
+  const t = setInterval(() => {
+    tries++;
+    if (install() || tries > 80) clearInterval(t);
+  }, 200);
+})();
+</script>
+<script>
+(() => {
+  if (window.__NG_EE_DISPLAY_CLEAN_V1__) return;
+  window.__NG_EE_DISPLAY_CLEAN_V1__ = true;
+
+  const norm = (s) => String(s ?? "").replace(/\s+/g, " ").trim();
+
+  function extractTextField(mixed) {
+    const s = norm(mixed);
+    if (!s.includes('"text"')) return s;
+
+    // Try JSON.parse from first { or [
+    const iObj = s.indexOf("{");
+    const iArr = s.indexOf("[");
+    let i = -1;
+    if (iObj >= 0 && iArr >= 0) i = Math.min(iObj, iArr);
+    else i = (iObj >= 0 ? iObj : iArr);
+
+    if (i >= 0) {
+      const jsonish = s.slice(i).trim();
+      try {
+        const p = JSON.parse(jsonish);
+        const o = Array.isArray(p) ? p[0] : p;
+        const t = norm(o?.text || "");
+        if (t) return t;
+      } catch {}
+    }
+
+    // Loose scan: read after "text":" until next unescaped quote
+    const k = s.indexOf('"text"');
+    if (k >= 0) {
+      const c = s.indexOf(":", k);
+      if (c >= 0) {
+        let q = s.indexOf('"', c);
+        if (q >= 0) {
+          q++;
+          let out = "";
+          for (let j = q; j < s.length; j++) {
+            const ch = s[j];
+            if (ch === '"' && s[j - 1] !== "\\") break;
+            out += ch;
+          }
+          out = norm(out.replace(/\\n/g, " "));
+          if (out) return out;
+        }
       }
     }
 
-    ["placeholder","title","aria-label"].forEach(function(a){
-      document.querySelectorAll("["+a+"]").forEach(function(el){
-        var v = el.getAttribute(a);
-        if (v && looksBad(v)){
-          var f = fix(v);
-          if (f && f !== v) el.setAttribute(a,f);
+    return s;
+  }
+
+  function cleanEE() {
+    const list =
+      document.getElementById("ee-list") ||
+      document.querySelector("[data-ng-ee-list]") ||
+      document.querySelector("#ng-sec-ee, #ng-sec-editorial-extraction, #editorialExtraction");
+
+    if (!list) return;
+
+    const cbs = Array.from(list.querySelectorAll('input[type="checkbox"]'));
+    for (const cb of cbs) {
+      const row = cb.closest("div,li") || cb.parentElement;
+      if (!row) continue;
+
+      // Find the main text container near checkbox (avoid buttons)
+      const textEl =
+        row.querySelector(".ee-text") ||
+        row.querySelector("label") ||
+        Array.from(row.querySelectorAll("div,span,p")).find(x => x !== cb && norm(x.textContent).length > 5) ||
+        row;
+
+      const raw = norm(cb.dataset?.text || textEl?.textContent || row.innerText || "");
+      const cleaned = extractTextField(raw);
+
+      // Update dataset for push logic
+      cb.dataset.text = cleaned;
+
+      // Update visible text (so JSON disappears)
+      if (textEl && cleaned && cleaned !== norm(textEl.textContent)) {
+        textEl.textContent = cleaned;
+      }
+    }
+  }
+
+  // Debounced observer (avoid hang)
+  let timer = null;
+  function schedule() {
+    if (timer) return;
+    timer = setTimeout(() => { timer = null; cleanEE(); }, 120);
+  }
+
+  // Initial run
+  schedule();
+
+  // Watch only top-level changes (less CPU)
+  const target =
+    document.getElementById("ee-list") ||
+    document.querySelector("[data-ng-ee-list]") ||
+    document.querySelector("#ng-sec-ee, #ng-sec-editorial-extraction, #editorialExtraction");
+
+  if (target) {
+    const obs = new MutationObserver(schedule);
+    obs.observe(target, { childList: true }); // no subtree -> less lag
+  }
+
+  console.log("[NG_EE_DISPLAY_CLEAN_V1] installed ✅");
+})();
+</script>
+<script>
+/* NG_EE_LIMIT_WIRE_STEP2A_START */
+(function () {
+  const LS_KEY = "NG_EE_LIMIT_CFG";
+
+  const byId = (id) => document.getElementById(id);
+  const qa = (sel) => Array.from(document.querySelectorAll(sel));
+
+  function eeRowFromCheckbox(cb) {
+    // Try to hide the most reasonable "row" container
+    return (
+      cb.closest("[data-ee-item]") ||
+      cb.closest(".ee-item") ||
+      cb.closest(".ee-row") ||
+      cb.closest("label") ||
+      cb.closest("div")
+    );
+  }
+
+  function eeGetRows() {
+    const list = byId("ee-list");
+    if (!list) return [];
+    const cbs = qa("#ee-list input[type='checkbox']");
+    const rows = [];
+    for (const cb of cbs) {
+      const row = eeRowFromCheckbox(cb);
+      if (row && !rows.includes(row)) rows.push(row);
+    }
+    return rows;
+  }
+
+  function eeGuessSpeaker(row) {
+    // Prefer explicit dataset if present
+    const ds = row && row.dataset ? (row.dataset.eeSpeaker || row.dataset.speaker || "") : "";
+    if (ds && ds.trim()) return ds.trim();
+
+    // Try any common speaker element
+    const sp =
+      row.querySelector?.("[data-ee-speaker], .ee-speaker, .speaker, .spk, b") || null;
+    const t = sp ? sp.textContent.trim() : "";
+    if (t && t.length <= 40) return t;
+
+    // Fallback: prefix before ':' in first 25 chars
+    const full = (row.textContent || "").replace(/\s+/g, " ").trim();
+    const idx = full.indexOf(":");
+    if (idx > 0 && idx < 25) return full.slice(0, idx).trim();
+
+    return "__ALL__";
+  }
+
+  function eeUpdateStatus(msg) {
+    const el = byId("ee-limit-status");
+    if (el) el.textContent = msg || "";
+  }
+
+  function eeApplyLimit(limitVal) {
+    const rows = eeGetRows();
+    // show all first
+    for (const r of rows) r.style.display = "";
+
+    if (limitVal === "all") {
+      return { total: rows.length, hidden: 0, groups: 0 };
+    }
+
+    const N = parseInt(limitVal, 10);
+    if (!N || N < 1) {
+      return { total: rows.length, hidden: 0, groups: 0 };
+    }
+
+    const groups = new Map();
+    for (const r of rows) {
+      const k = eeGuessSpeaker(r);
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(r);
+    }
+
+    let hidden = 0;
+    for (const arr of groups.values()) {
+      arr.forEach((r, i) => {
+        if (i >= N) {
+          r.style.display = "none";
+          hidden++;
         }
       });
-    });
-
-    console.log("[NG_UI_MOJIBAKE_FIX_V1] fixed_nodes", c);
+    }
+    return { total: rows.length, hidden, groups: groups.size };
   }
 
-  if (document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", function(){
-      run(); setTimeout(run, 250); setTimeout(run, 900);
-    });
-  } else {
-    run(); setTimeout(run, 250); setTimeout(run, 900);
+  function loadCfg() {
+    try {
+      return JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {};
+    } catch (e) {
+      return {};
+    }
   }
-})();
-</script>
-<!-- NG_UI_MOJIBAKE_FIX_V1_END -->
 
-<!-- NG_HIDE_STORYVIEW_UNLESS_PARAM_V1_START -->
-<script>
-(function(){
-  if (window.__NG_HIDE_STORYVIEW_UNLESS_PARAM_V1) return;
-  window.__NG_HIDE_STORYVIEW_UNLESS_PARAM_V1 = true;
+  function saveCfg(cfg) {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(cfg || {}));
+    } catch (e) {}
+  }
+function eeBuildSpeakerAccordion(limitVal) {
+  const list = byId("ee-list");
+  if (!list) return;
 
-  function forced(){ return /[?&]storyview=1\b/.test(location.search); }
-  function hide(){
-    if (forced()) return;
-    var cand = Array.prototype.slice.call(document.querySelectorAll(
-      '[id*="story"][id*="view" i], .storyview, .ng-storyview, [data-ng*="storyview" i]'
-    ));
-    for (var i=0;i<cand.length;i++){
-      var el = cand[i];
-      var tt = (el && el.textContent) ? el.textContent : "";
-      if (/Story View|Headline|Key Points|Web Article|Quick View/i.test(tt)){
-        el.style.display="none";
-        el.style.visibility="hidden";
-        el.style.pointerEvents="none";
+  // If already grouped once, unwrap back to original rows
+  const existingGroups = qa("#ee-list .ee-spk-group");
+  if (existingGroups.length) {
+    const rows = [];
+    existingGroups.forEach(g => {
+      qa(".ee-item-row", g).forEach(r => rows.push(r));
+    });
+    list.innerHTML = "";
+    rows.forEach(r => list.appendChild(r));
+  }
+
+  const rows = eeGetRows();
+  if (!rows.length) return;
+
+  // normalize: tag each row so we can re-find it later safely
+  rows.forEach((r) => {
+    r.classList.add("ee-item-row");
+  });
+
+  // group
+  const groups = new Map();
+  for (const r of rows) {
+    const k = eeGuessSpeaker(r);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(r);
+  }
+
+  // rebuild list DOM into groups
+  list.innerHTML = "";
+
+  const N = (limitVal === "all") ? Infinity : (parseInt(limitVal, 10) || 3);
+
+  for (const [speaker, arr] of groups.entries()) {
+if (!arr || !arr.length) continue;
+
+    const g = document.createElement("div");
+    g.className = "ee-spk-group";
+    g.style.cssText = "border:1px solid #e3e3e3;border-radius:12px;padding:10px;margin:10px 0;background:#fff;";
+
+    const header = document.createElement("div");
+    header.className = "ee-spk-header";
+    header.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;";
+
+    const left = document.createElement("div");
+    left.style.cssText = "font-weight:800;font-size:13px;";
+    const raw = (speaker || "").trim();
+
+// Clean garbage-like labels such as [""] or ["name"]
+let cleaned = raw.replace(/^\[\s*["']?/, "").replace(/["']?\s*\]$/, "").trim();
+
+// Treat unknown/empty as no-speaker
+const isUnknown = (!cleaned || cleaned === "__ALL__" || cleaned.toLowerCase() === "speaker");
+
+left.textContent = isUnknown
+  ? `Lines (${arr.length})`
+  : `${cleaned} — ${arr.length} lines`;
+
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ee-spk-toggle";
+    btn.style.cssText = "padding:6px 10px;border:1px solid #999;border-radius:999px;background:#f7f7f7;cursor:pointer;font-size:12px;";
+    btn.textContent = (arr.length > N) ? `Show more` : `All shown`;
+    btn.disabled = !(arr.length > N);
+
+    header.appendChild(left);
+    header.appendChild(btn);
+
+    const body = document.createElement("div");
+    body.className = "ee-spk-body";
+    body.style.cssText = "display:flex;flex-direction:column;gap:10px;";
+
+    // append rows and collapse beyond N
+    arr.forEach((r, idx) => {
+      body.appendChild(r);
+      r.style.display = (idx < N) ? "" : "none";
+      r.dataset.eeSpkCollapsed = (idx < N) ? "0" : "1";
+    });
+
+    btn.addEventListener("click", () => {
+      const collapsed = btn.getAttribute("data-collapsed") !== "0"; // default collapsed=true
+      if (collapsed) {
+        // expand
+        arr.forEach(r => { r.style.display = ""; r.dataset.eeSpkCollapsed = "0"; });
+        btn.textContent = "Show less";
+        btn.setAttribute("data-collapsed", "0");
+      } else {
+        // collapse back to N
+        arr.forEach((r, idx) => {
+          r.style.display = (idx < N) ? "" : "none";
+          r.dataset.eeSpkCollapsed = (idx < N) ? "0" : "1";
+        });
+        btn.textContent = "Show more";
+        btn.setAttribute("data-collapsed", "1");
+      }
+    });
+
+    g.appendChild(header);
+    g.appendChild(body);
+    list.appendChild(g);
+  }
+}
+
+function eeHideLegacyViewUI() {
+  const list = byId("ee-list");
+  if (!list) return;
+
+  const panel = list.closest(".panel") || list.parentElement || document;
+
+  const candidates = Array.from(panel.querySelectorAll("*"));
+  const eeViewRow = candidates.find(el => {
+    const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+    return t.includes("EE View:") && el.querySelector && el.querySelector("button");
+  });
+  if (eeViewRow) eeViewRow.style.display = "none";
+
+  const legacyStatus = candidates.find(el => {
+    const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+    return t.includes("(filtered)") && t.includes("Showing") && !el.closest("#ee-limit-bar");
+  });
+  if (legacyStatus) legacyStatus.style.display = "none";
+}
+
+
+  function init() {
+    const sel = byId("ee-limit-select");
+    const btnApply = byId("ee-limit-apply");
+    const btnReset = byId("ee-limit-reset");
+    const btnBestEach = byId("ee-best3-each");
+
+    if (!sel || !btnApply || !btnReset || !btnBestEach) return;
+
+    const cfg = Object.assign({ limit: "3", applied: false }, loadCfg());
+
+    // restore dropdown
+    const v = String(cfg.limit || "3");
+    sel.value = (v === "all" || v === "3" || v === "5" || v === "8") ? v : "3";
+
+    function applyNow() {
+      cfg.limit = sel.value;
+      cfg.applied = true;
+      const stat = eeApplyLimit(cfg.limit);
+eeBuildSpeakerAccordion(cfg.limit);
+eeHideLegacyViewUI();
+
+
+      eeUpdateStatus(`Showing ${stat.total - stat.hidden}/${stat.total} (speakers ${stat.groups || 1})`);
+      saveCfg(cfg);
+    }
+
+    function resetNow() {
+      cfg.applied = false;
+      eeApplyLimit("all");
+eeBuildSpeakerAccordion("all");
+eeHideLegacyViewUI();
+
+
+      eeUpdateStatus("");
+      saveCfg(cfg);
+    }
+
+    btnApply.addEventListener("click", applyNow);
+    btnReset.addEventListener("click", resetNow);
+
+    // Best-3-each wiring next step
+    function eeGetCheckbox(row) {
+  return row.querySelector?.("input[type='checkbox']") || null;
+}
+
+function eeGetScore(row) {
+  // Try common patterns: data-score, data-ee-score, [data-score], or "(score: 12)" text
+  const d = row && row.dataset ? (row.dataset.eeScore || row.dataset.score || "") : "";
+  if (d && !isNaN(+d)) return +d;
+
+  const dsEl = row.querySelector?.("[data-ee-score],[data-score]") || null;
+  if (dsEl) {
+    const v = dsEl.getAttribute("data-ee-score") || dsEl.getAttribute("data-score");
+    if (v && !isNaN(+v)) return +v;
+  }
+
+  const txt = (row.textContent || "");
+  const m = txt.match(/score\s*[:=]\s*(\d+(\.\d+)?)/i);
+  if (m && !isNaN(+m[1])) return +m[1];
+
+  return null;
+}
+
+function eeBest3EachSpeaker() {
+  const rows = eeGetRows();
+
+  // group rows by speaker
+  const groups = new Map();
+  for (const r of rows) {
+    // ignore hidden rows? (we will still consider hidden rows to avoid missing good ones)
+    const k = eeGuessSpeaker(r);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(r);
+  }
+
+  let totalChecked = 0;
+  let speakers = 0;
+
+  for (const [k, arr] of groups.entries()) {
+    speakers++;
+
+    // Sort by score desc if any score exists, else keep original order
+    const scored = arr.map(r => ({ r, s: eeGetScore(r) }));
+    const hasAnyScore = scored.some(x => typeof x.s === "number");
+
+    if (hasAnyScore) {
+      scored.sort((a, b) => {
+        const sa = (typeof a.s === "number") ? a.s : -Infinity;
+        const sb = (typeof b.s === "number") ? b.s : -Infinity;
+        return sb - sa;
+      });
+    }
+
+    const top3 = (hasAnyScore ? scored.map(x => x.r) : arr).slice(0, 3);
+
+    for (const r of top3) {
+      const cb = eeGetCheckbox(r);
+      if (cb && !cb.checked && !cb.disabled) {
+        cb.checked = true;
+        // trigger change if UI listens
+        cb.dispatchEvent(new Event("change", { bubbles: true }));
+        totalChecked++;
       }
     }
   }
-  hide(); setTimeout(hide, 80); setTimeout(hide, 300); setTimeout(hide, 900);
+
+  eeUpdateStatus(`Best3 each speaker ✓ (ticked +${totalChecked}, speakers ${speakers})`);
+}
+
+btnBestEach.addEventListener("click", function () {
+  try {
+    eeBest3EachSpeaker();
+  } catch (e) {
+    console.error("[NG_EE_BEST3_EACH] failed", e);
+    eeUpdateStatus("Best3 each speaker failed (see console)");
+  }
+});
+// --- NG_SIMPLE_UI_LOCK: hide auto/legacy EE controls ---
+try {
+  // Hide the auto-best button we added (manual-only lock)
+  const bestEach = byId("ee-best3-each");
+  if (bestEach) bestEach.style.display = "none";
+
+  // Also hide its space if needed (optional)
+  // (No need to hide the whole limit bar; keep dropdown Apply/Reset)
+
+  // Hide legacy EE View row + legacy filtered status (if present)
+  eeHideLegacyViewUI && eeHideLegacyViewUI();
+} catch (e) {
+  console.warn("[NG_SIMPLE_UI_LOCK] failed", e);
+}
+
+// --- NG_FORCE_HIDE_LEGACY_EE_VIEW (no helper needed) ---
+try {
+  const eeList = byId("ee-list");
+  const root = (eeList && (eeList.closest(".panel") || eeList.parentElement)) || document;
+
+  const els = Array.from(root.querySelectorAll("*"));
+  for (const el of els) {
+    const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+
+    // Hide the legacy "EE View:" button strip
+    if (t.includes("EE View:") && el.querySelector && el.querySelector("button")) {
+      el.style.display = "none";
+    }
+
+    // Hide legacy status line like "Showing 8/12 (filtered), total 12"
+    if (t.includes("(filtered)") && t.includes("Showing") && !el.closest("#ee-limit-bar")) {
+      el.style.display = "none";
+    }
+  }
+} catch (e) {
+  console.warn("[NG_FORCE_HIDE_LEGACY_EE_VIEW] failed", e);
+}
+// --- NG_PERSIST_HIDE_LEGACY_EE_VIEW (keeps hiding after Extract) ---
+function ngEEForceHideLegacyUI() {
+  try {
+    const eeList = byId("ee-list");
+    const root = (eeList && (eeList.closest(".panel") || eeList.parentElement)) || document;
+
+    // always hide auto-best button (manual-only)
+    const bestEach = byId("ee-best3-each");
+    if (bestEach) bestEach.style.display = "none";
+
+    const els = Array.from(root.querySelectorAll("*"));
+    for (const el of els) {
+      const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+
+      // Hide legacy "EE View:" strip
+      if (t.includes("EE View:") && el.querySelector && el.querySelector("button")) {
+        el.style.display = "none";
+      }
+
+      // Hide legacy filtered status line
+      if (t.includes("(filtered)") && t.includes("Showing") && !el.closest("#ee-limit-bar")) {
+        el.style.display = "none";
+      }
+    }
+  } catch (e) {
+    console.warn("[ngEEForceHideLegacyUI] failed", e);
+  }
+}
+
+// run once now
+ngEEForceHideLegacyUI();
+
+// observe EE area so if legacy UI reappears after Extract, it gets hidden again
+try {
+  const eeList = byId("ee-list");
+  const watchRoot = (eeList && (eeList.closest(".panel") || eeList.parentElement)) || document.body;
+
+  let __ngEEHideTimer = null;
+  const kick = () => {
+    clearTimeout(__ngEEHideTimer);
+    __ngEEHideTimer = setTimeout(ngEEForceHideLegacyUI, 60);
+  };
+
+  const obs = new MutationObserver(kick);
+  obs.observe(watchRoot, { childList: true, subtree: true });
+
+  // also kick once after a short delay (covers late render)
+  setTimeout(kick, 150);
+} catch (e) {
+  console.warn("[NG_PERSIST_HIDE_LEGACY_EE_VIEW] observer failed", e);
+}
+
+
+    // auto-apply if previously applied
+    if (cfg.applied) applyNow();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
+ /* NG_EE_LIMIT_WIRE_STEP2A_END */
 </script>
-<!-- NG_HIDE_STORYVIEW_UNLESS_PARAM_V1_END -->
 
 </body>
 </html>
+
+
+
+
+
 
 
 
