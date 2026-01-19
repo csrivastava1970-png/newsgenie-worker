@@ -8,3 +8,7 @@ logs/
 start_ng.cmd.bak
 backups/
 *.bak*
+
+# Secrets / local env
+.dev.vars
+
