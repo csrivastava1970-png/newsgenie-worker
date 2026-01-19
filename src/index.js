@@ -75,7 +75,7 @@ export default {
     /* NG_HEALTH_ROUTE_V1 20260119_162140 */
     try {
       const __u = new URL(request.url);
-      if (__u.pathname === "/health" || __u.pathname === "/api/health" || __u.pathname === "/api/health/") {
+      if (__u.pathname === '/health') {
         return new Response(JSON.stringify({ ok: true, ts: new Date().toISOString(), entry: 'src/index.js' }), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8' } });
       }
       if (__u.pathname === '/') {
@@ -101,15 +101,6 @@ export default {
       );
     }
 
-
-    // NG_PATCH_START:TRANSCRIPT_LATEST_V1
-    // Transcript latest (safe Response; avoids worker hanging)
-    if ((path === "/transcript/latest" || path === "/api/transcript/latest") && request.method === "GET") {
-      const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
-      const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
-      return new Response(JSON.stringify({ ok: true, latest: null, text: "", ts: new Date().toISOString() }), { status: 200, headers });
-    }
-    // NG_PATCH_END:TRANSCRIPT_LATEST_V1
     // Digi-pack API
     if (path === "/api/digi-pack" && request.method === "POST") {
       const body = await readJson(request);
@@ -153,5 +144,4 @@ export default {
   // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
-
 
