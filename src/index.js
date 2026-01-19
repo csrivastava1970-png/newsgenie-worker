@@ -102,14 +102,32 @@ export default {
     }
 
 
-    // NG_PATCH_START:TRANSCRIPT_LATEST_V1
-    // Transcript latest (safe Response; avoids worker hanging)
-    if ((path === "/transcript/latest" || path === "/api/transcript/latest") && request.method === "GET") {
-      const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
-      const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
-      return new Response(JSON.stringify({ ok: true, latest: null, text: "", ts: new Date().toISOString() }), { status: 200, headers });
-    }
-    // NG_PATCH_END:TRANSCRIPT_LATEST_V1
+// NG_PATCH_START:TRANSCRIPT_LATEST_V1
+// Transcript latest (GET/POST; in-memory store; always returns Response)
+if ((path === "/api/transcript/latest" || path === "/transcript/latest") && request.method === "POST") {
+  const body = await readJson(request);
+  const text = (body && body.text != null) ? String(body.text) : "";
+  const latest = {
+    text,
+    source: (body && body.source != null) ? String(body.source) : null,
+    ts: (body && body.ts) ? String(body.ts) : new Date().toISOString(),
+  };
+
+  globalThis.__NG_LATEST_TRANSCRIPT__ = latest;
+
+  const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
+  const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
+  return new Response(JSON.stringify({ ok: true, latest, text: latest.text, ts: new Date().toISOString() }), { status: 200, headers });
+}
+
+if ((path === "/transcript/latest" || path === "/api/transcript/latest") && request.method === "GET") {
+  const latest = globalThis.__NG_LATEST_TRANSCRIPT__ || null;
+  const text = (latest && latest.text) ? String(latest.text) : "";
+  const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
+  const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
+  return new Response(JSON.stringify({ ok: true, latest, text, ts: new Date().toISOString() }), { status: 200, headers });
+}
+// NG_PATCH_END:TRANSCRIPT_LATEST_V1
     // Digi-pack API
     if (path === "/api/digi-pack" && request.method === "POST") {
       const body = await readJson(request);
