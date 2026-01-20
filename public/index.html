@@ -293,28 +293,42 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 <!-- Transcript JSON Loader -->
 <!-- ========================= -->
 <section id="ng-transcript-loader" style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
+  <!-- Compact tools bar -->
   <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-    <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <h3 style="margin:0; font-size:14px;">Transcript Tools</h3>
       <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
-      <button type="button" id="btn-refresh-latest-transcript" style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#f7f7f7;">Refresh Latest (API)</button>
-      <span id="ng-latest-transcript-status" style="font-size:12px;opacity:.75;">(not loaded)</span>
-      <button type="button" id="btn-paste-transcript-json">Paste from Clipboard</button>
-      <button type="button" id="btn-import-transcript-json">Import file</button>
+      <button type="button" id="btn-refresh-latest-transcript" style="padding:8px 10px;border:1px solid #999;border-radius:10px;cursor:pointer;background:#f7f7f7;">Refresh Latest (API)</button>
+      <button type="button" id="btn-paste-transcript-json">Paste</button>
+      <button type="button" id="btn-import-transcript-json">Import</button>
       <input type="file" id="file-transcript-json" accept=".json,application/json,.txt" style="display:none;">
     </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <span style="font-size:12px;opacity:.7;">Status:</span>
+      <span id="ng-latest-transcript-status" style="font-size:12px;opacity:.85;">(not loaded)</span>
+      <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
+    </div>
   </div>
-  <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
-    Reverie output JSON यहाँ पेस्ट करें (display_text या text)। Load करने पर localStorage में save भी होगा।
-  </p>
-  <textarea id="ta-transcript-json" rows="8"
-    style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
-    placeholder="Paste JSON here..."></textarea>
-  <div id="ng-latest-transcript-preview" style="display:none;white-space:pre-wrap;max-height:160px;overflow:auto;border:1px dashed #bbb;border-radius:10px;padding:10px;font-size:13px;opacity:.9; margin-top:10px;"></div>
-  <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-    <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
-    <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
-  </div>
+
+  <!-- Collapsible inbox (keeps UI light) -->
+  <details id="ng-transcript-inbox-details" style="margin-top:10px;">
+    <summary style="cursor:pointer; user-select:none; font-size:13px; opacity:.85;">Transcript Inbox</summary>
+
+    <div style="margin-top:10px;">
+      <div id="ng-transcript-inbox-hint" style="margin-top:8px;font-size:12px;opacity:.75;">Paste Reverie JSON here (display_text or text). Load saves to localStorage.</div>
+      <textarea id="ta-transcript-json" rows="8"
+        style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:12px; line-height:1.35; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
+        placeholder="Paste JSON here..."></textarea>
+
+      <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+        <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
+      </div>
+
+      <div id="ng-latest-transcript-preview"
+        style="display:none;white-space:pre-wrap;max-height:160px;overflow:auto;border:1px dashed #bbb;border-radius:12px;padding:10px;font-size:13px;opacity:.9; margin-top:10px;"></div>
+    </div>
+  </details>
 </section>
 
 <!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_START -->
@@ -10679,6 +10693,34 @@ try {
 
 
 
+
+
+
+
+
+
+
+<script>
+/* NG_PATCH_START: INBOX_SUMMARY_GUARD_V1 */
+(function(){
+  function fix(){
+    var s = document.querySelector('#ng-transcript-inbox-details summary');
+    if(!s) return;
+    var want = 'Transcript Inbox';
+    var cur = (s.textContent||'').trim();
+    if(cur.indexOf('Transcript Inbox') === -1 && cur.indexOf('Transcript Inbox') === -1){
+      s.textContent = 'Transcript Inbox';
+} else {
+  // normalize stray quotes/spaces
+      s.textContent = 'Transcript Inbox';
+}
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fix, {once:true});
+  else fix();
+  window.addEventListener('load', function(){ setTimeout(fix, 0); }, {once:true});
+})();
+/* NG_PATCH_END: INBOX_SUMMARY_GUARD_V1 */
+</script>
 
 
 
