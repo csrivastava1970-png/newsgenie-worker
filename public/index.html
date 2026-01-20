@@ -7,7 +7,12 @@
   <title>NewsGenie Digital Producer</title>
 <link rel="icon" href="data:,">
   <!-- NG_STD_UI_TOOLBAR_ROW_V2_START -->
+
 <style>
+  /* NG_ADVANCED_PANELS_V1 */
+  html[data-ng-std-ui="simple"] #ng-advanced-panels{ display:none !important; }
+  html[data-ng-std-ui="advanced"] #ng-advanced-panels{ display:block; }
+
   /* NG_STD_UI_TOOLBAR_ROW_V2
      Goal: single-row toolbar (actions left, UI toggle right) — CSS-only, hang-free
      Rules: NO DOM moving, NO MutationObserver, only CSS overrides.
@@ -284,38 +289,66 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
       </div>
     </div>
 <!-- ========================= -->
+<!-- ========================= -->
 <!-- Transcript JSON Loader -->
 <!-- ========================= -->
-<section style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+<section id="ng-transcript-loader" style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-  <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
-
-  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-    <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
-
-    <!-- NEW -->
-    <button type="button" id="btn-paste-transcript-json">Paste from Clipboard</button>
-    <button type="button" id="btn-import-transcript-json">Import file</button>
-    <input type="file" id="file-transcript-json" accept=".json,application/json,.txt" style="display:none;">
+    <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
+      <button type="button" id="btn-refresh-latest-transcript" style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#f7f7f7;">Refresh Latest (API)</button>
+      <span id="ng-latest-transcript-status" style="font-size:12px;opacity:.75;">(not loaded)</span>
+      <button type="button" id="btn-paste-transcript-json">Paste from Clipboard</button>
+      <button type="button" id="btn-import-transcript-json">Import file</button>
+      <input type="file" id="file-transcript-json" accept=".json,application/json,.txt" style="display:none;">
+    </div>
   </div>
-</div>
-
-
   <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
     Reverie output JSON यहाँ पेस्ट करें (display_text या text)। Load करने पर localStorage में save भी होगा।
-
   </p>
-
   <textarea id="ta-transcript-json" rows="8"
     style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
-    placeholder='Paste JSON here...'></textarea>
-
-  <div style="display:flex; gap:8px; margin-top:10px;">
+    placeholder="Paste JSON here..."></textarea>
+  <div id="ng-latest-transcript-preview" style="display:none;white-space:pre-wrap;max-height:160px;overflow:auto;border:1px dashed #bbb;border-radius:10px;padding:10px;font-size:13px;opacity:.9; margin-top:10px;"></div>
+  <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
     <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
     <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
   </div>
 </section>
+
+<!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_START -->
+<div id="ng-superlight" style="margin-top:12px; display:grid; grid-template-columns: 1fr; gap:10px;">
+  <div class="panel" id="ng-sec-transcript-lines">
+    <b>Transcript Lines</b>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+      <button type="button" id="ng-lines-selectall">Select All</button>
+      <button type="button" id="ng-lines-clear">Clear Selection</button>
+      <span id="ng-lines-status" style="font-size:12px; opacity:.75;"></span>
+    </div>
+    <div id="ng-lines-wrap" style="margin-top:10px; display:flex; flex-direction:column; gap:8px; max-height:220px; overflow:auto; border:1px solid #eee; border-radius:12px; padding:10px;"></div>
+  </div>
+
+  <div class="panel" id="ng-sec-byte-draft">
+    <b>Byte Draft</b>
+    <div class="muted">Select lines → Make Byte → assign speaker/designation → Add to Final</div>
+
+    <textarea id="ng-byte-draft-text" rows="4" style="width:100%; margin-top:8px; padding:10px; border:1px solid #ccc; border-radius:10px;" placeholder="Selected lines will appear here..."></textarea>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+      <input id="ng-byte-draft-speaker" type="text" placeholder="Speaker (manual)" style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:220px;">
+      <input id="ng-byte-draft-desig" type="text" placeholder="Designation (manual)" style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:260px;">
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+      <button type="button" id="ng-make-byte" class="secondary">Make Byte Draft</button>
+      <button type="button" id="ng-add-final" class="primary">Add to Final Bytes</button>
+      <button type="button" id="ng-clear-draft">Clear Draft</button>
+      <span id="ng-byte-draft-status" style="font-size:12px; opacity:.75;"></span>
+    </div>
+  </div>
+</div>
+<!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_END -->
 
     <div style="margin-top:10px;">
       <label>Story Type</label>
@@ -345,23 +378,16 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     </div>
 
     <!-- BYTES -->
-<div class="panel" id="bytesWrap">
-  <b>Bytes (Speaker + Designation)</b>
-
-  <!-- hidden JSON sink for Final Bytes module -->
-  <textarea id="bytesJSONOut" style="display:none;"></textarea>
-
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;">
-    <div style="font-size:12px;opacity:.75;">
-      Multiple bytes जोड़ सकते हैं. Transcript AI generate करेगा.
-    </div>
-
+    <div class="panel" id="bytesWrap" data-ng-sec="bytes">
+      <b>Final Bytes</b>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+        <div style="font-size:12px;opacity:.75;">Select lines → Make Byte → assign speaker/designation → Add to Final.</div>
         <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
       </div>
-
-      <div id="bytesWrap" style="margin-top:10px;"></div>
+      <!-- hidden JSON sink for Final Bytes module -->
+      <textarea id="bytesJSONOut" style="display:none;"></textarea>
+      <div id="bytes-wrap" style="margin-top:10px;"></div>
     </div>
-
     <!-- VISUALS -->
     <!-- NG_STD_VISUALS_WRAP_V1_START -->
 <div id="visualsWrap" data-ng-sec="visuals">
@@ -390,58 +416,9 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     </div>
   </form>
 <!-- Editorial Extraction : Suggestions ONLY -->
-<section id="editorial-extraction" style="margin-top:16px;">
-  <h3 style="margin:0 0 8px 0;">Editorial Extraction</h3>
-<!-- NG_EE_LIMIT_UI_STEP1_START -->
-<div id="ee-limit-bar"
-     style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;padding:8px;border:1px solid #ddd;border-radius:10px;">
-  <div style="display:flex;align-items:center;gap:6px;">
-    <span style="font-size:12px;font-weight:700;">Per-speaker limit</span>
-    <select id="ee-limit-select"
-            style="padding:6px 10px;border:1px solid #999;border-radius:8px;background:#fff;cursor:pointer;">
-      <option value="3" selected>3</option>
-      <option value="5">5</option>
-      <option value="8">8</option>
-      <option value="all">All</option>
-    </select>
-  </div>
-
-  <button type="button" id="ee-limit-apply"
-          style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#f7f7f7;">
-    Apply
-  </button>
-
-  <button type="button" id="ee-limit-reset"
-          style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#fff;">
-    Reset
-  </button>
-
-  <button type="button" id="ee-best3-each"
-          title="Auto-select best 3 items per speaker (wiring in step-2)"
-          style="padding:8px 10px;border:1px solid #999;border-radius:8px;cursor:pointer;background:#f7f7f7;">
-    Best 3 each speaker
-  </button>
-
-  <span id="ee-limit-status" style="font-size:12px;opacity:.75;"></span>
-</div>
-<!-- NG_EE_LIMIT_UI_STEP1_END -->
 
 
-  <div id="ee-empty" style="opacity:.7;font-size:13px;padding:10px;border:1px dashed #bbb;border-radius:10px;">
-    NG_TRANSCRIPT से suggested bytes यहाँ दिखेंगे.
-
-  </div>
-
-  <div id="ee-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;"></div>
-
-  <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-    <button type="button" id="ee-push" ...>Promote to Final Bytes</button>
-
-    <button type="button" id="ee-clear">Discard / Clear suggestions</button>
-  </div>
-</section>
-
-
+<div id="ng-advanced-panels">
   <div class="panel">
     <div class="status"><b>Status:</b> <span id="ngStatus">Idle</span></div>
     <div style="margin-top:8px;"><b>Log</b></div>
@@ -474,6 +451,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
            font-size:12px;"></textarea>
 </div>
 
+</div><!-- /#ng-advanced-panels -->
 <script>
   const $ = (id) => document.getElementById(id);
   let NG_BUSY = false;
@@ -1624,28 +1602,34 @@ function initEditorialExtraction() {
 }
 
   // ---------------- ingest + hook NG_TRANSCRIPT ----------------
+  // ---------------- ingest NG_TRANSCRIPT -> Transcript Lines (Super Light) ----------------
   window.NG_ingestTranscript = function (reverieJsonOrText) {
-    const rawLines = collectCandidateLines(reverieJsonOrText, { maxNodes: 9000 });
-    const best = pickBestLines(rawLines, 6, 10).map(x => ({
-      speaker: x.speaker || "",
-      designation: x.designation || "",
-      text: x.text || ""
-    }));
-
-    // âœ… keep latest suggestions in memory (for pushToBytes fallback)
-window.__NG_EE_SUGGEST = Array.isArray(best) ? best : [];
-
-if (typeof window.NG_setEditorialSuggestions === "function") {
-  window.NG_setEditorialSuggestions(best);
-}
-
-// âœ… after render, ensure push button state is correct
-syncEePushBtn();
-
-console.log("[EE] Transcript â†’ suggestions:", best.length);
-return best;
-
-
+    try {
+      const raw = collectCandidateLines(reverieJsonOrText, { maxNodes: 9000 });
+      const lines0 = (raw || []).map(x => {
+        if (typeof x === "string") return x;
+        if (!x) return "";
+        return (x.text || x.display_text || x.utterance || x.line || x.value || "");
+      });
+      const lines = [];
+      const seen = new Set();
+      for (let i = 0; i < lines0.length && lines.length < 240; i++) {
+        const t = String(lines0[i] || "").replace(/\s+/g, " ").trim();
+        if (!t) continue;
+        const k = t.toLowerCase();
+        if (seen.has(k)) continue;
+        seen.add(k);
+        lines.push(t);
+      }
+      window.__NG_TLINES = lines;
+      if (typeof window.NG_setTranscriptLines === "function") window.NG_setTranscriptLines(lines);
+      console.log("[TL] Transcript -> lines:", lines.length);
+      return lines;
+    } catch (e) {
+      console.error("[TL] ingest error:", e);
+      return [];
+    }
+  };
   (function hookTranscriptSetter() {
     if (window.__NG_TRANSCRIPT_HOOKED) return;
     window.__NG_TRANSCRIPT_HOOKED = true;
@@ -1772,15 +1756,154 @@ return best;
   // ---------------- export global + auto init ----------------
   window.initEditorialExtraction = initEditorialExtraction;
 
- if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
-} else {
-  initEditorialExtraction();
-}
+  // EE auto-init disabled (Super Light UI uses Transcript Lines -> Byte Draft -> Final Bytes)
+  // If needed for legacy tests, call: window.initEditorialExtraction() manually in console.
+  if (false) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
+    } else {
+      initEditorialExtraction();
+    }
+  }
 
 }  // âœ… added: missing closing brace for script #2
 </script>
 <script src="/ng_transcript_hook_patch.js"></script>
+  <script src="/ng_latest_transcript_ui.js"></script>
+<script>
+/* NG_SUPERLIGHT_WIRING_V1: Transcript -> Lines -> Byte Draft -> Final Bytes */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function qsa(sel, root){ try { return Array.from((root||document).querySelectorAll(sel)); } catch (e){ return []; } }
+
+  // --- Transcript Lines renderer ---
+  window.NG_setTranscriptLines = function(lines){
+    var wrap=$("ng-lines-wrap");
+    var st=$("ng-lines-status");
+    if(!wrap) return;
+    wrap.innerHTML="";
+    var arr = Array.isArray(lines)? lines: [];
+    if(st) st.textContent = arr.length ? ("Lines: "+arr.length) : "No lines yet";
+    for(var i=0;i<arr.length;i++){
+      var t=String(arr[i]||"").trim();
+      if(!t) continue;
+      var row=document.createElement("label");
+      row.style.display="flex"; row.style.gap="10px"; row.style.alignItems="flex-start";
+      row.style.padding="6px 8px"; row.style.border="1px solid #f1f1f1"; row.style.borderRadius="10px";
+      var cb=document.createElement("input");
+      cb.type="checkbox"; cb.setAttribute("data-i", String(i));
+      cb.style.marginTop="3px";
+      var sp=document.createElement("span");
+      sp.textContent=t; sp.style.fontSize="13px"; sp.style.lineHeight="1.35";
+      row.appendChild(cb); row.appendChild(sp);
+      wrap.appendChild(row);
+    }
+  };
+
+  function getSelectedLines(){
+    var wrap=$("ng-lines-wrap");
+    var base = (window.__NG_TLINES && Array.isArray(window.__NG_TLINES)) ? window.__NG_TLINES : [];
+    if(!wrap) return [];
+    var idx = qsa("input[type=checkbox][data-i]:checked", wrap)
+      .map(function(cb){ return parseInt(cb.getAttribute("data-i")||"-1",10); })
+      .filter(function(n){ return n>=0; });
+    var out=[];
+    for(var k=0;k<idx.length;k++){
+      var i=idx[k];
+      var t=String(base[i]||"").trim();
+      if(t) out.push(t);
+    }
+    return out;
+  }
+
+  function selectAll(on){
+    var wrap=$("ng-lines-wrap"); if(!wrap) return;
+    qsa("input[type=checkbox][data-i]", wrap).forEach(function(cb){ cb.checked=!!on; });
+  }
+
+  // --- Final Bytes helpers ---
+  function bytesWrapEl(){ return document.getElementById("bytesWrap") || document.getElementById("bytes-wrap"); }
+  function addByteBtn(){ return document.getElementById("addByteBtn") || document.getElementById("add-byte") || document.getElementById("addByte"); }
+
+  function getByteInputs(){
+    var wrap=bytesWrapEl();
+    if(!wrap) return {sp:[], ds:[], tx:[]};
+    var sp=qsa('input[name="byte_speaker[]"]', wrap);
+    var ds=qsa('input[name="byte_designation[]"]', wrap);
+    var tx=qsa('textarea[name="byte_text[]"], input[name="byte_text[]"]', wrap);
+    return {sp:sp, ds:ds, tx:tx};
+  }
+
+  function ensureRows(min){
+    var safety=0;
+    while(safety++<20){
+      var f=getByteInputs();
+      var n=Math.max(f.sp.length, f.ds.length, f.tx.length);
+      if(n>=min) return n;
+      var b=addByteBtn(); if(b) b.click(); else break;
+    }
+    var f2=getByteInputs();
+    return Math.max(f2.sp.length, f2.ds.length, f2.tx.length);
+  }
+
+  function findEmptySlot(){
+    var f=getByteInputs();
+    var n=Math.max(f.sp.length, f.ds.length, f.tx.length);
+    for(var i=0;i<n;i++){
+      var a=((f.sp[i]&&f.sp[i].value)||"").trim();
+      var b=((f.ds[i]&&f.ds[i].value)||"").trim();
+      var c=((f.tx[i]&&f.tx[i].value)||"").trim();
+      if(!a && !b && !c) return i;
+      if(!a && !b && c) return i;
+    }
+    return n;
+  }
+
+  function fillSlot(i, speaker, desig, text){
+    ensureRows(i+1);
+    var f=getByteInputs();
+    if(f.sp[i]) f.sp[i].value = speaker||"";
+    if(f.ds[i]) f.ds[i].value = desig||"";
+    if(f.tx[i]) f.tx[i].value = text||"";
+  }
+
+  function makeDraftFromSelection(){
+    var sel=getSelectedLines();
+    var ta=$("ng-byte-draft-text");
+    var st=$("ng-byte-draft-status");
+    if(!ta) return;
+    ta.value = sel.join(" ");
+    if(st) st.textContent = sel.length ? ("Selected: "+sel.length) : "No lines selected";
+  }
+
+  function addToFinal(){
+    var ta=$("ng-byte-draft-text");
+    var t=(ta && ta.value || "").trim();
+    var sp=($("ng-byte-draft-speaker") && $("ng-byte-draft-speaker").value || "").trim();
+    var ds=($("ng-byte-draft-desig") && $("ng-byte-draft-desig").value || "").trim();
+    var st=$("ng-byte-draft-status");
+    if(!t){ if(st) st.textContent="Draft is empty"; return; }
+    var i=findEmptySlot();
+    fillSlot(i, sp, ds, t);
+    if(st) st.textContent="Added to Final Bytes (row "+(i+1)+")";
+  }
+
+  function clearDraft(){
+    var ta=$("ng-byte-draft-text"); if(ta) ta.value="";
+    var st=$("ng-byte-draft-status"); if(st) st.textContent="";
+  }
+
+  function bind(){
+    var a=$("ng-lines-selectall"); if(a && !a.__ng){ a.__ng=1; a.addEventListener("click", function(){ selectAll(true); }); }
+    var c=$("ng-lines-clear"); if(c && !c.__ng){ c.__ng=1; c.addEventListener("click", function(){ selectAll(false); }); }
+    var m=$("ng-make-byte"); if(m && !m.__ng){ m.__ng=1; m.addEventListener("click", function(){ makeDraftFromSelection(); }); }
+    var f=$("ng-add-final"); if(f && !f.__ng){ f.__ng=1; f.addEventListener("click", function(){ addToFinal(); }); }
+    var d=$("ng-clear-draft"); if(d && !d.__ng){ d.__ng=1; d.addEventListener("click", function(){ clearDraft(); }); }
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bind, {once:true}); else bind();
+})();
+</script>
 <script>
 /* =========================
    Bytes JSON Button (V1)
