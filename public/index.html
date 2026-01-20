@@ -1979,12 +1979,12 @@ function ensureBytesJSONUI(){
     btn.style.padding = "8px 10px";
     btn.style.cursor = "pointer";
 
-    var btnToggle = document.createElement("button");
-    btnToggle.type = "button";
-    btnToggle.id = "btnBytesJSONToggle";
-    btnToggle.textContent = "Show";
-    btnToggle.style.padding = "8px 10px";
-    btnToggle.style.cursor = "pointer";
+
+
+
+
+
+
 
     var hint = document.createElement("span");
     hint.id = "bytesJSONHint";
@@ -2002,7 +2002,7 @@ function ensureBytesJSONUI(){
     out.style.fontFamily = "ui-monospace, Menlo, Consolas, monospace";
 
     bar.appendChild(btn);
-    bar.appendChild(btnToggle);
+    // btnToggle removed
     bar.appendChild(hint);
 
     box.appendChild(bar);
@@ -2023,15 +2023,15 @@ function ensureBytesJSONUI(){
 
       out.value = json;
       out.style.display = "block";
-      btnToggle.textContent = "Hide";
+      // toggle removed; keep output visible
 
       try { localStorage.setItem("NG_LAST_BYTES_JSON_V1", json); } catch(e) {}
 
       var old = btn.textContent;
-      btn.textContent = "Copyingâ€¦";
+      btn.textContent = "Copying...";
 
       copyText(json).then(function(){
-        btn.textContent = "Copied âœ“";
+        btn.textContent = "Copied";
         hint.textContent = "Copied to clipboard";
         setTimeout(function(){
           btn.textContent = old;
@@ -2040,11 +2040,11 @@ function ensureBytesJSONUI(){
       });
     });
 
-    btnToggle.addEventListener("click", function(){
-      var isHidden = (out.style.display === "none");
-      out.style.display = isHidden ? "block" : "none";
-      btnToggle.textContent = isHidden ? "Hide" : "Show";
-    });
+
+
+
+
+
 
     return true;
   }
@@ -10721,6 +10721,7 @@ try {
 })();
 /* NG_PATCH_END: INBOX_SUMMARY_GUARD_V1 */
 </script>
+
 
 
 
