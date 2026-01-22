@@ -17,3 +17,7 @@ public/index_backup_*.html
 src/index_backup_*.js
 public/ng_*_backup_*.js
 public/ng_latest_transcript_ui*.js
+_local_backups/
+final/
+_snip_transcript_handlers.txt
+
