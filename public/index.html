@@ -1,4 +1,5 @@
 ﻿
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -10,7 +11,14 @@
 
 <style>
   /* NG_ADVANCED_PANELS_V1 */
+  /* NG_ADV_ONLY_WRAP_V1 */
+  html[data-ng-std-ui="simple"] #ng-adv-only{ display:none !important; }
+  html[data-ng-std-ui="advanced"] #ng-adv-only{ display:block !important; }
+#ng-preview-prompt-panel { display:none !important; }
+
+
   html[data-ng-std-ui="simple"] #ng-advanced-panels{ display:none !important; }
+  html[data-ng-std-ui="simple"] #ng-byte-draft-box{ display:none !important; }
   html[data-ng-std-ui="advanced"] #ng-advanced-panels{ display:block; }
 
   /* NG_STD_UI_TOOLBAR_ROW_V2
@@ -288,6 +296,35 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
         
       </div>
     </div>
+
+    <!-- STORY BASICS (moved up) -->
+      <label>Story Type</label>
+      <select name="storyType" id="storyType" required>
+        <option value="">Select</option>
+        <option value="breaking">Breaking</option>
+        <option value="developing">Developing</option>
+        <option value="explainer">Explainer</option>
+        <option value="debate">Debate</option>
+      </select>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>What Happened (mandatory)</label>
+      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
+
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>Sources / References (mandatory)</label>
+      <textarea name="sources" id="sources" rows="3" placeholder="Links / documents / official statements" required></textarea>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label>Background (optional but counts)</label>
+      <textarea name="background" id="background" rows="3" placeholder="Context / past events / why it matters"></textarea>
+    </div>
+    <!-- STORY BASICS END -->
+
 <!-- ========================= -->
 <!-- ========================= -->
 <!-- Transcript JSON Loader -->
@@ -343,64 +380,76 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     <div id="ng-lines-wrap" style="margin-top:10px; display:flex; flex-direction:column; gap:8px; max-height:220px; overflow:auto; border:1px solid #eee; border-radius:12px; padding:10px;"></div>
   </div>
 
-  <div class="panel" id="ng-sec-byte-draft">
-    <b>Byte Draft</b>
-    <div class="muted">Select lines → Make Byte → assign speaker/designation → Add to Final</div>
+  </div>
+</div>
+<!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_END -->
 
-    <textarea id="ng-byte-draft-text" rows="4" style="width:100%; margin-top:8px; padding:10px; border:1px solid #ccc; border-radius:10px;" placeholder="Selected lines will appear here..."></textarea>
+    <div id="ng-adv-only" style="margin-top:10px;">
+
+    <!-- BYTES -->
+    <div class="panel" id="bytesWrap" data-ng-sec="bytes">
+      <b>Bytes</b>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+        <div style="font-size:12px;opacity:.75;">Add bytes from selection or paste/type manually.</div>
+        <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
+      </div>
+
+            <div id="ng-byte-defaults" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <input
+          id="ng-byte-default-speaker"
+          type="text"
+          placeholder="Default Speaker"
+          style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:220px;"
+        >
+        <input
+          id="ng-byte-default-desig"
+          type="text"
+          placeholder="Default Designation"
+          style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:260px;"
+        >
+        <span style="font-size:12px; opacity:.7;">(Auto-fill for new byte rows)</span>
+      </div>
+<!-- NG_BYTES_UNIFIED_DRAFT_V1_START -->
+<div id="ng-byte-draft-area" style="margin-top:10px; display:none;">
+  <div id="ng-byte-draft-box" style="margin-top:10px;padding:10px;border:1px dashed #cbd5e1;border-radius:12px;">
+    <div style="font-size:12px;opacity:.8;margin-bottom:6px;">Draft Byte (select transcript lines OR paste/type manually)</div>
+
+    <textarea
+      id="ng-byte-draft-text"
+      rows="4"
+      style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;"
+      placeholder="Selected lines will appear here... (or paste/type)"
+    ></textarea>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-      <input id="ng-byte-draft-speaker" type="text" placeholder="Speaker (manual)" style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:220px;">
-      <input id="ng-byte-draft-desig" type="text" placeholder="Designation (manual)" style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:260px;">
+      <input
+        id="ng-byte-draft-speaker"
+        type="text"
+        placeholder="Speaker (manual)"
+        style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:220px;"
+      >
+      <input
+        id="ng-byte-draft-desig"
+        type="text"
+        placeholder="Designation (manual)"
+        style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:260px;"
+      >
     </div>
 
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-      <button type="button" id="ng-make-byte" class="secondary">Make Byte Draft</button>
-      <button type="button" id="ng-add-final" class="primary">Add to Final Bytes</button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
+      <button type="button" id="ng-make-byte" class="secondary">Make Draft from Selection</button>
+      <button type="button" id="ng-add-final" class="primary">Add to Bytes</button>
       <button type="button" id="ng-clear-draft">Clear Draft</button>
       <span id="ng-byte-draft-status" style="font-size:12px; opacity:.75;"></span>
     </div>
   </div>
 </div>
-<!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_END -->
+<!-- NG_BYTES_UNIFIED_DRAFT_V1_END -->
 
-    <div style="margin-top:10px;">
-      <label>Story Type</label>
-      <select name="storyType" id="storyType" required>
-        <option value="">Select</option>
-        <option value="breaking">Breaking</option>
-        <option value="developing">Developing</option>
-        <option value="explainer">Explainer</option>
-        <option value="debate">Debate</option>
-      </select>
-    </div>
 
-    <div style="margin-top:10px;">
-      <label>What Happened (mandatory)</label>
-      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
-
-    </div>
-
-    <div style="margin-top:10px;">
-      <label>Sources / References (mandatory)</label>
-      <textarea name="sources" id="sources" rows="3" placeholder="Links / documents / official statements" required></textarea>
-    </div>
-
-    <div style="margin-top:10px;">
-      <label>Background (optional but counts)</label>
-      <textarea name="background" id="background" rows="3" placeholder="Context / past events / why it matters"></textarea>
-    </div>
-
-    <!-- BYTES -->
-    <div class="panel" id="bytesWrap" data-ng-sec="bytes">
-      <b>Final Bytes</b>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
-        <div style="font-size:12px;opacity:.75;">Select lines → Make Byte → assign speaker/designation → Add to Final.</div>
-        <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
-      </div>
       <!-- hidden JSON sink for Final Bytes module -->
       <textarea id="bytesJSONOut" style="display:none;"></textarea>
-      <div id="bytes-wrap" style="margin-top:10px;"></div>
+      <div id="ng-manual-bytes" style="margin-top:10px; display:none;"><div id="bytes-wrap"></div></div>
     </div>
     <!-- VISUALS -->
     <!-- NG_STD_VISUALS_WRAP_V1_START -->
@@ -449,7 +498,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     <div><b>Response</b></div>
     <pre id="ngResponse">(no response yet)</pre>
   </div>
-<div class="panel">
+<div class="panel" id="ng-preview-prompt-panel">
+
   <div style="display:flex;align-items:center;justify-content:space-between;">
     <b>Preview Prompt (will be sent)</b>
     <button type="button" id="copy-prompt"
@@ -495,10 +545,10 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
   function safeTrim(v) { return (v ?? "").toString().trim(); }
 
   function updatePromptPreview(promptObj) {
-    const box = document.getElementById("prompt-preview");
-    if (!box) return;
-    box.value = JSON.stringify(promptObj, null, 2);
-  }
+  // Preview Prompt panel is hidden; disable preview updates to save work.
+  return;
+}
+
 
   // ---------- FormData helpers (getAll compatible) ----------
   function collectBytes(fd) {
@@ -823,22 +873,37 @@ function initBytesUI() {
 
   // âœ… FIX: your real IDs (from your console)
   const wrap = document.getElementById("bytesWrap");
-  const addBtn = document.getElementById("addByteBtn");
-  if (!wrap || !addBtn) {
-    console.warn("[BYTES] Missing bytesWrap/addByteBtn", { wrap: !!wrap, addBtn: !!addBtn });
-    return;
-  }
+const addBtn = document.getElementById("addByteBtn");
+const rowsWrap = document.getElementById("bytes-wrap");
+
+// ✅ real wrapper (your STEP4)
+const draftBox = document.getElementById("ng-byte-draft-box");
+const manual = document.getElementById("ng-manual-bytes");
+
+
+if (!wrap || !addBtn || !rowsWrap || !draftBox) {
+  console.warn("[BYTES] Missing bytes UI nodes", {
+    wrap: !!wrap, addBtn: !!addBtn, rowsWrap: !!rowsWrap, draftBox: !!draftBox
+  });
+  return;
+}
+
 
   // âœ… ensure button is usable
   addBtn.disabled = false;
 
   function getCount() {
-    return wrap.querySelectorAll("[data-byte-row]").length;
+    return rowsWrap.querySelectorAll("[data-byte-row]").length;
   }
+function updateDraftBoxVisibility() {
+  const n = getCount();
+  draftBox.style.display = (n === 0) ? "none" : "block";
+}
+updateDraftBoxVisibility(); // initial state on load
 
   function updateRemoveButtonsState() {
-    const rows = Array.from(wrap.querySelectorAll("[data-byte-row]"));
-    const disable = rows.length <= 1;
+    const rows = Array.from(rowsWrap.querySelectorAll("[data-byte-row]"));
+    const disable = false; // allow removing last row (manual auto-hides at 0)
 
     rows.forEach((row) => {
       const btn = row.querySelector("[data-remove-byte]");
@@ -847,12 +912,12 @@ function initBytesUI() {
       btn.disabled = disable;
       btn.style.opacity = disable ? "0.5" : "1";
       btn.style.cursor = disable ? "not-allowed" : "pointer";
-      btn.title = disable ? "At least 1 byte is required" : "Remove this byte";
+      btn.title = "Remove this byte";
     });
   }
 
   function renumber() {
-    const rows = Array.from(wrap.querySelectorAll("[data-byte-row]"));
+    const rows = Array.from(rowsWrap.querySelectorAll("[data-byte-row]"));
     rows.forEach((row, idx) => {
       const n = idx + 1;
       row.setAttribute("data-byte-row", String(n));
@@ -872,22 +937,43 @@ function initBytesUI() {
     // - a container with data-byte-row
     // - inputs name="byte_speaker[]" and name="byte_designation[]"
     // - a remove button having data-remove-byte
-    wrap.insertAdjacentHTML("beforeend", byteRowTemplate(n));
+    rowsWrap.insertAdjacentHTML("beforeend", byteRowTemplate(n));
     renumber();
+
+    // auto-fill from defaults (if empty)
+    try {
+      const defSp = (document.getElementById('ng-byte-default-speaker')?.value || '').trim();
+      const defDs = (document.getElementById('ng-byte-default-desig')?.value || '').trim();
+      const last = rowsWrap.querySelector('[data-byte-row]:last-child');
+      if (last) {
+        const sp = last.querySelector('input[name="byte_speaker[]"]');
+        const ds = last.querySelector('input[name="byte_designation[]"]');
+        if (sp && !sp.value.trim() && defSp) sp.value = defSp;
+        if (ds && !ds.value.trim() && defDs) ds.value = defDs;
+      }
+    } catch (e) {}
   }
 
   // âœ… ensure 1st row exists
-  if (getCount() === 0) addByteRow();
+  // NG_PATCH_DISABLE_DEFAULT_BYTE_ROW_V1: removed auto first row
+// if (getCount() === 0) addByteRow();
 
-  // âœ… expose helpers for pushToBytes()
+  // ✅ expose helpers for pushToBytes()
   window.NG_addByteRow = addByteRow;
   window.NG_getByteCount = getCount;
 
+  // ✅ add row button (manual UI on demand)
+ addBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (manual) manual.style.display = "block";
+  if (draftBox) draftBox.style.display = "block";
+  addByteRow();
+  updateDraftBoxVisibility();
+});
+addBtn.addEventListener("click", () => addBtn.scrollIntoView({ block: "center" }));
+
+
   // âœ… add row button
-  addBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    addByteRow();
-  });
 
   // âœ… remove (event delegation)
   wrap.addEventListener("click", (e) => {
@@ -898,10 +984,10 @@ function initBytesUI() {
 
     const row = btn.closest("[data-byte-row]");
     if (!row) return;
-
-    if (getCount() <= 1) return; // keep minimum 1 row
     row.remove();
     renumber();
+updateDraftBoxVisibility();
+
   });
 
   // initial state
@@ -945,9 +1031,9 @@ function initBytesUI() {
 
         <div style="margin-top:8px;">
           <label style="font-size:12px;opacity:.8;display:block;margin-bottom:4px;">What to show</label>
-          placeholder="E.g., दुकान पर छापा, सील पैक, अस्पताल, लैब, दस्तावेज"
+          <input type="text" name="visual_show[]" placeholder="E.g., दुकान पर छापा, सील पैक, अस्पताल, लैब, दस्तावेज"
+  style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" />
 
-            style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" />
         </div>
 
         <div style="margin-top:8px;">
@@ -983,13 +1069,15 @@ function initBytesUI() {
       const n = getCount() + 1;
       wrap.insertAdjacentHTML("beforeend", visualRowTemplate(n));
       renumber();
+       
     }
 
-    if (getCount() === 0) addVisualRow();
-    addBtn.addEventListener("click", addVisualRow);
+    // if (getCount() === 0) addVisualRow();
+
+    document.getElementById("add-visual")?.addEventListener("click", addVisualRow);
 
     // event delegation (ONLY visuals actions)
-    wrap.addEventListener("click", (e) => {
+  wrap.addEventListener("click", (e) => {
       const btn = e.target.closest('button[data-action]');
       if (!btn) return;
 
@@ -999,7 +1087,7 @@ function initBytesUI() {
       const action = btn.getAttribute("data-action");
 
       if (action === "remove-visual") {
-        if (getCount() <= 1) return;
+        // NG_ALLOW_REMOVE_LAST_ROW_V1 (was: if (getCount() <= 1) return;)
         row.remove();
         renumber();
         return;
@@ -1780,7 +1868,7 @@ function initEditorialExtraction() {
     }
   }
 
-}  // âœ… added: missing closing brace for script #2
+
 </script>
 <script src="/ng_transcript_hook_patch.js"></script>
   <script src="/ng_latest_transcript_ui.js"></script>
@@ -1806,6 +1894,8 @@ function initEditorialExtraction() {
       row.style.padding="6px 8px"; row.style.border="1px solid #f1f1f1"; row.style.borderRadius="10px";
       var cb=document.createElement("input");
       cb.type="checkbox"; cb.setAttribute("data-i", String(i));
+cb.setAttribute("data-ng-line", t);
+
       cb.style.marginTop="3px";
       var sp=document.createElement("span");
       sp.textContent=t; sp.style.fontSize="13px"; sp.style.lineHeight="1.35";
@@ -1899,6 +1989,8 @@ function initEditorialExtraction() {
     if(!t){ if(st) st.textContent="Draft is empty"; return; }
     var i=findEmptySlot();
     fillSlot(i, sp, ds, t);
+try{ if(window.NG_pushDraftTextToFinal){ window.NG_pushDraftTextToFinal(); } }catch(e){}
+
     if(st) st.textContent="Added to Final Bytes (row "+(i+1)+")";
   }
 
@@ -1922,8 +2014,10 @@ function initEditorialExtraction() {
 /* =========================
    Bytes JSON Button (V1)
    - Adds "Copy Bytes JSON" button inside #bytesWrap
-   - Uses existing window.NG_getBytesJSON()
+   - Adds "+ Add Byte" button with id="addByteBtn" (needed for NG_addFinalByte/ensureByteRows)
+   - Copy uses existing window.NG_getBytesJSON()
 ========================= */
+
 (function initBytesJSONButton(){
   function $(id){ return document.getElementById(id); }
 
@@ -10721,6 +10815,389 @@ try {
 })();
 /* NG_PATCH_END: INBOX_SUMMARY_GUARD_V1 */
 </script>
+<script>
+/* NG_TRANSCRIPT_WIRE_V1_START */
+(function () {
+  function $(id) { return document.getElementById(id); }
+
+  const ta = $('ta-transcript-json');
+  const st = $('ng-latest-transcript-status');
+
+  if (!ta || !st) {
+    console.warn('[NG] transcript wire: missing textarea/status', { ta: !!ta, st: !!st });
+    return;
+  }
+
+  function safeJsonParse(s) { try { return JSON.parse(s); } catch (e) { return null; } }
+
+  function pickText(obj) {
+    if (obj == null) return '';
+    if (typeof obj === 'string') return obj;
+    if (Array.isArray(obj)) {
+      return obj.map(pickText).filter(Boolean).join('\n');
+    }
+    if (typeof obj === 'object') {
+      const keys = ['display_text', 'displayText', 'text', 'transcript', 'raw_text', 'rawText', 'final_text', 'finalText'];
+      for (const k of keys) {
+        if (typeof obj[k] === 'string' && obj[k].trim()) return obj[k];
+      }
+      const nests = ['data', 'result', 'latest', 'payload'];
+      for (const n of nests) {
+        if (obj[n]) {
+          const t = pickText(obj[n]);
+          if (t) return t;
+        }
+      }
+      if (Array.isArray(obj.segments)) {
+        return obj.segments.map(seg => (seg && (seg.text || seg.display_text)) || '').filter(Boolean).join('\n');
+      }
+    }
+    return '';
+  }
+
+  function extractTranscriptText(raw) {
+    const s = (raw || '').trim();
+    if (!s) return '';
+    if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))) {
+      const j = safeJsonParse(s);
+      if (j !== null) {
+        const t = pickText(j).trim();
+        if (t) return t;
+      }
+    }
+    return s; // treat as plain text transcript
+  }
+
+  function fallbackSplitIntoLines(text) {
+    const t = (text || '').replace(/\r/g, '').trim();
+    if (!t) return [];
+    let parts = t.split('\n').map(x => x.trim()).filter(Boolean);
+    if (parts.length <= 1) {
+      parts = t.split(/(?<=[।!?])\s+|(?<=\.)\s+/).map(x => x.trim()).filter(Boolean);
+    }
+    const out = [];
+    for (const p of parts) {
+      if (p.length <= 180) { out.push(p); continue; }
+      let cur = '';
+      for (const w of p.split(/\s+/)) {
+        if (!cur) cur = w;
+        else if ((cur + ' ' + w).length <= 180) cur += ' ' + w;
+        else { out.push(cur); cur = w; }
+      }
+      if (cur) out.push(cur);
+    }
+    return out;
+  }
+
+  function applyFromTextarea(reason) {
+    const raw = ta.value || '';
+    const transcriptText = extractTranscriptText(raw);
+
+    if (!transcriptText) {
+      window.NG_TRANSCRIPT = '';
+      st.textContent = 'Empty (no transcript)';
+      st.style.opacity = '.75';
+      if (typeof window.NG_setTranscriptLines === 'function') window.NG_setTranscriptLines([]);
+      return;
+    }
+
+    window.NG_TRANSCRIPT = transcriptText;
+
+    const splitter = (typeof window.splitIntoLines === 'function') ? window.splitIntoLines : fallbackSplitIntoLines;
+    const lines = splitter(transcriptText);
+
+    if (typeof window.NG_setTranscriptLines === 'function') window.NG_setTranscriptLines(lines);
+
+    st.textContent = `Loaded: ${transcriptText.length} chars · ${lines.length} lines` + (reason ? ` · ${reason}` : '');
+    st.style.opacity = '.9';
+  }
+
+  // manual test hook
+  window.NG_applyTranscriptFromTextarea = applyFromTextarea;
+
+  // Debounced apply on user paste/type
+  let tmr = null;
+  ta.addEventListener('input', () => {
+    clearTimeout(tmr);
+    tmr = setTimeout(() => applyFromTextarea('typed/pasted'), 250);
+  });
+
+  // Watch programmatic changes (Refresh Latest etc.)
+  let lastSeen = ta.value || '';
+  setInterval(() => {
+    const now = ta.value || '';
+    if (now !== lastSeen) {
+      lastSeen = now;
+      applyFromTextarea('updated');
+    }
+  }, 600);
+
+  // After loader button clicks, re-apply shortly after (lets existing handler finish)
+  const btnIds = [
+    'btn-load-transcript-json',
+    'btn-paste-transcript-json',
+    'btn-refresh-latest-transcript',
+    'btn-import-transcript-json'
+  ];
+
+  btnIds.forEach(id => {
+    const b = $(id);
+    if (!b) return;
+    // capture=true so we definitely schedule, but we do NOT block existing handlers
+    b.addEventListener('click', () => {
+      setTimeout(() => applyFromTextarea(id), 120);
+      setTimeout(() => applyFromTextarea(id), 1200);
+    }, true);
+  });
+
+  // initial apply
+  setTimeout(() => applyFromTextarea('init'), 50);
+})();
+/* NG_TRANSCRIPT_WIRE_V1_END */
+</script>
+<script>
+/* NG_BYTES_FROM_LINES_WIRE_V1_START */
+(function () {
+  function $(id){ return document.getElementById(id); }
+
+  const wrap = $('ng-lines-wrap');
+  const draftArea = $('ng-byte-draft-area');
+  const draftText = $('ng-byte-draft-text');
+  const draftSp = $('ng-byte-draft-speaker');
+  const draftDes = $('ng-byte-draft-desig');
+  const defSp = $('ng-byte-default-speaker');
+  const defDes = $('ng-byte-default-desig');
+  const btnMake = $('ng-make-byte');
+  const btnAdd = $('ng-add-final');
+  const btnClear = $('ng-clear-draft');
+  const st = $('ng-byte-draft-status');
+
+  if(!wrap || !draftArea || !draftText || !btnMake || !btnAdd){
+    console.warn('[NG] bytes-from-lines: missing elements', {
+      wrap:!!wrap, draftArea:!!draftArea, draftText:!!draftText, btnMake:!!btnMake, btnAdd:!!btnAdd
+    });
+    return;
+  }
+
+  function getSelectedLines(){
+    const items = wrap.querySelectorAll('input[type="checkbox"][data-ng-line]');
+    const out = [];
+    items.forEach(cb => { if(cb.checked) out.push(cb.getAttribute('data-ng-line')||''); });
+    return out.map(s => (s||'').trim()).filter(Boolean);
+  }
+
+  function showDraft(){
+    draftArea.style.display = 'block';
+  }
+
+  function setStatus(msg){
+    if(st) st.textContent = msg || '';
+  }
+
+  function fillDraftFromSelection(){
+    const lines = getSelectedLines();
+    if(!lines.length){
+      showDraft();
+      setStatus('No lines selected.');
+      return;
+    }
+    showDraft();
+    draftText.value = lines.join('\n');
+    setStatus('Draft created from selection: ' + lines.length + ' line(s).');
+  }
+
+  // Keep draft live-updated when selection changes (lightweight)
+  let tmr=null;
+  wrap.addEventListener('change', (e) => {
+    const t = e.target;
+    if(!(t && t.matches && t.matches('input[type="checkbox"][data-ng-line]'))) return;
+    clearTimeout(tmr);
+    tmr=setTimeout(() => {
+      const lines = getSelectedLines();
+      if(lines.length){
+        showDraft();
+        draftText.value = lines.join('\n');
+        setStatus('Selection updated: ' + lines.length + ' line(s).');
+      } else {
+        setStatus('Selection cleared.');
+      }
+    }, 120);
+  });
+
+  btnMake.addEventListener('click', () => fillDraftFromSelection());
+
+  if(btnClear){
+    btnClear.addEventListener('click', () => {
+      draftText.value = '';
+      if(draftSp) draftSp.value = '';
+      if(draftDes) draftDes.value = '';
+      setStatus('Draft cleared.');
+    });
+  }
+
+  // Add to Final Bytes (uses existing bytes system if available)
+  btnAdd.addEventListener('click', () => {
+    showDraft();
+
+    const txt = (draftText.value||'').trim();
+    if(!txt){
+      setStatus('Draft is empty.');
+      return;
+    }
+
+    const speaker = ((draftSp && draftSp.value) || (defSp && defSp.value) || '').trim();
+    const desig   = ((draftDes && draftDes.value) || (defDes && defDes.value) || '').trim();
+
+    // Preferred path: if your app exposes a function to add bytes, use it
+    if(typeof window.NG_addFinalByte === 'function'){
+      window.NG_addFinalByte({ speaker, designation: desig, text: txt });
+      setStatus('Added to Final Bytes (via NG_addFinalByte).');
+      return;
+    }
+
+    // Fallback: push into bytes JSON sink if present (minimal non-breaking)
+    const sink = $('bytesJSONOut');
+    try{
+      let arr = [];
+      if(sink && sink.value && sink.value.trim()){
+        arr = JSON.parse(sink.value);
+        if(!Array.isArray(arr)) arr = [];
+      }
+      arr.push({ speaker, designation: desig, text: txt });
+      if(sink) sink.value = JSON.stringify(arr, null, 2);
+      setStatus('Added to Final Bytes (fallback JSON sink).');
+    } catch(e){
+      console.warn('[NG] add-final fallback failed', e);
+      setStatus('Failed to add to Final Bytes (see console).');
+    }
+  });
+
+  // expose helper for manual test
+  window.NG_makeDraftFromSelection = fillDraftFromSelection;
+
+  console.log('[NG] bytes-from-lines wired');
+})();
+ /* NG_BYTES_FROM_LINES_WIRE_V1_END */
+</script>
+<script>
+/* === NG_BYTE_REMOVE_FOR_NG_BYTE_ROW_V1_START === */
+(function () {
+  function qs(sel, root){ return (root||document).querySelector(sel); }
+  function qsa(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+
+  function bytesWrap() { return document.getElementById('bytesWrap'); }
+
+  function ensureRemoveBtnOnRow(row){
+  if(!row || !row.classList || !row.classList.contains('row')) return;
+
+  // ✅ only real byte rows (must have all 3 fields)
+  const hasSp = !!row.querySelector('input[name="byte_speaker[]"]');
+  const hasDs = !!row.querySelector('input[name="byte_designation[]"]');
+  const hasTx = !!row.querySelector('textarea[name="byte_text[]"],input[name="byte_text[]"]');
+  if(!(hasSp && hasDs && hasTx)) return;
+
+ // ✅ dedupe ANY "Remove" buttons (even if class missing)
+const rmCandidates = Array.from(row.querySelectorAll('button'))
+  .filter(b => ((b.textContent||'').trim().toLowerCase() === 'remove'));
+
+if (rmCandidates.length) {
+  // keep first, normalize it to our class, remove the rest
+  rmCandidates[0].classList.add('ng-remove-row-btn');
+  rmCandidates.forEach((b, idx) => { if (idx > 0) b.remove(); });
+
+  // also dedupe extra action wrappers if any
+  const wraps = row.querySelectorAll('.ng-byte-row-actions');
+  wraps.forEach((w, idx) => { if (idx > 0) w.remove(); });
+
+  row.__ngRemoveInjected = true;
+  return;
+}
+
+
+  // ✅ action container (no grid break)
+  let act = row.querySelector('.ng-byte-row-actions');
+  if(!act){
+    act = document.createElement('div');
+    act.className = 'ng-byte-row-actions';
+    act.style.cssText = 'display:flex; justify-content:flex-start; align-items:center; gap:8px; margin-top:6px;';
+    row.appendChild(act);
+  }
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'ng-remove-row-btn danger';
+  btn.textContent = 'Remove';
+  btn.style.cssText = 'padding:8px 10px;border:1px solid #999;border-radius:10px;cursor:pointer;background:#f7f7f7;';
+  act.appendChild(btn);
+
+  row.__ngRemoveInjected = true;
+}
+  function injectAll(){
+    var bw = bytesWrap();
+    if(!bw) return false;
+    qsa('.row', bw).forEach(ensureRemoveBtnOnRow);
+
+    return true;
+  }
+
+  function onRemoveClick(e){
+    var btn = e.target && e.target.closest && e.target.closest('.ng-remove-row-btn');
+    if(!btn) return;
+    var row = btn.closest('.row');
+
+    if(row) {
+      try { row.remove(); } catch(err){}
+      if (typeof window.NG_syncFinalBytesFromRows === 'function') {
+        try { setTimeout(window.NG_syncFinalBytesFromRows, 50); } catch(err){}
+      }
+    }
+  }
+
+  function install(){
+    var bw = bytesWrap();
+    if(!bw) return false;
+
+    if(!bw.__ngRemoveDelegationInstalled){
+      bw.addEventListener('click', onRemoveClick, true);
+      bw.__ngRemoveDelegationInstalled = true;
+    }
+
+    injectAll();
+setTimeout(injectAll, 50);
+setTimeout(injectAll, 200);
+
+
+    if(!bw.__ngRemoveObserver){
+      var obs = new MutationObserver(function(){
+        injectAll();
+      });
+      obs.observe(bw, { childList:true, subtree:true });
+      bw.__ngRemoveObserver = obs;
+    }
+
+   console.log('[NG] remove-for-.row installed ✅');
+
+    return true;
+  }
+
+  var tries = 0;
+  (function tick(){
+    tries++;
+    if(install()) return;
+    if(tries < 60) setTimeout(tick, 250);
+  })();
+})();
+/* === NG_BYTE_REMOVE_FOR_NG_BYTE_ROW_V1_END === */
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
 
 
 
