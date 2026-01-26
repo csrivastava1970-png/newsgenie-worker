@@ -267,6 +267,35 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
 </style>
 
+<style>
+/* NG_TOOLBAR_LAYOUT_FIX_V1_START */
+/* Layout-only: fixes shifted toolbar buttons without touching JS */
+#ng-std-ui-toolbar-row,
+#ng-std-ui-toggle-root,
+#ng-dp-actions,
+.ng-std-ui-toolbar-row,
+.ng-toolbar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+
+#ng-std-ui-toolbar-row > * ,
+#ng-std-ui-toggle-root > * ,
+#ng-dp-actions > * {
+  margin: 0 !important;
+}
+
+#ng-std-ui-toolbar-row button,
+#ng-std-ui-toggle-root button,
+#ng-dp-actions button {
+  position: static !important;
+  transform: none !important;
+}
+/* NG_TOOLBAR_LAYOUT_FIX_V1_END */
+</style>
 </head>
 <!-- NG_MARKER: 2026-01-06_IST_TEST_123 -->
 
@@ -295,6 +324,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
       <div>
         <label>Angle (optional)</label>
+        <input id="angle" name="angle" type="text" placeholder="Angle (optional) — 3–8 words" style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:10px;" />
         
       </div>
     </div>
@@ -776,6 +806,47 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 </div>
 
 </div><!-- /#ng-advanced-panels -->
+<script>
+/* NG_ANGLE_WIRE_V1_START */
+(function(){
+  try{
+    var el = document.getElementById('angle');
+    if(!el) return;
+
+    var key = 'ng_story_angle_v1';
+
+    // restore
+    try{
+      var saved = localStorage.getItem(key) || '';
+      if(saved && !el.value) el.value = saved;
+    }catch(e){}
+
+    // persist
+    el.addEventListener('input', function(){
+      try{ localStorage.setItem(key, el.value || ''); }catch(e){}
+    });
+
+    window.NG_getAngle = function(){ return (el && el.value ? String(el.value).trim() : ''); };
+
+    if(typeof window.NG_getStoryMeta === 'function' && !window.NG_getStoryMeta.__ng_angle_wrapped){
+      var _orig = window.NG_getStoryMeta;
+      var _wrap = function(){
+        var o = {};
+        try { o = _orig() || {}; } catch(e){ o = {}; }
+        o.angle = window.NG_getAngle();
+        return o;
+      };
+      _wrap.__ng_angle_wrapped = true;
+      window.NG_getStoryMeta = _wrap;
+    } else if(typeof window.NG_getStoryMeta !== 'function'){
+      window.NG_getStoryMeta = function(){ return { angle: window.NG_getAngle() }; };
+    }
+  }catch(e){
+    console.warn('NG_ANGLE_WIRE_V1 error', e);
+  }
+})();
+</script>
+<!-- NG_ANGLE_WIRE_V1_END -->
 </body>
 <!-- NG_PATCH_START: AUTORUN_KILL_V1 -->
 </body>
@@ -864,6 +935,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 </script>
 
 </html>
+
+
 
 
 
