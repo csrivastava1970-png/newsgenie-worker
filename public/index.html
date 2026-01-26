@@ -123,86 +123,7 @@ body *{ grid-column: 1 / -1; }
 
   /* 5) Responsive: on narrower screens, drop toggle below + allow actions wrap */
  
-/* NG_STD_UI_TOOLBAR_FIXED_V1_START — robust, DOM-depth independent */
-:root{
-  --ng_tb_edge: 12px;
-  --ng_tb_pad_top: 78px;           /* body push-down */
-  --ng_tb_toggle_reserve: 230px;   /* right space for toggle */
-}
-
-/* Push content down so fixed toolbar doesn't overlap */
-body{
-  padding-top: var(--ng_tb_pad_top) !important;
-}
-
-/* Actions bar (left) */
-#ng-dp-actions{
-  position: fixed !important;
-  left: var(--ng_tb_edge) !important;
-  top: var(--ng_tb_edge) !important;
-  right: calc(var(--ng_tb_edge) + var(--ng_tb_toggle_reserve)) !important;
-  z-index: 9999 !important;
-
-  margin: 0 !important;
-  padding: 6px 8px !important;
-  border: 1px solid rgba(0,0,0,0.10) !important;
-  border-radius: 12px !important;
-  background: rgba(255,255,255,0.92) !important;
-  backdrop-filter: blur(6px);
-
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
-  align-items: center !important;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Toggle (right) */
-#ng-std-ui-toggle-root{
-  position: fixed !important;
-  right: var(--ng_tb_edge) !important;
-  top: var(--ng_tb_edge) !important;
-  z-index: 10000 !important;
-
-  margin: 0 !important;
-  padding: 6px 8px !important;
-  border: 1px solid rgba(0,0,0,0.10) !important;
-  border-radius: 12px !important;
-  background: rgba(255,255,255,0.92) !important;
-  backdrop-filter: blur(6px);
-
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Hide scrollbar (still scrolls) */
-#ng-dp-actions{ scrollbar-width: none; }
-#ng-dp-actions::-webkit-scrollbar{ height: 0; }
-
-/* Small screens: stack toggle under actions */
-@media (max-width: 980px){
-  :root{
-    --ng_tb_toggle_reserve: 0px;
-    --ng_tb_pad_top: 126px;
-  }
-  #ng-dp-actions{
-    right: var(--ng_tb_edge) !important;
-  }
-  #ng-std-ui-toggle-root{
-    top: calc(var(--ng_tb_edge) + 56px) !important;
-  }
-}
-/* NG_STD_UI_TOOLBAR_FIXED_V1_END */
-
-
-
-  <style>
+<style>
     body { font-family: system-ui, Arial; margin: 16px; }
     .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     label { font-size: 12px; opacity: .8; display:block; margin-bottom:4px; }
@@ -216,18 +137,6 @@ body{
     .status { font-size: 13px; }
     .muted { font-size:12px; opacity:.75; margin-top:6px; }
 #btnBytesJSON { display: none !important; }
-/* OLD sticky toolbar (remove/disable)
-#ng-dp-actions{
-  position: sticky;
-  top: 10px;
-  z-index: 50;
-  background: #fff;
-  padding: 8px;
-  border-radius: 12px;
-  border: 1px solid #e5e5e5;
-}
-*/
-
 /* Force placement: Row-1 Title, Row-2 Toolbar (Actions + Toggle) */
 h2{
   grid-column: 1 / -1 !important;
@@ -423,63 +332,6 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
       <b>Bytes</b>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
         <div style="font-size:12px;opacity:.75;">Add bytes from selection or paste/type manually.</div>
-<!-- NG_STD_UI_TOOLBAR_ROW_MINI_V1_START -->
-<div id="ng-std-ui-toolbar-mini" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0 12px 0;">
-  <button type="button" id="ng-ui-simple" class="btn">Simple</button>
-  <button type="button" id="ng-ui-advanced" class="btn">Advanced</button>
-  <button type="button" id="ng-ui-storyview" class="btn">Story View</button>
-  <button type="button" id="ng-ui-commit" class="btn">Commit to Byte</button>
-  <span id="ng-ui-mode-pill" style="font-size:12px;opacity:.75;">mode: advanced</span>
-</div>
-<script>
-(function(){
-  if (window.__NG_STD_UI_TOOLBAR_MINI_V1) return;
-  window.__NG_STD_UI_TOOLBAR_MINI_V1 = true;
-
-  function setMode(mode){
-    const visualsWrap = document.querySelector("#visualsWrap");
-    const tInbox = document.querySelector("#ng-transcript-inbox") || document.querySelector("#ng-transcript-loader") || document.querySelector("#ng-transcript-loader-wrap");
-    if (mode === "simple"){
-      if (visualsWrap) visualsWrap.style.display = "none";
-      if (tInbox) tInbox.style.display = "none";
-    } else {
-      if (visualsWrap) visualsWrap.style.display = "block";
-      if (tInbox) tInbox.style.display = "block";
-    }
-    const pill = document.querySelector("#ng-ui-mode-pill");
-    if (pill) pill.textContent = "mode: " + mode;
-    window.__NG_UI_MODE = mode;
-  }
-
-  document.addEventListener("click", (e)=>{
-    const id = e.target && e.target.id;
-
-    if (id === "ng-ui-simple") setMode("simple");
-    if (id === "ng-ui-advanced") setMode("advanced");
-
-    if (id === "ng-ui-storyview") {
-      const sv = document.querySelector("#ng-storyview") || document.querySelector("#storyView") || document.querySelector("#ng-storyview-v9");
-      if (sv) sv.scrollIntoView({behavior:"smooth", block:"start"});
-      else alert("StoryView panel not found in DOM.");
-    }
-
-    if (id === "ng-ui-commit") {
-      const sel = [...document.querySelectorAll("#ng-sec-transcript-lines .line.selected, #ng-sec-transcript-lines .ng-line.selected, #ng-sec-transcript-lines [data-selected='1']")]
-        .map(el => (el.textContent||"").trim()).filter(Boolean);
-      const ta = document.querySelector("#ng-byte-draft-text");
-      if (!ta) return alert("Draft textarea (#ng-byte-draft-text) not found");
-      if (!sel.length) return alert("No transcript lines selected");
-      const add = sel.join("\n");
-      ta.value = (ta.value ? (ta.value + "\n") : "") + add;
-      ta.dispatchEvent(new Event("input",{bubbles:true}));
-      alert("Committed "+sel.length+" line(s) to Draft Byte.");
-    }
-  }, true);
-
-  setMode("advanced");
-})();
-</script>
-<!-- NG_STD_UI_TOOLBAR_ROW_MINI_V1_END -->
 <script>
 /* NG_ADD_BYTE_FALLBACK_V1_START */
 (function(){
@@ -935,6 +787,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 </script>
 
 </html>
+
+
 
 
 
