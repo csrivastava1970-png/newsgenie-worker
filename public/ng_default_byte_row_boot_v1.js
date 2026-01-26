@@ -962,6 +962,14 @@
   }
 }
 
+    // Hide "(No bytes yet)" if count > 0
+    if(count > 0){
+      const empties = Array.from(panel.querySelectorAll("*"))
+        .filter(el => /\(No bytes yet\)/i.test(el.innerText||""));
+      empties.forEach(el => { el.style.display = "none"; });
+    }
+  }
+
   function renderCards(host, bytes){
     host.innerHTML = "";
     bytes.forEach((b, idx) => {
@@ -1014,68 +1022,52 @@
 })();
  /* NG_FINAL_BYTES_RENDER_FALLBACK_V14B_END */
 
-
-
-
-/* NG_BYTES_JSONOUT_SYNC_V1_START */
+/* NG_FINAL_BYTES_RENDER_FALLBACK_V14B2_START */
 (function(){
-  function safeSync(){
+  function norm(s){ return (s||"").toString().trim(); }
+  function getOut(){ return document.getElementById("bytesJSONOut"); }
+
+  function readBytes(){
+    const out = getOut();
+    const txt = out ? (out.value || "") : "";
+    if(!txt) return [];
     try{
-      const st = window.__NG_FINAL_BYTES_STATE__;
-      if(!st || !Array.isArray(st.bytes) || st.bytes.length===0) return;
-
-      const out = document.getElementById("bytesJSONOut");
-      if(!out) return;
-
-      const cur = (out.value||"").trim();
-      if(cur.length===0){
-        out.value = JSON.stringify(st.bytes, null, 2);
-        out.dispatchEvent(new Event("input", { bubbles:true }));
-        out.dispatchEvent(new Event("change", { bubbles:true }));
-      }
-    }catch(e){}
+      const j = JSON.parse(txt);
+      if(Array.isArray(j)) return j;
+      if(j && Array.isArray(j.bytes)) return j.bytes;
+      return [];
+    }catch(e){ return []; }
   }
 
-  // periodic guard (in case some other code clears it)
-  setInterval(safeSync, 300);
-
-  // quick sync after Add Byte click
-  document.addEventListener("click", (ev) => {
-    const t = ev && ev.target;
-    if(t && (t.id === "ng-add-byte-btn-restore")){
-      setTimeout(safeSync, 20);
-      setTimeout(safeSync, 200);
-    }
-  }, true);
-
-  // initial
-  setTimeout(safeSync, 50);
-})();
- /* NG_BYTES_JSONOUT_SYNC_V1_END */
-/* NG_FINAL_BYTES_MOVE_MISPLACED_LIST_V1_START */
-(function(){
   function findFinalPanel(){
     const nodes = Array.from(document.querySelectorAll("div,section,details"))
       .filter(n => /Final Bytes/i.test(n.innerText || ""));
     if(!nodes.length) return null;
 
+    // prefer one that contains "Final Bytes •"
     const scored = nodes.map(n => {
       const t = (n.innerText||"");
       let s = 0;
       if(/Final Bytes\s*•/i.test(t)) s += 5;
-      if(/Add Byte/i.test(t)) s += 2;
+      if(/\(No bytes yet\)/i.test(t)) s += 2;
       return {n,s};
     }).sort((a,b)=>b.s-a.s);
 
     return scored[0].n;
   }
 
-  function ensureHost(panel){
+  function ensureListHost(panel){
     if(!panel) return null;
-    let host = panel.querySelector("#ng-final-bytes-host-v1");
+
+    let host =
+      panel.querySelector("#ng-final-bytes-list-auto") ||
+      panel.querySelector("[data-role='final-bytes-list']") ||
+      panel.querySelector("#ng-final-bytes-list");
+
     if(!host){
       host = document.createElement("div");
-      host.id = "ng-final-bytes-host-v1";
+      host.id = "ng-final-bytes-list-auto";
+      host.setAttribute("data-role","final-bytes-list");
       host.style.marginTop = "10px";
       host.style.display = "flex";
       host.style.flexDirection = "column";
@@ -1085,207 +1077,20 @@
     return host;
   }
 
-  function looksLikeFinalList(el){
-    const txt = (el.innerText||"").trim();
-    if(!txt) return false;
-    // pattern like "#1\ntext2" or "#1 text2"
-    return /^#\d+\b/m.test(txt) && txt.length < 8000;
-  }
+  function updateCount(panel, count){
+    if(!panel) return;
+    const candidates = Array.from(panel.querySelectorAll("*"))
+      .filter(el => /Final Bytes\s*•/i.test(el.innerText||""))
+      .slice(0,5);
 
-  function findMisplacedInResponse(){
-    // try to find "Response" section container
-    const respNodes = Array.from(document.querySelectorAll("div,section,details"))
-      .filter(n => /^Response\b/i.test((n.innerText||"").trim()))
-      .slice(0,2);
-
-    const scope = respNodes[0] || document;
-
-    // candidate blocks: div/pre/p
-    const cands = Array.from(scope.querySelectorAll("div,pre,p"))
-      .filter(el => looksLikeFinalList(el))
-      .sort((a,b)=> (b.innerText||"").length - (a.innerText||"").length);
-
-    return cands[0] || null;
-  }
-
-  function moveOnce(){
-    const panel = findFinalPanel();
-    const host = ensureHost(panel);
-    if(!panel || !host) return { ok:false, err:"no_final_panel" };
-
-    const misplaced = findMisplacedInResponse();
-    if(!misplaced) return { ok:true, moved:false };
-
-    // Move node (do not clone)
-    host.appendChild(misplaced);
-    misplaced.style.border = "1px solid #e5e7eb";
-    misplaced.style.borderRadius = "12px";
-    misplaced.style.padding = "10px";
-    misplaced.style.background = "#fff";
-
-    return { ok:true, moved:true };
-  }
-
-  // Run after Add Byte
-  document.addEventListener("click", (ev) => {
-    const t = ev && ev.target;
-    if(t && (t.id === "ng-add-byte-btn-restore")){
-      setTimeout(() => { try{ moveOnce(); }catch(e){} }, 80);
-      setTimeout(() => { try{ moveOnce(); }catch(e){} }, 250);
-    }
-  }, true);
-
-  // Also run on load
-  setTimeout(() => { try{ moveOnce(); }catch(e){} }, 500);
-
-  // Expose helper for manual debug
-  window.__NG_MOVE_FINAL_LIST__ = moveOnce;
-})();
- /* NG_FINAL_BYTES_MOVE_MISPLACED_LIST_V1_END */
-/* NG_FINAL_BYTES_HOST_RELOCATE_V1_START */
-(function(){
-  function findFinalPanel(){
-    const nodes = Array.from(document.querySelectorAll("div,section,details"))
-      .filter(n => /Final Bytes/i.test(n.innerText || ""));
-    if(!nodes.length) return null;
-
-    // Prefer the panel that contains "Final Bytes •"
-    const scored = nodes.map(n => {
-      const t = (n.innerText||"");
-      let s = 0;
-      if(/Final Bytes\s*•/i.test(t)) s += 5;
-      if(/Add Byte/i.test(t)) s += 2;
-      return {n,s};
-    }).sort((a,b)=>b.s-a.s);
-
-    return scored[0].n;
-  }
-
-  function ensureInPanel(){
-    const panel = findFinalPanel();
-    if(!panel) return { ok:false, err:"no_final_panel" };
-
-    const host = document.getElementById("ng-final-bytes-list-auto");
-    if(!host) return { ok:true, moved:false, note:"no_host" };
-
-    // If already inside panel, ok
-    if(panel.contains(host)) return { ok:true, moved:false, note:"already_in_panel" };
-
-    // Move host into panel (append at end)
-    panel.appendChild(host);
-    return { ok:true, moved:true, note:"moved_into_final_panel" };
-  }
-
-  // Run soon after load
-  setTimeout(() => { try{ ensureInPanel(); }catch(e){} }, 400);
-  setTimeout(() => { try{ ensureInPanel(); }catch(e){} }, 1200);
-
-  // After Add Byte, relocate again
-  document.addEventListener("click", (ev) => {
-    const t = ev && ev.target;
-    if(t && (t.id === "ng-add-byte-btn-restore")){
-      setTimeout(() => { try{ ensureInPanel(); }catch(e){} }, 120);
-      setTimeout(() => { try{ ensureInPanel(); }catch(e){} }, 350);
-    }
-  }, true);
-
-  // Expose for manual test
-  window.__NG_FINAL_BYTES_HOST_RELOCATE__ = ensureInPanel;
-})();
- /* NG_FINAL_BYTES_HOST_RELOCATE_V1_END */
-/* NG_FINAL_BYTES_PIN_TO_BYTESWRAP_V1_START */
-(function(){
-  function pin(){
-    const bw = document.getElementById("bytesWrap");
-    if(!bw) return { ok:false, err:"no_bytesWrap" };
-
-    const host = document.getElementById("ng-final-bytes-list-auto");
-    if(!host) return { ok:true, pinned:false, note:"no_host" };
-
-    if(bw.contains(host)) return { ok:true, pinned:true, moved:false };
-
-    // Move host to the end of bytesWrap (inside correct panel)
-    bw.appendChild(host);
-    return { ok:true, pinned:true, moved:true };
-  }
-
-  // On load + after Add Byte
-  setTimeout(() => { try{ pin(); }catch(e){} }, 300);
-  setTimeout(() => { try{ pin(); }catch(e){} }, 900);
-
-  document.addEventListener("click", (ev) => {
-    const t = ev && ev.target;
-    if(t && (t.id === "ng-add-byte-btn-restore")){
-      setTimeout(() => { try{ pin(); }catch(e){} }, 120);
-      setTimeout(() => { try{ pin(); }catch(e){} }, 350);
-    }
-  }, true);
-
-  window.__NG_PIN_FINAL_HOST__ = pin;
-})();
- /* NG_FINAL_BYTES_PIN_TO_BYTESWRAP_V1_END */
-/* NG_FINAL_BYTES_CARDS_RENDER_V1_START */
-(function(){
-  function norm(s){ return (s||"").toString().trim(); }
-
-  function readBytes(){
-    // prefer state
-    const st = window.__NG_FINAL_BYTES_STATE__;
-    if(st && Array.isArray(st.bytes) && st.bytes.length) return st.bytes;
-
-    // fallback to bytesJSONOut
-    const out = document.getElementById("bytesJSONOut");
-    const txt = out ? (out.value||"").trim() : "";
-    if(!txt) return [];
-    try{
-      const j = JSON.parse(txt);
-      if(Array.isArray(j)) return j;
-      if(j && Array.isArray(j.bytes)) return j.bytes;
-    }catch(e){}
-    return [];
-  }
-
-  function ensureHost(){
-    const bw = document.getElementById("bytesWrap");
-    if(!bw) return null;
-
-    // host should exist (your pinned host)
-    let host = document.getElementById("ng-final-bytes-list-auto");
-    if(!host){
-      host = document.createElement("div");
-      host.id = "ng-final-bytes-list-auto";
-      bw.appendChild(host);
-    }
-
-    // cards container inside host
-    let cards = document.getElementById("ng-final-bytes-cards-v1");
-    if(!cards){
-      cards = document.createElement("div");
-      cards.id = "ng-final-bytes-cards-v1";
-      cards.style.marginTop = "10px";
-      cards.style.display = "flex";
-      cards.style.flexDirection = "column";
-      cards.style.gap = "8px";
-      host.appendChild(cards);
-    }
-    return { bw, host, cards };
-  }
-
-  function syncCount(bw, n){
-    if(!bw) return;
-    const cand = Array.from(bw.querySelectorAll("*"))
-      .find(el => /Final Bytes/i.test(el.innerText||"") && /•/.test(el.innerText||""));
-    if(cand){
-      cand.innerText = `Final Bytes • ${n}`;
+    if(candidates[0]){
+      candidates[0].innerText = `Final Bytes • ${count}`;
     }
   }
 
-  function render(){
-    const h = ensureHost();
-    if(!h) return { ok:false, err:"no_bytesWrap" };
-
-    const bytes = readBytes();
-    h.cards.innerHTML = "";
+  function renderCards(host, bytes){
+    if(!host) return;
+    host.innerHTML = "";
 
     bytes.forEach((b, idx) => {
       const card = document.createElement("div");
@@ -1308,661 +1113,124 @@
       q.textContent = norm(b.text);
       card.appendChild(q);
 
-      h.cards.appendChild(card);
+      host.appendChild(card);
     });
-
-    syncCount(h.bw, bytes.length);
-    return { ok:true, count: bytes.length, hostInBytesWrap: !!(h.bw && h.bw.contains(h.host)) };
   }
 
-  window.__NG_FINAL_BYTES_CARDS_RENDER_V1__ = render;
+  function renderV14B2(){
+    const bytes = readBytes();
+    const panel = findFinalPanel();
+    const host = ensureListHost(panel);
 
-  // render on add-byte click
-  document.addEventListener("click", (ev) => {
-    const t = ev && ev.target;
-    if(t && (t.id === "ng-add-byte-btn-restore")){
-      setTimeout(() => { try{ render(); }catch(e){} }, 80);
-      setTimeout(() => { try{ render(); }catch(e){} }, 250);
-    }
-  }, true);
+    renderCards(host, bytes);
+    updateCount(panel, bytes.length);
 
-  // initial + keepalive (in case another code wipes)
-  setTimeout(() => { try{ render(); }catch(e){} }, 400);
-  setInterval(() => { try{ render(); }catch(e){} }, 800);
+    return { ok:true, count: bytes.length, panelFound: !!panel, hostId: host ? host.id : null };
+  }
+
+  // Expose renderer safely:
+  window.__NG_FINAL_BYTES_RENDER_V14B2__ = renderV14B2;
+
+  // If V14 missing, provide it:
+  if (typeof window.__NG_FINAL_BYTES_RENDER_V14__ !== "function") {
+    window.__NG_FINAL_BYTES_RENDER_V14__ = renderV14B2;
+  }
+
+  // Bind to bytesJSONOut updates:
+  const out = getOut();
+  if(out && !out.__ng_v14b2_bound__){
+    out.__ng_v14b2_bound__ = true;
+    out.addEventListener("input", () => { try{ renderV14B2(); }catch(e){} }, true);
+    out.addEventListener("change", () => { try{ renderV14B2(); }catch(e){} }, true);
+  }
+
+  // Initial render
+  try{ renderV14B2(); }catch(e){}
 })();
- /* NG_FINAL_BYTES_CARDS_RENDER_V1_END */
-/* NG_FINAL_BYTES_RENDER_ALIAS_V1_START */
-(function(){
-  function alias(){
-    if(typeof window.__NG_FINAL_BYTES_CARDS_RENDER_V1__ !== "function") return;
-    // Point all known render entrypoints to the stable renderer
-    window.__NG_FINAL_BYTES_RENDER_V14__ = window.__NG_FINAL_BYTES_CARDS_RENDER_V1__;
-    window.__NG_FINAL_BYTES_RENDER_V13__ = window.__NG_FINAL_BYTES_CARDS_RENDER_V1__;
-    window.__NG_FINAL_BYTES_RENDER_V12__ = window.__NG_FINAL_BYTES_CARDS_RENDER_V1__;
-  }
-  setTimeout(alias, 50);
-  setTimeout(alias, 500);
-})();
- /* NG_FINAL_BYTES_RENDER_ALIAS_V1_END */
-/* NG_FINAL_BYTES_ANCHOR_TO_HEADER_V1_START */
-(function(){
-  function findHeader(){
-    const bw = document.getElementById("bytesWrap") || document;
-    const cands = Array.from(bw.querySelectorAll("div,span,h1,h2,h3,label,summary"))
-      .map(el => ({ el, t: (el.innerText||"").replace(/\s+/g," ").trim() }))
-      .filter(x => /Final Bytes/i.test(x.t) && /•/.test(x.t) && x.t.length < 80);
-    // prefer shortest / most specific
-    cands.sort((a,b)=>a.t.length-b.t.length);
-    return cands[0] ? cands[0].el : null;
-  }
-
-  function anchor(){
-    const header = findHeader();
-    const host = document.getElementById("ng-final-bytes-list-auto");
-    if(!host) return { ok:false, err:"no_host" };
-    if(!header) return { ok:false, err:"no_final_header" };
-
-    const parent = header.parentNode;
-    if(!parent) return { ok:false, err:"no_parent" };
-
-    // place host right after the header row
-    const after = header.nextSibling;
-    if(after){
-      parent.insertBefore(host, after);
-    } else {
-      parent.appendChild(host);
-    }
-
-    // re-render
-    if(typeof window.__NG_FINAL_BYTES_CARDS_RENDER_V1__ === "function"){
-      try{ window.__NG_FINAL_BYTES_CARDS_RENDER_V1__(); }catch(e){}
-    }
-    return { ok:true, anchored:true };
-  }
-
-  setTimeout(()=>{ try{ anchor(); }catch(e){} }, 600);
-  setTimeout(()=>{ try{ anchor(); }catch(e){} }, 1300);
-  document.addEventListener("click",(ev)=>{
-    const t = ev && ev.target;
-    // native +Add Byte OR our add button
-    if(t && (/\+\s*Add\s*Byte/i.test((t.textContent||"").trim()) || t.id==="ng-add-byte-btn-restore")){
-      setTimeout(()=>{ try{ anchor(); }catch(e){} }, 120);
-      setTimeout(()=>{ try{ anchor(); }catch(e){} }, 350);
-    }
-  }, true);
-
-  window.__NG_FINAL_ANCHOR__ = anchor;
-})();
- /* NG_FINAL_BYTES_ANCHOR_TO_HEADER_V1_END */
-
-/* NG_BYTESJSONOUT_DEDUPE_V1_START */
-(function(){
-  function dedupe(){
-    const outs = Array.from(document.querySelectorAll("#bytesJSONOut"));
-    if(outs.length <= 1) return { ok:true, kept: outs.length, removed: 0 };
-
-    // keep the one that already has content (prefer non-empty)
-    let keep = outs.find(x => ((x.value||"").trim().length > 0)) || outs[0];
-    outs.forEach(x => { if(x !== keep){ try{ x.remove(); }catch(e){} } });
-
-    return { ok:true, kept: 1, removed: outs.length-1 };
-  }
-
-  setTimeout(()=>{ try{ console.log("[NG] bytesJSONOut dedupe:", dedupe()); }catch(e){} }, 200);
-  setTimeout(()=>{ try{ dedupe(); }catch(e){} }, 900);
-
-  window.__NG_BYTESJSONOUT_DEDUPE__ = dedupe;
-})();
- /* NG_BYTESJSONOUT_DEDUPE_V1_END */
-/* NG_BIND_NATIVE_ADD_TO_RENDER_V1_START */
-(function(){
-  function bind(){
-    const bw = document.getElementById("bytesWrap");
-    if(!bw) return { ok:false, err:"no_bytesWrap" };
-
-    const btn = Array.from(bw.querySelectorAll("button"))
-      .find(b => /\+\s*Add\s*Byte/i.test((b.textContent||"").trim()));
-    if(!btn) return { ok:false, err:"no_native_add_btn" };
-
-    if(btn.__ng_bound_render_v1__) return { ok:true, bound:false, note:"already_bound" };
-    btn.__ng_bound_render_v1__ = true;
-
-    btn.addEventListener("click", () => {
-      try{
-        if(typeof window.__NG_FINAL_BYTES_CARDS_RENDER_V1__ === "function"){
-          window.__NG_FINAL_BYTES_CARDS_RENDER_V1__();
-        }
-        if(typeof window.__NG_FINAL_ANCHOR__ === "function"){
-          window.__NG_FINAL_ANCHOR__();
-        }
-        if(typeof window.__NG_FINAL_COUNT_SYNC__ === "function"){
-          window.__NG_FINAL_COUNT_SYNC__();
-        }
-      }catch(e){}
-    }, true);
-
-    return { ok:true, bound:true };
-  }
-
-  setTimeout(()=>{ try{ console.log("[NG] bind native add:", bind()); }catch(e){} }, 400);
-  setTimeout(()=>{ try{ bind(); }catch(e){} }, 1200);
-})();
- /* NG_BIND_NATIVE_ADD_TO_RENDER_V1_END */
-/* NG_WIRE_NATIVE_ADD_BYTE_TO_STATE_V1_START */
-(function(){
-  function norm(s){ return (s||"").toString().trim(); }
-  function isVisible(el){
-    if(!el) return false;
-    const cs = window.getComputedStyle ? getComputedStyle(el) : null;
-    if(cs && (cs.display==="none" || cs.visibility==="hidden")) return false;
-    if(el.offsetParent === null && cs && cs.position !== "fixed") return false;
-    return true;
-  }
-
-  function getOut(){
-    // always keep the first bytesJSONOut
-    return document.querySelector("#bytesJSONOut");
-  }
-
-  function ensureState(){
-    if(!window.__NG_FINAL_BYTES_STATE__) window.__NG_FINAL_BYTES_STATE__ = {};
-    if(!Array.isArray(window.__NG_FINAL_BYTES_STATE__.bytes)) window.__NG_FINAL_BYTES_STATE__.bytes = [];
-    return window.__NG_FINAL_BYTES_STATE__;
-  }
-
-  function findByLabelText(root, labelNeedle){
-    const labels = Array.from(root.querySelectorAll("label"))
-      .map(l => ({ l, t: norm(l.textContent).toLowerCase() }))
-      .filter(x => x.t.includes(labelNeedle));
-    for(const x of labels){
-      // look for input/textarea within same parent block
-      const p = x.l.parentElement || root;
-      const cand = p.querySelector("input,textarea");
-      if(cand && isVisible(cand)) return cand;
-      // fallback: next siblings
-      let n = x.l.nextElementSibling;
-      while(n){
-        if((n.tagName==="INPUT" || n.tagName==="TEXTAREA") && isVisible(n)) return n;
-        const inner = n.querySelector && n.querySelector("input,textarea");
-        if(inner && isVisible(inner)) return inner;
-        n = n.nextElementSibling;
-      }
-    }
-    return null;
-  }
-
-  function collectFromBytesWrap(){
-    const bw = document.getElementById("bytesWrap") || document;
-    // Prefer explicit labels
-    const speakerEl = findByLabelText(bw, "speaker name") || findByLabelText(bw, "speaker");
-    const desigEl   = findByLabelText(bw, "designation");
-
-    // Text/Quote textarea: avoid bytesJSONOut + default template
-    let textEl = findByLabelText(bw, "text / quote") || findByLabelText(bw, "text") || findByLabelText(bw, "quote");
-    if(textEl && (textEl.id==="bytesJSONOut" || textEl.id==="ng-default-quote-template")) textEl = null;
-
-    if(!textEl){
-      const tas = Array.from(bw.querySelectorAll("textarea"))
-        .filter(t => t.id!=="bytesJSONOut" && t.id!=="ng-default-quote-template" && isVisible(t));
-      // usually last visible textarea is the row's Text/Quote
-      textEl = tas[tas.length-1] || null;
-    }
-
-    return {
-      speaker: speakerEl ? norm(speakerEl.value) : "",
-      designation: desigEl ? norm(desigEl.value) : "",
-      text: textEl ? norm(textEl.value) : ""
-    };
-  }
-
-  function syncOut(bytes){
-    const out = getOut();
-    if(!out) return { ok:false, err:"no_bytesJSONOut" };
-    out.value = JSON.stringify(bytes, null, 2);
-    try{
-      out.dispatchEvent(new Event("input", { bubbles:true }));
-      out.dispatchEvent(new Event("change", { bubbles:true }));
-    }catch(e){}
-    return { ok:true, outLen: out.value.length };
-  }
-
-  function renderAll(){
-    try{ if(typeof window.__NG_FINAL_BYTES_CARDS_RENDER_V1__==="function") window.__NG_FINAL_BYTES_CARDS_RENDER_V1__(); }catch(e){}
-    try{ if(typeof window.__NG_FINAL_ANCHOR__==="function") window.__NG_FINAL_ANCHOR__(); }catch(e){}
-    try{ if(typeof window.__NG_FINAL_COUNT_SYNC__==="function") window.__NG_FINAL_COUNT_SYNC__(); }catch(e){}
-  }
-
-  function onAddByteCommit(){
-    const st = ensureState();
-    const b = collectFromBytesWrap();
-    if(!b.text){
-      return { ok:false, err:"empty_text" };
-    }
-    st.bytes.push({ speaker: b.speaker, designation: b.designation, text: b.text });
-    const s = syncOut(st.bytes);
-    renderAll();
-    return { ok:true, count: st.bytes.length, sync: s };
-  }
-
-  function bind(){
-    // bind ONLY to exact "Add Byte" (not "+ Add Byte")
-    const bw = document.getElementById("bytesWrap") || document;
-    const btns = Array.from(bw.querySelectorAll("button"))
-      .filter(b => norm(b.textContent).toLowerCase() === "add byte");
-    let bound = 0;
-    btns.forEach(btn => {
-      if(btn.__ng_commit_bound_v1__) return;
-      btn.__ng_commit_bound_v1__ = true;
-      btn.addEventListener("click", () => { try{ onAddByteCommit(); }catch(e){} }, true);
-      bound++;
-    });
-    return { ok:true, buttonsFound: btns.length, newlyBound: bound };
-  }
-
-  // run a few times because UI rows/buttons can be injected later
-  setTimeout(()=>{ try{ console.log("[NG] bind commit:", bind()); }catch(e){} }, 400);
-  setTimeout(()=>{ try{ bind(); }catch(e){} }, 1200);
-  setInterval(()=>{ try{ bind(); }catch(e){} }, 1500);
-
-  window.__NG_ADD_BYTE_COMMIT_V1__ = onAddByteCommit;
-})();
- /* NG_WIRE_NATIVE_ADD_BYTE_TO_STATE_V1_END */
-/* NG_KEEP_ONE_FINAL_BYTES_PANEL_V1_START */
-/* NG_KEEP_ONE_FINAL_BYTES_PANEL_V1_PICKKEEP_FIX_START */
+ /* NG_FINAL_BYTES_RENDER_FALLBACK_V14B2_END */
+/* NG_FINAL_BYTES_RENDER_V1_START */
 (function () {
-  function q(sel){ return document.querySelector(sel); }
+  if (window.__NG_FINAL_BYTES_RENDER_V1_INSTALLED) return;
+  window.__NG_FINAL_BYTES_RENDER_V1_INSTALLED = true;
 
-  // Find the BEST "Final Bytes" root using stable anchors
-  window.NG_pickKeepFinalBytesRoot = function () {
-    // 0) If we already marked a keep root earlier, reuse it
-    const marked = document.querySelector('[data-ng-final-bytes-keep="1"]');
-    if (marked) return marked;
+  function ensureCountLabel() {
+    const host = document.querySelector("#ng-final-bytes-list-auto");
+    if (!host) return null;
 
-    // 1) Prefer your real cards host (you confirmed it exists)
-    const host = q('#ng-final-bytes-list-auto');
-    if (host) {
-      const root =
-        host.closest('#bytesWrap, #ng-final-bytes, #ng-final-bytes-panel, section, .panel, .card, details, div') ||
-        host.parentElement;
-      if (root) {
-        root.setAttribute('data-ng-final-bytes-keep', '1');
-        return root;
-      }
+    let label = document.querySelector("#ng-final-bytes-count-label");
+    if (!label) {
+      label = document.createElement("div");
+      label.id = "ng-final-bytes-count-label";
+      label.style.cssText = "font-size:12px;opacity:.85;margin:6px 0 10px 0;display:block;";
+      // label ko host ke top me pin
+      host.insertBefore(label, host.firstChild);
     }
-
-    // 2) Fallback: look for any element that visually represents Final Bytes
-    const candidates = Array.from(document.querySelectorAll('details, section, .panel, .card, div'))
-      .filter(el => {
-        const t = (el.innerText || '').replace(/\s+/g,' ').trim();
-        return /Final Bytes/i.test(t) && t.length < 3000;
-      });
-
-    if (candidates.length) {
-      candidates.sort((a,b) => (a.innerText||'').length - (b.innerText||'').length);
-      candidates[0].setAttribute('data-ng-final-bytes-keep', '1');
-      return candidates[0];
-    }
-
-    return null;
-  };
-
-  // If existing code calls pickKeep(), force it to use our stable finder
-  try {
-    if (typeof window.pickKeep === 'function') {
-      const _old = window.pickKeep;
-      window.pickKeep = function () {
-        return window.NG_pickKeepFinalBytesRoot() || _old();
-      };
-    }
-  } catch(e){}
-})();
-/* NG_KEEP_ONE_FINAL_BYTES_PANEL_V1_PICKKEEP_FIX_END */
-/* NG_FINAL_BYTES_COMMIT_BUTTON_V1_START */
-(function () {
-  function firstQuoteBox() {
-    const scope = document.querySelector('#bytesWrap') || document;
-    return (
-      scope.querySelector('textarea[name="quote"], textarea[id*="quote"], textarea[placeholder*="Quote"], textarea[placeholder*="byte"]') ||
-      scope.querySelector('textarea')
-    );
+    return label;
   }
 
-  function ensureCommitBtn() {
-    const wrap = document.querySelector('#bytesWrap') || document.body;
-    if (!wrap) return { ok:false, why:'bytesWrap not found' };
+  function ensureCardsRoot() {
+    const host = document.querySelector("#ng-final-bytes-list-auto");
+    if (!host) return null;
 
-    if (document.querySelector('#ng-commit-final-byte-btn')) return { ok:true, already:true };
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.id = 'ng-commit-final-byte-btn';
-    btn.textContent = 'Commit to Final Bytes';
-    btn.style.cssText = 'background:#000;color:#fff;border:0;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer;';
-
-    btn.addEventListener('click', () => {
-      const ta = firstQuoteBox();
-      if (!ta) return console.warn('[NG_COMMIT_BTN] quote textarea not found');
-      ta.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, cancelable:true }));
-      try { window.NG_renderFinalBytes?.(); } catch(e){}
-    });
-
-    const ta = firstQuoteBox();
-    if (ta && ta.parentElement) {
-      const gap = document.createElement('div');
-      gap.style.height = '8px';
-      ta.parentElement.appendChild(gap);
-      ta.parentElement.appendChild(btn);
-    } else {
-      wrap.appendChild(btn);
+    let root = document.querySelector("#ng-final-bytes-cards-v1");
+    if (!root) {
+      root = document.createElement("div");
+      root.id = "ng-final-bytes-cards-v1";
+      root.style.cssText = "margin-top:10px; display:flex; flex-direction:column; gap:8px;";
+      host.appendChild(root);
     }
-
-    return { ok:true, inserted:true };
+    return root;
   }
 
-  setTimeout(() => console.log('[NG_COMMIT_BTN]', ensureCommitBtn()), 0);
-})();
- /* NG_FINAL_BYTES_COMMIT_BUTTON_V1_END */
-/* NG_FINAL_BYTES_REMOVE_WIRE_V1_START */
-(function(){
-  function q(sel,root){ return (root||document).querySelector(sel); }
-  function qa(sel,root){ return Array.from((root||document).querySelectorAll(sel)); }
-
-  function getHost(){
-    return q('#ng-final-bytes-list-auto') || q('#ng-final-bytes-list') || q('#finalBytesList') || q('#finalBytes') || null;
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  function getBytesJSONOutTA(){
-    return q('#bytesJSONOut') || q('textarea#bytesJSONOut') || q('textarea[name="bytesJSONOut"]') || null;
-  }
+  function renderCards(bytes) {
+    const root = ensureCardsRoot();
+    if (!root) return;
 
-  function getFinalBytesRef(){
-    try{
-      if (window.NG_STATE && Array.isArray(window.NG_STATE.finalBytes)) return { obj: window.NG_STATE, key: 'finalBytes' };
-      if (window.NG_STATE && Array.isArray(window.NG_STATE.finals))     return { obj: window.NG_STATE, key: 'finals' };
-      if (Array.isArray(window.finalBytes)) return { direct: 'finalBytes' };
-      if (Array.isArray(window.finals))     return { direct: 'finals' };
-      if (Array.isArray(window.NG_FINAL_BYTES)) return { direct: 'NG_FINAL_BYTES' };
-    }catch(e){}
-    return null;
-  }
-
-  function readFinalBytesArray(){
-    const ref = getFinalBytesRef();
-    if (ref){
-      if (ref.obj) return ref.obj[ref.key];
-      if (ref.direct) return window[ref.direct];
-    }
-    const ta = getBytesJSONOutTA();
-    if (ta && ta.value && ta.value.trim()){
-      try{
-        const v = JSON.parse(ta.value);
-        if (Array.isArray(v)) return v;
-      }catch(e){}
-    }
-    return [];
-  }
-
-  function writeFinalBytesArray(arr){
-    const ref = getFinalBytesRef();
-    if (ref){
-      if (ref.obj) ref.obj[ref.key] = arr;
-      if (ref.direct) window[ref.direct] = arr;
-    }
-    const ta = getBytesJSONOutTA();
-    if (ta){
-      try{ ta.value = JSON.stringify(arr, null, 2); }catch(e){}
-      try{ ta.dispatchEvent(new Event('input', {bubbles:true})); }catch(e){}
-      try{ ta.dispatchEvent(new Event('change', {bubbles:true})); }catch(e){}
-    }
-  }
-
-  function callRerender(){
-    const f =
-      window.NG_renderFinalBytes ||
-      window.renderFinalBytes ||
-      window.NG_renderFinalBytesAuto ||
-      window.renderFinalBytesAuto ||
-      null;
-    if (typeof f === 'function'){
-      try{ f(); return true; }catch(e){ console.warn('[NG_REMOVE] rerender error', e); }
-    }
-    return false;
-  }
-
-  function ensureRemoveButtons(){
-    const host = getHost();
-    if (!host) return {ok:false, why:'host missing'};
-    const cards = qa(':scope > *', host);
-
-    cards.forEach((card, idx) => {
-      if (!(card instanceof Element)) return;
-      card.setAttribute('data-ng-final-idx', String(idx));
-
-      // If already present, skip
-      if (card.querySelector('button.ng-final-remove-btn')) return;
-
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'ng-final-remove-btn';
-      btn.textContent = 'Remove';
-      btn.style.cssText = 'margin-top:8px;background:#b91c1c;color:#fff;border:0;border-radius:10px;padding:8px 10px;font-weight:600;cursor:pointer;outline:none;box-shadow:none;';
-
-      // Prefer footer-like placement: if card has last row div, append there; else append to card
-      const footer = card.querySelector('.footer, .actions, .btns, [data-footer]') || null;
-      (footer || card).appendChild(btn);
-    });
-
-    return {ok:true, cards: cards.length};
-  }
-
-  function onHostClick(ev){
-    const btn = ev.target && ev.target.closest && ev.target.closest('button.ng-final-remove-btn');
-    if (!btn) return;
-
-    const host = getHost();
-    if (!host) return;
-
-    const card = btn.closest('[data-ng-final-idx]') || btn.parentElement;
-    const idx = parseInt(card && card.getAttribute ? (card.getAttribute('data-ng-final-idx')||'-1') : '-1', 10);
-    if (!(idx >= 0)) return;
-
-    const arr = readFinalBytesArray();
-    if (idx >= arr.length){
-      console.warn('[NG_REMOVE] idx out of range', {idx, len: arr.length});
-      try{ card.remove(); }catch(e){}
-      ensureRemoveButtons();
+    const arr = Array.isArray(bytes) ? bytes : [];
+    if (!arr.length) {
+      root.innerHTML = `<div style="font-size:12px;opacity:.6;border:1px dashed #e2e8f0;border-radius:12px;padding:10px;">
+        Final Bytes empty
+      </div>`;
       return;
     }
 
-    arr.splice(idx, 1);
-    writeFinalBytesArray(arr);
+    root.innerHTML = arr.map((b, i) => {
+      const sp = esc(b.speaker || "");
+      const des = esc(b.designation || "");
+      const tx = esc(b.text || "");
+      const head = (sp || des) ? `<div style="font-size:12px;opacity:.85;margin-bottom:6px;">
+        <b>${sp || "—"}</b>${des ? ` • ${des}` : ""}
+      </div>` : "";
 
-    const did = callRerender();
-    if (!did){
-      try{ card.remove(); }catch(e){}
-      setTimeout(ensureRemoveButtons, 0);
-    } else {
-      // allow rerender to rebuild DOM then re-inject remove btns
-      setTimeout(ensureRemoveButtons, 80);
+      return `<div class="ng-final-card" data-idx="${i}" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
+        ${head}
+        <div style="font-size:14px;line-height:1.3;">${tx || "<span style='opacity:.6'>—</span>"}</div>
+      </div>`;
+    }).join("");
+  }
+
+  window.NG_FINAL_BYTES_APPLY_STATE = function (bytes, meta) {
+    // 1) Count label always visible
+    const n = Array.isArray(bytes) ? bytes.length : 0;
+
+    const pinned = ensureCountLabel();
+    if (pinned) pinned.textContent = `Final Bytes • ${n}`;
+
+    // (optional) draft-status span ko bhi populate kar do (agar wahi aap dekhte ho)
+    const draftStatus = document.querySelector("#ng-byte-draft-status");
+    if (draftStatus && !draftStatus.textContent.trim()) {
+      draftStatus.textContent = `Final Bytes • ${n}`;
     }
 
-    console.log('[NG_REMOVE] removed', {idx, remaining: arr.length});
-  }
+    // 2) Cards render
+    renderCards(bytes);
 
-  function bindHost(host){
-    if (!host) return {ok:false, why:'no host'};
-    if (host.getAttribute('data-ng-remove-wired') === '1') return {ok:true, already:true};
-
-    host.setAttribute('data-ng-remove-wired','1');
-    host.addEventListener('click', onHostClick);
-
-    // Observe host children changes and re-inject remove buttons (no interval)
-    let t=null;
-    const obs = new MutationObserver(() => {
-      clearTimeout(t);
-      t = setTimeout(() => { try{ ensureRemoveButtons(); }catch(e){} }, 40);
-    });
-    obs.observe(host, {childList:true, subtree:false});
-
-    const r1 = ensureRemoveButtons();
-    setTimeout(() => { try{ ensureRemoveButtons(); }catch(e){} }, 200);
-    return {ok:true, wired:true, ensure:r1};
-  }
-
-  // Host can be replaced during rerender => retry binding
-  (function retryBind(){
-    let tries=0;
-    const tick = () => {
-      const host = getHost();
-      const r = bindHost(host);
-      if (r && r.ok) { console.log('[NG_REMOVE_INSTALL]', r); return true; }
-      return false;
-    };
-    if (tick()) return;
-    const iv = setInterval(() => {
-      tries++;
-      if (tick() || tries>80) clearInterval(iv);
-    }, 250);
-  })();
+    // debug (once in a while ok)
+    // console.log("[NG_FINAL_BYTES_RENDER_V1] applied", {n, source: meta && meta.source});
+  };
 })();
-/* NG_FINAL_BYTES_REMOVE_WIRE_V1_END */
-(function(){
-  function pickKeep(){
-    const host = document.getElementById("ng-final-bytes-list-auto");
-    if(!host) return null;
-
-    // candidate: nearest ancestor (div/section/details) that CONTAINS host and also contains "Final Bytes •"
-    let cur = host.parentElement;
-    while(cur){
-      const t = (cur.innerText||"");
-      if(/Final Bytes\s*•/i.test(t)) return cur;
-      cur = cur.parentElement;
-    }
-    return null;
-  }
-
-  function run(){
-    const keep = pickKeep();
-    const finals = Array.from(document.querySelectorAll("div,section,details"))
-      .filter(n => /Final Bytes\s*•/i.test(n.innerText||""));
-
-    let hidden = 0;
-    finals.forEach(n => {
-      if(keep && n !== keep){
-        n.style.display = "none";
-        hidden++;
-      }
-    });
-
-    return {
-      ok:true,
-      finalsFound: finals.length,
-      hidden,
-      keep: keep ? (keep.tagName + "#" + (keep.id||"")) : null
-    };
-  }
-
-  setTimeout(()=>{ try{ console.log("[NG] keep one final panel:", run()); }catch(e){} }, 500);
-  setInterval(()=>{ try{ run(); }catch(e){} }, 1500);
-
-  window.__NG_KEEP_ONE_FINAL_PANEL__ = run;
-})();
- /* NG_KEEP_ONE_FINAL_BYTES_PANEL_V1_END */
-
-
-/* NG_FINAL_BYTES_FIXED_COMMIT_BTN_V1_START */
-(function(){
-  function findDefaultQuoteTA(){
-    return Array.from(document.querySelectorAll('textarea'))
-      .find(x => (x.getAttribute('placeholder')||'').includes('default byte/quote')) || null;
-  }
-
-  function installFixedCommitBtn(){
-    // If already installed, do nothing
-    if (document.querySelector('#ng-commit-final-byte-btn-fixed')) return {ok:true, already:true};
-
-    const ta = findDefaultQuoteTA() || document.querySelector('#bytesWrap textarea') || document.querySelector('textarea');
-    if (!ta) return {ok:false, why:'no textarea found'};
-
-    const btn = document.createElement('button');
-    btn.id = 'ng-commit-final-byte-btn-fixed';
-    btn.type = 'button';
-    btn.textContent = 'Commit to Final Bytes';
-    btn.style.cssText = 'position:fixed;right:16px;bottom: 72px;top:auto;left:auto;z-index:999999;background:#000;color:#fff;border:0;border-radius:12px;padding:12px 14px;font-weight:700;cursor:pointer;display:inline-block;visibility:visible;opacity:1;';
-
-    btn.addEventListener('click', () => {
-      ta.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, cancelable:true }));
-      console.log('[NG_FIXED_COMMIT] dblclick dispatched');
-    });
-
-    document.body.appendChild(btn); if(btn.parentElement!==document.body) document.body.appendChild(btn);
-    const r = btn.getBoundingClientRect();
-    return {ok:true, rect:{x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.width),h:Math.round(r.height)}};
-  }
-
-  // Install after DOM settles
-  let tries=0;
-  const iv=setInterval(() => {
-    tries++;
-    const r=installFixedCommitBtn();
-    if(r.ok || tries>40){ console.log('[NG_FIXED_COMMIT_INSTALL]', r); clearInterval(iv); }
-  }, 200);
-})();
-/* NG_FINAL_BYTES_FIXED_COMMIT_BTN_V1_END */
-
-
-/* NG_DRAFTS_OVERLAY_CLOSE_X_V1_START */
-(function(){
-  function findOverlay(){
-    return Array.from(document.querySelectorAll('div'))
-      .find(d => (d.textContent||'').includes('No drafts found') && (d.textContent||'').includes('Refresh List')) || null;
-  }
-
-  function install(){
-    const ov = findOverlay();
-    if(!ov) return {ok:false, why:'overlay not found'};
-
-    if(ov.querySelector('#ng-drafts-overlay-close-x')) return {ok:true, already:true};
-
-    // make sure overlay can host absolute button
-    const cs = getComputedStyle(ov);
-    if(cs.position === 'static') ov.style.position = 'relative';
-
-    const x = document.createElement('button');
-    x.id = 'ng-drafts-overlay-close-x';
-    x.type = 'button';
-    x.textContent = '×';
-    x.title = 'Close';
-    x.style.cssText = 'position:absolute;right:10px;top:10px;z-index:999999;background:transparent;color:#fff;border:0;font-size:22px;line-height:1;cursor:pointer;opacity:.85;';
-    x.addEventListener('click', () => { ov.style.display = 'none'; console.log('[NG_OVERLAY] closed'); });
-
-    ov.appendChild(x);
-    return {ok:true, installed:true};
-  }
-
-  let tries=0;
-  const iv=setInterval(() => {
-    tries++;
-    const r=install();
-    if(r.ok || tries>60){ console.log('[NG_OVERLAY_CLOSE_X]', r); clearInterval(iv); }
-  }, 250);
-})();
-/* NG_DRAFTS_OVERLAY_CLOSE_X_V1_END */
-/* NG_HEALTHPILL_OFFSET_FROM_STORYVIEW_V1_START */
-(function(){
-  function apply(){
-    const pill = document.querySelector('#ngHealthPill');
-    if(!pill) return {ok:false, why:'no pill'};
-    pill.style.setProperty('right','200px','important');  // keep clear of Story View
-    pill.style.setProperty('bottom','16px','important');
-    pill.style.setProperty('z-index','999990','important');
-    return {ok:true};
-  }
-  let tries=0;
-  const iv=setInterval(() => {
-    tries++;
-    const r=apply();
-    if(r.ok || tries>80){ console.log('[NG_HEALTHPILL_OFFSET]', r); clearInterval(iv); }
-  }, 200);
-})();
-/* NG_HEALTHPILL_OFFSET_FROM_STORYVIEW_V1_END */
+ /* NG_FINAL_BYTES_RENDER_V1_END */

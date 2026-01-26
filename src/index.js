@@ -1,5 +1,4 @@
-﻿console.log("[NG_BOOT_SIG] src/index.js 20260119_162645");
-// src/index.js  (BOOT v3: echo + openai mode)
+﻿// src/index.js  (BOOT v3: echo + openai mode)
 // Root if (path === "/" && request.method === "GET") {   return new globalThis.Response("OK", { status: 200, headers: corsHeaders(request) }); } 
 // Uses OpenAI Responses API + Structured Outputs (json_schema)
 
@@ -76,18 +75,22 @@ export default {
     try {
       const __u = new URL(request.url);
       if (__u.pathname === "/health" || __u.pathname === "/api/health" || __u.pathname === "/api/health/") {
-        return new Response(JSON.stringify({ ok: true, ts: new Date().toISOString(), entry: 'src/index.js' }), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8' } });
+        return new Response(
+          JSON.stringify({ ok: true, ts: new Date().toISOString(), entry: "src/index.js" }),
+          { status: 200, headers: { "content-type": "application/json; charset=utf-8" } }
+        );
       }
-      if (__u.pathname === '/') {
-        return new Response('OK', { status: 200, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      if (__u.pathname === "/") {
+        return new Response("OK", { status: 200, headers: { "content-type": "text/plain; charset=utf-8" } });
       }
     } catch (e) { /* ignore */ }
+
     const url = new URL(request.url);
     const path = url.pathname;
 
     // CORS preflight
     if (request.method === "OPTIONS") {
-      return new globalThis.Response(null, { status: 204, headers: corsHeaders(request) });
+      return new Response(null, { status: 204, headers: corsHeaders(request) });
     }
 
     const has_openai_key = !!(env && env.OPENAI_API_KEY);
@@ -101,36 +104,67 @@ export default {
       );
     }
 
+    // NG_PATCH_START:TRANSCRIPT_LATEST_V1
+    // Transcript latest (GET/POST; in-memory store; always returns Response)
+    if ((path === "/api/transcript/latest" || path === "/transcript/latest") && request.method === "POST") {
+      const text = (body && body.text != null) ? String(body.text) : "";
+      const latest = {
+        text,
+        source: (body && body.source != null) ? String(body.source) : null,
+        ts: (body && body.ts) ? String(body.ts) : new Date().toISOString(),
+      };
+      globalThis.__NG_LATEST_TRANSCRIPT__ = latest;
 
-// NG_PATCH_START:TRANSCRIPT_LATEST_V1
-// Transcript latest (GET/POST; in-memory store; always returns Response)
-if ((path === "/api/transcript/latest" || path === "/transcript/latest") && request.method === "POST") {
-  const body = await readJson(request);
-  const text = (body && body.text != null) ? String(body.text) : "";
-  const latest = {
-    text,
-    source: (body && body.source != null) ? String(body.source) : null,
-    ts: (body && body.ts) ? String(body.ts) : new Date().toISOString(),
-  };
+      const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
+      const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
+      return new Response(JSON.stringify({ ok: true, latest, text: latest.text, ts: new Date().toISOString() }), { status: 200, headers });
+    }
 
-  globalThis.__NG_LATEST_TRANSCRIPT__ = latest;
+    if ((path === "/transcript/latest" || path === "/api/transcript/latest") && request.method === "GET") {
+      const latest = globalThis.__NG_LATEST_TRANSCRIPT__ || null;
+      const text = (latest && latest.text) ? String(latest.text) : "";
+      const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
+      const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
+      return new Response(JSON.stringify({ ok: true, latest, text, ts: new Date().toISOString() }), { status: 200, headers });
+    }
+    // NG_PATCH_END:TRANSCRIPT_LATEST_V1
 
-  const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
-  const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
-  return new Response(JSON.stringify({ ok: true, latest, text: latest.text, ts: new Date().toISOString() }), { status: 200, headers });
+    // NG_PATCH_START:BYTES_LATEST_V1
+    // Bytes latest (GET/POST; in-memory store; always returns Response)
+    if ((path === "/api/bytes/latest" || path === "/bytes/latest") && request.method === "POST") {
+      const __raw = await request.text();
+if (!__raw || !__raw.trim()) {
+  const latest = (globalThis.__NG_LATEST_BYTES__ || { bytes: null, source: null, ts: null });
+  return json({ ok:true, latest, bytes: latest.bytes ?? null, ts: new Date().toISOString() }, 200, corsHeaders(request));
 }
+const body = (() => { try { return JSON.parse(__raw.replace(/^\uFEFF/, "")); } catch(e) { return {}; } })();
+      const bytes = (body && body.bytes != null) ? body.bytes : (body && body.latest != null ? body.latest : null);
 
-if ((path === "/transcript/latest" || path === "/api/transcript/latest") && request.method === "GET") {
-  const latest = globalThis.__NG_LATEST_TRANSCRIPT__ || null;
-  const text = (latest && latest.text) ? String(latest.text) : "";
-  const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
-  const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
-  return new Response(JSON.stringify({ ok: true, latest, text, ts: new Date().toISOString() }), { status: 200, headers });
-}
-// NG_PATCH_END:TRANSCRIPT_LATEST_V1
-    // Digi-pack API
+      const latest = {
+        bytes,
+        source: (body && body.source != null) ? String(body.source) : null,
+        ts: (body && body.ts) ? String(body.ts) : new Date().toISOString(),
+      };
+
+      globalThis.__NG_LATEST_BYTES__ = latest;
+
+      const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
+      const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
+      return new Response(JSON.stringify({ ok: true, latest, bytes: latest.bytes, ts: new Date().toISOString() }), { status: 200, headers });
+    }
+
+    if ((path === "/api/bytes/latest" || path === "/bytes/latest") && request.method === "GET") {
+      const latest = globalThis.__NG_LATEST_BYTES__ || null;
+      const bytes = (latest && latest.bytes != null) ? latest.bytes : null;
+
+      const cors = (typeof corsHeaders === "function") ? corsHeaders(request) : {};
+      const headers = Object.assign({ "content-type": "application/json; charset=utf-8" }, cors);
+      return new Response(JSON.stringify({ ok: true, latest, bytes, ts: new Date().toISOString() }), { status: 200, headers });
+    }
+    // NG_PATCH_END:BYTES_LATEST_V1
+
+    // Digi-pack API (kept as-is)
     if (path === "/api/digi-pack" && request.method === "POST") {
-      const body = await readJson(request);
       const promptObj = safeParsePrompt(body);
 
       const mode = String(env?.GEN_MODE || "echo").toLowerCase();
@@ -156,20 +190,21 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
         );
       }
 
-            if (!has_openai_key) {
-        return json({ ok: false, path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OPENAI_API_KEY missing" });
+      if (!has_openai_key) {
+        return json({ ok: false, path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OPENAI_API_KEY missing" }, 400, corsHeaders(request));
       }
 
+      // If your OpenAI mode logic continues below in your file, it will still run.
+      // If not present, we'll fall through to 404.
+    }
 
-    // fallback
+    // final fallback (guarantee Response)
     return json(
       { ok: false, ts: new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error: "Not found" },
       404,
       corsHeaders(request)
     );
   }
-  // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
-}
 }
 
 
