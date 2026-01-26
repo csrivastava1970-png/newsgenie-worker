@@ -333,68 +333,6 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
         <div style="font-size:12px;opacity:.75;">Add bytes from selection or paste/type manually.</div>
 <script>
-/* NG_ADD_BYTE_FALLBACK_V1_START */
-(function(){
-  if (window.__NG_ADD_BYTE_FALLBACK_V1) return;
-  window.__NG_ADD_BYTE_FALLBACK_V1 = true;
-
-  function escAttr(s){ return String(s??"").replace(/"/g,"&quot;"); }
-
-  function addRow(){
-    const wrap = document.querySelector("#bytes-wrap");
-    if (!wrap) return;
-
-    const defSp = document.querySelector("#ng-byte-default-speaker")?.value || "";
-    const defDe = document.querySelector("#ng-byte-default-desig")?.value || "";
-
-    const row = document.createElement("div");
-    row.className = "ng-byte-row";
-    row.style.cssText = "display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;align-items:start;";
-
-    row.innerHTML = `
-      <input class="ng-byte-speaker" placeholder="Speaker" value="${escAttr(defSp)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
-      <input class="ng-byte-desig" placeholder="Designation" value="${escAttr(defDe)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
-      <button type="button" class="danger ng-byte-remove" style="padding:8px 12px;border-radius:10px;border:1px solid #ef4444;background:#fff;">Remove</button>
-      <textarea class="ng-byte-text" placeholder="Quote / Byte text" rows="3" style="grid-column:1 / -1; padding:10px;border:1px solid #e5e7eb;border-radius:10px;"></textarea>
-    `;
-
-    row.querySelector(".ng-byte-remove").addEventListener("click", () => row.remove());
-    wrap.appendChild(row);
-  }
-
-  // bind once
-  function bind(){
-    const btn = document.querySelector("#addByteBtn");
-    const wrap = document.querySelector("#bytes-wrap");
-    if (!btn || !wrap) return false;
-
-    if (!btn.dataset.ngBoundFallback) {
-      btn.dataset.ngBoundFallback = "1";
-      btn.addEventListener("click", (e) => {
-        // If some other handler adds a row, fine. Otherwise ensure at least one row exists.
-        setTimeout(() => {
-          const any = wrap.querySelector(".ng-byte-row, textarea, input");
-          if (!any) addRow();
-          else {
-            // If handler exists but created nothing, still add row
-            const hasRow = wrap.querySelector(".ng-byte-row, textarea.ng-byte-text");
-            if (!hasRow) addRow();
-          }
-        }, 0);
-      }, true);
-    }
-    return true;
-  }
-
-  // try now + retry a few times (in case DOM late)
-  if (bind()) return;
-  let tries = 0;
-  const t = setInterval(() => {
-    tries++;
-    if (bind() || tries > 25) clearInterval(t);
-  }, 200);
-})();
- /* NG_ADD_BYTE_FALLBACK_V1_END */
 </script>
 <script>
 /* NG_BYTES_WRAP_HEIGHT_FIX_V1_START */
@@ -480,58 +418,6 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
  /* NG_MOVE_ADD_FINAL_BTN_V1_END */
 </script>
 <script>
-/* NG_ADD_FINAL_SYNC_FALLBACK_V1_START */
-(function(){
-  if (window.__NG_ADD_FINAL_SYNC_FALLBACK_V1) return;
-  window.__NG_ADD_FINAL_SYNC_FALLBACK_V1 = true;
-
-  function collectBytes(){
-    const wrap = document.querySelector("#bytes-wrap");
-    if (!wrap) return [];
-    const rows = [...wrap.querySelectorAll(".ng-byte-row")];
-    const out = [];
-    for (const r of rows){
-      const sp = (r.querySelector(".ng-byte-speaker")?.value || "").trim();
-      const de = (r.querySelector(".ng-byte-desig")?.value || "").trim();
-      const tx = (r.querySelector(".ng-byte-text")?.value || "").trim();
-      if (!tx) continue;
-      out.push({ speaker: sp, designation: de, text: tx });
-    }
-    return out;
-  }
-
-  async function post(bytes){
-    const r = await fetch("/api/bytes/latest",{
-      method:"POST",
-      headers: {"content-type":"application/json"},
-      body: JSON.stringify({ bytes, source:"ui_add_final_fallback_v1", ts:new Date().toISOString() })
-    });
-    return r.json().catch(()=>null);
-  }
-
-  async function syncNow(){
-    try{
-      const bytes = collectBytes();
-      await post(bytes);
-    }catch(e){
-      console.warn("[NG_ADD_FINAL_SYNC_FALLBACK_V1] sync failed", e);
-    }
-  }
-  window.NG_syncFinalBytesNow = syncNow;
-
-  // Add to Bytes -> sync
-  document.addEventListener("click", (e)=>{
-    if (e.target && e.target.id === "ng-add-final"){
-      // let existing handler run, then ensure backend matches our rows
-      setTimeout(syncNow, 0);
-    }
-    // Remove -> sync
-    if (e.target && e.target.classList && e.target.classList.contains("ng-byte-remove")){
-      setTimeout(syncNow, 0);
-    }
-  }, true);
-})();
- /* NG_ADD_FINAL_SYNC_FALLBACK_V1_END */
 </script>
         <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
       </div>
@@ -703,6 +589,129 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 <!-- NG_PATCH_START: AUTORUN_KILL_V1 -->
 </body>
 </html>
+
+<!-- NG_FALLBACKS_CONSOLIDATED_V1_START -->
+<script>
+/* Consolidated fallbacks (single copy). Logic unchanged; structure tidied. */
+</script>
+
+/* NG_ADD_BYTE_FALLBACK_V1_START */
+(function(){
+  if (window.__NG_ADD_BYTE_FALLBACK_V1) return;
+  window.__NG_ADD_BYTE_FALLBACK_V1 = true;
+
+  function escAttr(s){ return String(s??"").replace(/"/g,"&quot;"); }
+
+  function addRow(){
+    const wrap = document.querySelector("#bytes-wrap");
+    if (!wrap) return;
+
+    const defSp = document.querySelector("#ng-byte-default-speaker")?.value || "";
+    const defDe = document.querySelector("#ng-byte-default-desig")?.value || "";
+
+    const row = document.createElement("div");
+    row.className = "ng-byte-row";
+    row.style.cssText = "display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;align-items:start;";
+
+    row.innerHTML = `
+      <input class="ng-byte-speaker" placeholder="Speaker" value="${escAttr(defSp)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
+      <input class="ng-byte-desig" placeholder="Designation" value="${escAttr(defDe)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
+      <button type="button" class="danger ng-byte-remove" style="padding:8px 12px;border-radius:10px;border:1px solid #ef4444;background:#fff;">Remove</button>
+      <textarea class="ng-byte-text" placeholder="Quote / Byte text" rows="3" style="grid-column:1 / -1; padding:10px;border:1px solid #e5e7eb;border-radius:10px;"></textarea>
+    `;
+
+    row.querySelector(".ng-byte-remove").addEventListener("click", () => row.remove());
+    wrap.appendChild(row);
+  }
+
+  // bind once
+  function bind(){
+    const btn = document.querySelector("#addByteBtn");
+    const wrap = document.querySelector("#bytes-wrap");
+    if (!btn || !wrap) return false;
+
+    if (!btn.dataset.ngBoundFallback) {
+      btn.dataset.ngBoundFallback = "1";
+      btn.addEventListener("click", (e) => {
+        // If some other handler adds a row, fine. Otherwise ensure at least one row exists.
+        setTimeout(() => {
+          const any = wrap.querySelector(".ng-byte-row, textarea, input");
+          if (!any) addRow();
+          else {
+            // If handler exists but created nothing, still add row
+            const hasRow = wrap.querySelector(".ng-byte-row, textarea.ng-byte-text");
+            if (!hasRow) addRow();
+          }
+        }, 0);
+      }, true);
+    }
+    return true;
+  }
+
+  // try now + retry a few times (in case DOM late)
+  if (bind()) return;
+  let tries = 0;
+  const t = setInterval(() => {
+    tries++;
+    if (bind() || tries > 25) clearInterval(t);
+  }, 200);
+})();
+ /* NG_ADD_BYTE_FALLBACK_V1_END */
+
+/* NG_ADD_FINAL_SYNC_FALLBACK_V1_START */
+(function(){
+  if (window.__NG_ADD_FINAL_SYNC_FALLBACK_V1) return;
+  window.__NG_ADD_FINAL_SYNC_FALLBACK_V1 = true;
+
+  function collectBytes(){
+    const wrap = document.querySelector("#bytes-wrap");
+    if (!wrap) return [];
+    const rows = [...wrap.querySelectorAll(".ng-byte-row")];
+    const out = [];
+    for (const r of rows){
+      const sp = (r.querySelector(".ng-byte-speaker")?.value || "").trim();
+      const de = (r.querySelector(".ng-byte-desig")?.value || "").trim();
+      const tx = (r.querySelector(".ng-byte-text")?.value || "").trim();
+      if (!tx) continue;
+      out.push({ speaker: sp, designation: de, text: tx });
+    }
+    return out;
+  }
+
+  async function post(bytes){
+    const r = await fetch("/api/bytes/latest",{
+      method:"POST",
+      headers: {"content-type":"application/json"},
+      body: JSON.stringify({ bytes, source:"ui_add_final_fallback_v1", ts:new Date().toISOString() })
+    });
+    return r.json().catch(()=>null);
+  }
+
+  async function syncNow(){
+    try{
+      const bytes = collectBytes();
+      await post(bytes);
+    }catch(e){
+      console.warn("[NG_ADD_FINAL_SYNC_FALLBACK_V1] sync failed", e);
+    }
+  }
+  window.NG_syncFinalBytesNow = syncNow;
+
+  // Add to Bytes -> sync
+  document.addEventListener("click", (e)=>{
+    if (e.target && e.target.id === "ng-add-final"){
+      // let existing handler run, then ensure backend matches our rows
+      setTimeout(syncNow, 0);
+    }
+    // Remove -> sync
+    if (e.target && e.target.classList && e.target.classList.contains("ng-byte-remove")){
+      setTimeout(syncNow, 0);
+    }
+  }, true);
+})();
+ /* NG_ADD_FINAL_SYNC_FALLBACK_V1_END */
+
+<!-- NG_FALLBACKS_CONSOLIDATED_V1_END -->
 </body>
 <script>
 /* NG_FINAL_BYTES_UI_POLL_V1_START */
@@ -787,6 +796,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 </script>
 
 </html>
+
 
 
 
