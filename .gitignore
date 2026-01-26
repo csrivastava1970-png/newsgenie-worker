@@ -21,3 +21,16 @@ _local_backups/
 final/
 _snip_transcript_handlers.txt
 
+
+
+# ---- NewsGenie local artifacts (auto-generated) ----
+_ng_bytes_scan_*.log
+public/index_backup_*.html
+public/index.html.bak_*
+public/*.bak_*
+public/*_FAIL.js.bak_*
+public/script*.bak_*
+public/_script*.bak_*
+backups/
+*.log
+
