@@ -910,6 +910,104 @@ window.NG_refreshFinalBytes_DISABLED = function(){
 
 })();  /* NG_FINAL_BYTES_UI_POLL_V1_END */ </script>
 
+<!-- NG_SMOKE_TEST_BUTTON_V1_START -->
+<button id="ng-smoke-test"
+  style="position:fixed;right:16px;bottom:16px;z-index:9999;
+         padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;
+         background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.08);
+         font-size:12px;cursor:pointer;">
+  Smoke Test
+</button>
+
+<script>
+(function(){
+  const btn = document.getElementById("ng-smoke-test");
+  if (!btn || btn.dataset.bound) return;
+  btn.dataset.bound = "1";
+
+  async function run(){
+    const out = { ts: new Date().toISOString(), checks: [] };
+
+    function ok(name, extra){ out.checks.push({ name, ok:true, ...extra }); }
+    function bad(name, extra){ out.checks.push({ name, ok:false, ...extra }); }
+
+    // Check: build stamp
+    const stamp = document.querySelector('meta[name="ng-build-stamp"]')?.getAttribute('content') || null;
+    stamp ? ok("build_stamp", { stamp }) : bad("build_stamp");
+
+    // Check: health
+    try{
+      const h = await fetch("/api/health", { cache:"no-store" }).then(r=>r.json());
+      h?.ok ? ok("api_health", { h }) : bad("api_health", { h });
+    }catch(e){ bad("api_health", { error: String(e?.message||e) }); }
+
+    // Check: bytes latest
+    try{
+      const b = await fetch("/api/bytes/latest", { cache:"no-store" }).then(r=>r.json());
+      const n = Array.isArray(b?.bytes) ? b.bytes.length : (Array.isArray(b?.latest?.bytes) ? b.latest.bytes.length : 0);
+      ok("api_bytes_latest", { count: n, payload: b });
+    }catch(e){ bad("api_bytes_latest", { error: String(e?.message||e) }); }
+
+    // Check: refresh function + render host
+    const host = document.querySelector("#ng-final-bytes-list-auto");
+    host ? ok("final_bytes_host") : bad("final_bytes_host");
+
+    if (typeof window.NG_refreshFinalBytes === "function") ok("NG_refreshFinalBytes_exists");
+    else bad("NG_refreshFinalBytes_exists");
+
+    // Try render
+    try{
+      if (typeof window.NG_refreshFinalBytes === "function") {
+        const r = await window.NG_refreshFinalBytes();
+        const cards = document.querySelectorAll(".ng-final-card").length;
+        ok("NG_refreshFinalBytes_run", { ret: r, cards });
+      }
+    }catch(e){ bad("NG_refreshFinalBytes_run", { error: String(e?.message||e) }); }
+
+ console.log("[NG_SMOKE_TEST]", out);
+// Show results on-page (no console dependency) — DEV ONLY (box)
+const __NG_SMOKE_ON__ = new URLSearchParams(location.search).get("smoke") === "1";
+
+/*
+  DEV-ONLY: hide Smoke button on normal URLs.
+  NOTE: Best practice is to ALSO hide on page-load (outside run()).
+  This line ensures that once run() executes, the button state is correct.
+*/
+const __btn = document.getElementById("ng-smoke-btn");
+if (__btn) __btn.style.display = __NG_SMOKE_ON__ ? "inline-flex" : "none";
+
+// DEV-OFF: no box/no further work
+if (!__NG_SMOKE_ON__) return out;
+
+
+// DEV-ON: show box
+let box = document.getElementById("ng-smoke-out");
+if (!box) {
+  box = document.createElement("pre");
+  box.id = "ng-smoke-out";
+  box.style.cssText =
+    "position:fixed;right:16px;bottom:64px;z-index:9999;max-width:520px;max-height:320px;" +
+    "overflow:auto;padding:10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;" +
+    "box-shadow:0 6px 18px rgba(0,0,0,.08);font-size:11px;white-space:pre-wrap;";
+  document.body.appendChild(box);
+}
+
+box.style.cursor = "pointer";
+box.textContent = "[NG_SMOKE_TEST]\n" + JSON.stringify(out, null, 2);
+box.onclick = () => box.remove();
+
+return out;
+
+}
+
+
+  btn.addEventListener("click", run);
+})();
+</script>
+<!-- NG_SMOKE_TEST_BUTTON_V1_END -->
+
+<script src="ng_add_byte_multirow_v3.js"></script>
+
 </body>
 
 
