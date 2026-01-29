@@ -1,24 +1,29 @@
-/* === NG_ADD_BYTE_MULTIROW_V3_3_START (20260129) === */
+/* === NG_ADD_BYTE_MULTIROW_V3_2_START (20260129) === */
 (function () {
-  if (window.__NG_ADD_BYTE_MULTIROW_V3_3__) return;
-  window.__NG_ADD_BYTE_MULTIROW_V3_3__ = true;
+  if (window.__NG_ADD_BYTE_MULTIROW_V3_2__) return;
+  window.__NG_ADD_BYTE_MULTIROW_V3_2__ = true;
 
   function normText(s) {
     return (s || "").replace(/\s+/g, " ").trim().toLowerCase();
   }
 
-  // ---------- ADD BYTE BUTTON ----------
   function matchesAddBtn(el) {
     if (!el || !el.tagName) return false;
 
+    // ✅ your button
     if (el.id === "addByteBtn") return true;
+
+    // other common ids
     if (el.id === "btnAddByte" || el.id === "btn-add-byte") return true;
 
+    // dataset markers
     if (el.getAttribute && el.getAttribute("data-add-byte") === "1") return true;
 
+    // class hint
     var cls = (el.className || "").toString();
     if (cls.indexOf("ng-add-byte") >= 0) return true;
 
+    // text fallback
     if (el.tagName === "BUTTON") {
       var t = normText(el.textContent);
       if (t === "+ add byte" || t === "add byte" || t.indexOf("add byte") >= 0) return true;
@@ -35,44 +40,19 @@
     return null;
   }
 
-  // ---------- REMOVE BUTTON ----------
-  function matchesRemoveBtn(el) {
-    if (!el || !el.tagName) return false;
-    if (el.tagName !== "BUTTON") return false;
-
-    if (el.getAttribute && el.getAttribute("data-remove-byte") === "1") return true;
-
-    var cls = (el.className || "").toString();
-    if (cls.indexOf("ng-remove-byte") >= 0) return true;
-    if (cls.indexOf("danger") >= 0) return true;
-
-    var t = normText(el.textContent);
-    if (t === "remove" || t.indexOf("remove") >= 0) return true;
-
-    return false;
-  }
-
-  function closestRemoveBtn(node) {
-    var cur = node;
-    while (cur && cur !== document) {
-      if (matchesRemoveBtn(cur)) return cur;
-      cur = cur.parentNode;
-    }
-    return null;
-  }
-
-  // ---------- HOST / TEMPLATE ----------
   function findExistingByteRow() {
+    // The “byte row” is the one that has a Remove button
     var rb = document.querySelector("button.danger,[data-remove-byte],.ng-remove-byte");
     if (!rb) return null;
 
     var row =
-      (rb.closest && (rb.closest("[data-byte-row]") || rb.closest(".ng-byte-row"))) ||
+      (rb.closest && (rb.closest("[data-byte-row]") || rb.closest(".ng-byte-row") || rb.closest(".row"))) ||
       null;
 
+    // Must have textarea (byte text)
     if (row && row.querySelector && row.querySelector("textarea")) return row;
 
-    // fallback climb until textarea found
+    // fallback: climb up until we find textarea
     var p = rb.parentNode;
     while (p && p !== document) {
       if (p.querySelector && p.querySelector("textarea")) return p;
@@ -82,7 +62,7 @@
   }
 
   function findRowsHost(btn) {
-    // optional explicit override
+    // 1) explicit override (optional)
     try {
       var sel = btn && btn.getAttribute ? btn.getAttribute("data-target") : null;
       if (sel) {
@@ -91,12 +71,14 @@
       }
     } catch (e) {}
 
-    // if byte row exists, host = its parent
+    // 2) if at least 1 byte row already exists, host = row.parentElement
     var existingRow = findExistingByteRow();
     if (existingRow && existingRow.parentElement) return existingRow.parentElement;
 
-    // fallback guesses
+    // 3) fallback ids (best guesses)
     return (
+      document.querySelector("#bytes-wrap") ||
+
       document.getElementById("bytesWrapInner") ||
       document.getElementById("bytesWrap") ||
       document.getElementById("ng-bytes-rows") ||
@@ -157,12 +139,13 @@
 
   function addRow(btn) {
     var host = findRowsHost(btn);
-    if (!host) return { ok: false, reason: "no_host" };
+    if (!host) {
+      console.warn("[NG_ADD_BYTE_MULTIROW_V3_2] no host");
+      return { ok: false, reason: "no_host" };
+    }
 
-    // template = an existing byte row (best)
+    // template = existing byte row if present; else first textarea-containing block in host
     var tpl = findExistingByteRow();
-
-    // fallback: any child with textarea
     if (!tpl) {
       var cands = host.querySelectorAll("div, section, article, li");
       for (var i = 0; i < cands.length; i++) {
@@ -172,7 +155,10 @@
         }
       }
     }
-    if (!tpl) return { ok: false, reason: "no_template" };
+    if (!tpl) {
+      console.warn("[NG_ADD_BYTE_MULTIROW_V3_2] no template");
+      return { ok: false, reason: "no_template" };
+    }
 
     var row = tpl.cloneNode(true);
     stripIds(row);
@@ -192,61 +178,9 @@
     return { ok: true };
   }
 
-  function findRowFromRemoveButton(rb) {
-    if (!rb) return null;
-
-    // try closest markers first
-    var row = (rb.closest && (rb.closest("[data-byte-row]") || rb.closest(".ng-byte-row"))) || null;
-    if (row) return row;
-
-    // fallback: climb until we find a container with textarea
-    var p = rb.parentNode;
-    var steps = 0;
-    while (p && p !== document && steps < 12) {
-      if (p.querySelector && p.querySelector("textarea")) return p;
-      p = p.parentNode;
-      steps++;
-    }
-    return null;
-  }
-
-  function handleRemove(ev, rb) {
-    // restrict removal to within bytes host so we don't kill other "Remove" buttons elsewhere
-    var addBtn = document.getElementById("addByteBtn") || rb; // fallback
-    var host = findRowsHost(addBtn);
-    if (host && !host.contains(rb)) {
-      return false;
-    }
-
-    var row = findRowFromRemoveButton(rb);
-    if (!row) return false;
-
-    if (row.parentNode) row.parentNode.removeChild(row);
-
-    try {
-      document.dispatchEvent(new CustomEvent("ng:byte-row-removed", { detail: { row: row } }));
-    } catch (e) {}
-
-    return true;
-  }
-
-  // Delegated click handler (capture=true)
   document.addEventListener(
     "click",
     function (ev) {
-      // 1) Remove
-      var rb = closestRemoveBtn(ev.target);
-      if (rb) {
-        var did = handleRemove(ev, rb);
-        if (did) {
-          ev.preventDefault();
-          if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-          ev.stopPropagation();
-        }
-        return;
-      }
-
-      // 2) Add Byte
       var btn = closestAddBtn(ev.target);
       if (!btn) return;
 
@@ -260,6 +194,6 @@
     true
   );
 
-  console.log("[NG_ADD_BYTE_MULTIROW_V3_3] installed");
+  console.log("[NG_ADD_BYTE_MULTIROW_V3_2] installed");
 })();
-/* === NG_ADD_BYTE_MULTIROW_V3_3_END === */
+/* === NG_ADD_BYTE_MULTIROW_V3_2_END === */

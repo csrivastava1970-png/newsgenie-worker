@@ -819,7 +819,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
   function ensureHost() {
     let host = document.querySelector("#ng-final-bytes-list-auto");
     if (!host) {
-      const TARGET = document.querySelector("#bytesWrap") || document.querySelector("#ng-adv-only") || document.body;
+      const TARGET = document.querySelector("#bytes-wrap") || document.querySelector("#bytesWrap") || document.querySelector("#ng-adv-only") || document.body;
       host = document.createElement("div");
       host.id = "ng-final-bytes-list-auto";
       host.style.cssText = "margin-top:10px;";
@@ -1012,6 +1012,7 @@ return out;
 
 
 </html>
+
 
 
 
