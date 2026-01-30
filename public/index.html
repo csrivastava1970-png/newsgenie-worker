@@ -708,13 +708,15 @@ const defDe = "";
     }
 
     function bind(){
-      if (window.__NG_ADD_BYTE_MULTIROW_V3__) return true;
+  if (window.__NG_ADD_BYTE_MULTIROW_V3__) return true;
+  if (window.__NG_ADD_BYTE_MULTIROW_V3_2__) return true;
 
-      const btn = document.querySelector("#addByteBtn");
-      const wrap = document.querySelector("#bytes-wrap");
-      if (!btn || !wrap) return false;
+  const btn = document.querySelector("#addByteBtn");
+  const wrap = document.querySelector("#bytes-wrap");
+  if (!btn || !wrap) return false;
 
-      if (!btn.dataset.ngBoundFallback) {
+  if (!btn.dataset.ngBoundFallback) {
+
         btn.dataset.ngBoundFallback = "1";
         btn.addEventListener("click", () => {
           setTimeout(() => {
