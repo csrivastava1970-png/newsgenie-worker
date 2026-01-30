@@ -120,15 +120,8 @@
     }
   }
 
-  function getDefaultQuoteText() {
-    var el =
-      document.querySelector("#ng-default-byte-quote") ||
-      document.querySelector("#ng-byte-default-quote") ||
-      document.querySelector("#defaultQuote") ||
-      document.querySelector("textarea[data-default-quote]");
-    if (!el) return "";
-    return (el.value || "").toString();
-  }
+  function getDefaultQuoteText() { return ""; }
+
 
   function applyDefaultQuoteIfAny(row) {
     var txt = getDefaultQuoteText();
@@ -164,7 +157,7 @@
     stripIds(row);
     clearInputs(row);
     enableRemove(row);
-    applyDefaultQuoteIfAny(row);
+  
 
     host.appendChild(row);
 

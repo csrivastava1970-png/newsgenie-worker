@@ -437,21 +437,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
         <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
       </div>
 
-            <div id="ng-byte-defaults" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <input
-          id="ng-byte-default-speaker"
-          type="text"
-          placeholder="Default Speaker"
-          style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:220px;"
-        >
-        <input
-          id="ng-byte-default-desig"
-          type="text"
-          placeholder="Default Designation"
-          style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:260px;"
-        >
-        <span style="font-size:12px; opacity:.7;">(Auto-fill for new byte rows)</span>
-      </div>
+            
 <!-- NG_BYTES_UNIFIED_DRAFT_V1_START -->
 <div id="ng-byte-draft-area" style="margin-top:10px; display:none;">
   <div id="ng-byte-draft-box" style="margin-top:10px;padding:10px;border:1px dashed #cbd5e1;border-radius:12px;">
@@ -701,9 +687,8 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     function addRow(){
       const wrap = document.querySelector("#bytes-wrap");
       if (!wrap) return;
-
-      const defSp = document.querySelector("#ng-byte-default-speaker")?.value || "";
-      const defDe = document.querySelector("#ng-byte-default-desig")?.value || "";
+const defSp = "";
+const defDe = "";
 
       const row = document.createElement("div");
       row.className = "ng-byte-row";
@@ -712,8 +697,10 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
       row.innerHTML = `
         <input class="ng-byte-speaker" placeholder="Speaker" value="${escAttr(defSp)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
         <input class="ng-byte-desig" placeholder="Designation" value="${escAttr(defDe)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
-        <button type="button" class="danger ng-byte-remove" style="padding:8px 12px;border-radius:10px;border:1px solid #ef4444;background:#fff;">Remove</button>
+        
         <textarea class="ng-byte-text" placeholder="Quote / Byte text" rows="3" style="grid-column:1 / -1; padding:10px;border:1px solid #e5e7eb;border-radius:10px;"></textarea>
+<button type="button" class="danger ng-byte-remove" style="grid-column:1 / -1; justify-self:end; padding:8px 12px;border-radius:10px;border:1px solid #ef4444;background:#fff;">Remove</button>
+
       `;
 
       row.querySelector(".ng-byte-remove").addEventListener("click", () => row.remove());
