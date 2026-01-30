@@ -123,12 +123,7 @@
   function getDefaultQuoteText() { return ""; }
 
 
-  function applyDefaultQuoteIfAny(row) {
-    var txt = getDefaultQuoteText();
-    if (!txt) return;
-    var ta = row.querySelector("textarea");
-    if (ta && !ta.value) ta.value = txt;
-  }
+  
 
   function addRow(btn) {
     var host = findRowsHost(btn);
