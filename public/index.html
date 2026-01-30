@@ -708,6 +708,8 @@ const defDe = "";
     }
 
     function bind(){
+      if (window.__NG_ADD_BYTE_MULTIROW_V3__) return true;
+
       const btn = document.querySelector("#addByteBtn");
       const wrap = document.querySelector("#bytes-wrap");
       if (!btn || !wrap) return false;

@@ -1,5 +1,7 @@
 /* === NG_ADD_BYTE_MULTIROW_V3_2_START (20260129) === */
 (function () {
+window.__NG_ADD_BYTE_MULTIROW_V3__ = true;
+
   if (window.__NG_ADD_BYTE_MULTIROW_V3_2__) return;
   window.__NG_ADD_BYTE_MULTIROW_V3_2__ = true;
 
