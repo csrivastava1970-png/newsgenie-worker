@@ -1,6 +1,6 @@
-/* === NG_ADD_BYTE_MULTIROW_V3_2_START (20260129) === */
-(function () {
+﻿/* === NG_ADD_BYTE_MULTIROW_V3_2_START (20260129) === */
 window.__NG_ADD_BYTE_MULTIROW_V3__ = true;
+(function () {
 
   if (window.__NG_ADD_BYTE_MULTIROW_V3_2__) return;
   window.__NG_ADD_BYTE_MULTIROW_V3_2__ = true;
@@ -12,7 +12,7 @@ window.__NG_ADD_BYTE_MULTIROW_V3__ = true;
   function matchesAddBtn(el) {
     if (!el || !el.tagName) return false;
 
-    // ✅ your button
+    // âœ… your button
     if (el.id === "addByteBtn") return true;
 
     // other common ids
@@ -43,7 +43,7 @@ window.__NG_ADD_BYTE_MULTIROW_V3__ = true;
   }
 
   function findExistingByteRow() {
-    // The “byte row” is the one that has a Remove button
+    // The â€œbyte rowâ€ is the one that has a Remove button
     var rb = document.querySelector("button.danger,[data-remove-byte],.ng-remove-byte");
     if (!rb) return null;
 
@@ -168,6 +168,31 @@ window.__NG_ADD_BYTE_MULTIROW_V3__ = true;
     return { ok: true };
   }
 
+  // --- Remove button: event delegation (works for all future rows) ---
+  document.addEventListener(
+    "click",
+    function (ev) {
+      var rm = ev.target && ev.target.closest ? ev.target.closest(".ng-byte-remove, [data-remove-byte], .ng-remove-byte, button.danger") : null;
+      if (!rm) return;
+
+      // only treat as remove if it looks like a remove button
+      var t = (rm.textContent || "").toString().toLowerCase();
+      if (t.indexOf("remove") < 0 && t.indexOf("delete") < 0 && !rm.classList.contains("ng-byte-remove")) return;
+
+      var row =
+        (rm.closest && (rm.closest("[data-byte-row]") || rm.closest(".ng-byte-row") || rm.closest(".row"))) ||
+        null;
+
+      if (row) {
+        row.remove();
+        ev.preventDefault();
+        if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+        ev.stopPropagation();
+      }
+    },
+    true
+  );
+  // --- end remove delegation ---
   document.addEventListener(
     "click",
     function (ev) {
@@ -187,3 +212,4 @@ window.__NG_ADD_BYTE_MULTIROW_V3__ = true;
   console.log("[NG_ADD_BYTE_MULTIROW_V3_2] installed");
 })();
 /* === NG_ADD_BYTE_MULTIROW_V3_2_END === */
+
