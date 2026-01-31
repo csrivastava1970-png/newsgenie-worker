@@ -1,4 +1,4 @@
-
+﻿
 /* === Editorial Extraction : Suggestions Panel + Transcript Auto-Ingest (Clean V3) === */
 (function () {
   "use strict";
@@ -12,38 +12,38 @@
   function norm(s) { return String(s ?? "").replace(/\s+/g, " ").trim(); }
   function normKey(s) {
     return norm(s).toLowerCase()
-      .replace(/[“”"']/g, "")
+      .replace(/[â€œâ€"']/g, "")
       .replace(/[^\p{L}\p{N}\s]/gu, "")
       .replace(/\s+/g, " ")
       .trim();
   }
 
-  // optional speaker→designation map
+  // optional speakerâ†’designation map
   window.__NG_SPEAKER_MAP = window.__NG_SPEAKER_MAP || {
-    "किरण रिजिजू": "केंद्रीय मंत्री",
-    "जयराम रमेश": "कांग्रेस नेता"
+    "à¤•à¤¿à¤°à¤£ à¤°à¤¿à¤œà¤¿à¤œà¥‚": "à¤•à¥‡à¤‚à¤¦à¥à¤°à¥€à¤¯ à¤®à¤‚à¤¤à¥à¤°à¥€",
+    "à¤œà¤¯à¤°à¤¾à¤® à¤°à¤®à¥‡à¤¶": "à¤•à¤¾à¤‚à¤—à¥à¤°à¥‡à¤¸ à¤¨à¥‡à¤¤à¤¾"
   };
 
   // ---------------- extraction helpers ----------------
   function guessSpeakerFromText(text) {
     const t = norm(text);
 
-    // "नाम (पद): बयान..."
-    const m2 = t.match(/^(.{2,40})\s*\((.{2,40})\)\s*[:：]\s*(.+)$/);
+    // "à¤¨à¤¾à¤® (à¤ªà¤¦): à¤¬à¤¯à¤¾à¤¨..."
+    const m2 = t.match(/^(.{2,40})\s*\((.{2,40})\)\s*[:ï¼š]\s*(.+)$/);
     if (m2) return { speaker: norm(m2[1]), designation: norm(m2[2]), text: norm(m2[3]) };
 
-    // "नाम: बयान..."
-    const m = t.match(/^([^:：]{2,40})\s*[:：]\s*(.+)$/);
+    // "à¤¨à¤¾à¤®: à¤¬à¤¯à¤¾à¤¨..."
+    const m = t.match(/^([^:ï¼š]{2,40})\s*[:ï¼š]\s*(.+)$/);
     if (m) return { speaker: norm(m[1]), text: norm(m[2]) };
 
-    // "नाम ने कहा/बताया... (कि) ..."
+    // "à¤¨à¤¾à¤® à¤¨à¥‡ à¤•à¤¹à¤¾/à¤¬à¤¤à¤¾à¤¯à¤¾... (à¤•à¤¿) ..."
     const m3 = t.match(
-      /^([^\s:：]{2,20}(?:\s+[^\s:：]{2,20}){0,2})\s+(?:ने\s+(?:कहा|बोले|बताया|आरोप\s+लगाया|दावा\s+किया|तंज\s+कसा)|का\s+कहना\s+है)\s*(?:कि\s*)?(.+)$/
+      /^([^\s:ï¼š]{2,20}(?:\s+[^\s:ï¼š]{2,20}){0,2})\s+(?:à¤¨à¥‡\s+(?:à¤•à¤¹à¤¾|à¤¬à¥‹à¤²à¥‡|à¤¬à¤¤à¤¾à¤¯à¤¾|à¤†à¤°à¥‹à¤ª\s+à¤²à¤—à¤¾à¤¯à¤¾|à¤¦à¤¾à¤µà¤¾\s+à¤•à¤¿à¤¯à¤¾|à¤¤à¤‚à¤œ\s+à¤•à¤¸à¤¾)|à¤•à¤¾\s+à¤•à¤¹à¤¨à¤¾\s+à¤¹à¥ˆ)\s*(?:à¤•à¤¿\s*)?(.+)$/
     );
     if (m3) {
       const sp = norm(m3[1]);
       const rest = norm(m3[2] || "");
-      if (sp && !/^(उन्होंने|उसने|हमने|आपने|इन्होंने|उनका|उसका)$/u.test(sp)) {
+      if (sp && !/^(à¤‰à¤¨à¥à¤¹à¥‹à¤‚à¤¨à¥‡|à¤‰à¤¸à¤¨à¥‡|à¤¹à¤®à¤¨à¥‡|à¤†à¤ªà¤¨à¥‡|à¤‡à¤¨à¥à¤¹à¥‹à¤‚à¤¨à¥‡|à¤‰à¤¨à¤•à¤¾|à¤‰à¤¸à¤•à¤¾)$/u.test(sp)) {
         return { speaker: sp, text: rest || t };
       }
     }
@@ -62,14 +62,14 @@
     else score -= 0.2;
 
     if (line.speaker) score += 1.6;
-    if (/[“”"']/.test(t)) score += 1.2;
+    if (/[â€œâ€"']/.test(t)) score += 1.2;
     if (/[?!]/.test(t)) score += 0.4;
 
-    if (/(कहा|बोले|बताया|स्पष्ट|साफ|जवाब|तैयार|आरोप|तंज|सरकार|विपक्ष|जांच|सवाल|चुनाव|संसद|देश|जनता)/.test(t)) score += 2;
-    if (/(नहीं|गलत|झूठ|सबूत|कार्रवाई|मांग|इस्तीफा|हमला|बचाव)/.test(t)) score += 1;
-    if (/[0-9०-९]/.test(t)) score += 0.6;
+    if (/(à¤•à¤¹à¤¾|à¤¬à¥‹à¤²à¥‡|à¤¬à¤¤à¤¾à¤¯à¤¾|à¤¸à¥à¤ªà¤·à¥à¤Ÿ|à¤¸à¤¾à¤«|à¤œà¤µà¤¾à¤¬|à¤¤à¥ˆà¤¯à¤¾à¤°|à¤†à¤°à¥‹à¤ª|à¤¤à¤‚à¤œ|à¤¸à¤°à¤•à¤¾à¤°|à¤µà¤¿à¤ªà¤•à¥à¤·|à¤œà¤¾à¤‚à¤š|à¤¸à¤µà¤¾à¤²|à¤šà¥à¤¨à¤¾à¤µ|à¤¸à¤‚à¤¸à¤¦|à¤¦à¥‡à¤¶|à¤œà¤¨à¤¤à¤¾)/.test(t)) score += 2;
+    if (/(à¤¨à¤¹à¥€à¤‚|à¤—à¤²à¤¤|à¤à¥‚à¤ |à¤¸à¤¬à¥‚à¤¤|à¤•à¤¾à¤°à¥à¤°à¤µà¤¾à¤ˆ|à¤®à¤¾à¤‚à¤—|à¤‡à¤¸à¥à¤¤à¥€à¤«à¤¾|à¤¹à¤®à¤²à¤¾|à¤¬à¤šà¤¾à¤µ)/.test(t)) score += 1;
+    if (/[0-9à¥¦-à¥¯]/.test(t)) score += 0.6;
 
-    if (/(धन्यवाद|नमस्कार|स्वागत|आप देख रहे|देखिए|दोस्तों|चलिये|अब हम)/.test(t)) score -= 4;
+    if (/(à¤§à¤¨à¥à¤¯à¤µà¤¾à¤¦|à¤¨à¤®à¤¸à¥à¤•à¤¾à¤°|à¤¸à¥à¤µà¤¾à¤—à¤¤|à¤†à¤ª à¤¦à¥‡à¤– à¤°à¤¹à¥‡|à¤¦à¥‡à¤–à¤¿à¤|à¤¦à¥‹à¤¸à¥à¤¤à¥‹à¤‚|à¤šà¤²à¤¿à¤¯à¥‡|à¤…à¤¬ à¤¹à¤®)/.test(t)) score -= 4;
 
     return score;
   }
@@ -138,7 +138,7 @@
         .replace(/\r/g, "\n")
         .replace(/[ \t]+/g, " ")
         .replace(/\n{3,}/g, "\n\n")
-        .replace(/([।.?!])\s+/g, "$1\n")
+        .replace(/([à¥¤.?!])\s+/g, "$1\n")
         .trim();
 
       const parts = normalized
@@ -400,7 +400,7 @@ function initEditorialExtraction() {
     return set;
   }
 
-  // ✅ return true/false
+  // âœ… return true/false
   function fillSlot(slotIndex, item) {
     ensureByteRows(slotIndex + 1);
 
@@ -437,7 +437,7 @@ function initEditorialExtraction() {
   function render(list) {
     suggestions = Array.isArray(list) ? list : [];
 
-    // ✅ keep suggestions in memory for pushToBytes
+    // âœ… keep suggestions in memory for pushToBytes
     window.__NG_EE_SUGGEST = suggestions;
     window.__NG_EE_SUGGESTIONS = suggestions; // backward alias
 
@@ -505,7 +505,7 @@ function initEditorialExtraction() {
 
       const key = `${normKeyLocal(speaker)}|${normKeyLocal(desig)}|${normKeyLocal(text)}`;
 
-      // ✅ no duplicates: already in bytes OR already pushed in this click
+      // âœ… no duplicates: already in bytes OR already pushed in this click
       if (dupeSet.has(key) || pushedRun.has(key)) continue;
 
       // find next empty slot and ensure rows
@@ -514,7 +514,7 @@ function initEditorialExtraction() {
 
       const ok = fillSlot(slot, { speaker, designation: desig, text });
 
-      // ✅ only if filled successfully: uncheck + count + add to sets
+      // âœ… only if filled successfully: uncheck + count + add to sets
       if (ok) {
         const cb = eeList.querySelector(`input[type="checkbox"][data-i="${idx}"]`);
         if (cb) cb.checked = false;
@@ -563,18 +563,19 @@ function initEditorialExtraction() {
       text: x.text || ""
     }));
 
-    // ✅ keep latest suggestions in memory (for pushToBytes fallback)
+    // âœ… keep latest suggestions in memory (for pushToBytes fallback)
 window.__NG_EE_SUGGEST = Array.isArray(best) ? best : [];
 
 if (typeof window.NG_setEditorialSuggestions === "function") {
   window.NG_setEditorialSuggestions(best);
 }
 
-// ✅ after render, ensure push button state is correct
-syncEePushBtn();
+// âœ… after render, ensure push button state is correct
+if (typeof syncEePushBtn === 'function') { syncEePushBtn(); }
 
-console.log("[EE] Transcript → suggestions:", best.length);
+console.log("[EE] Transcript â†’ suggestions:", best.length);
 return best;
+};  // closes window.NG_ingestTranscript
 
 
   (function hookTranscriptSetter() {
@@ -670,8 +671,62 @@ return best;
       try { parsed = JSON.parse(raw); } catch { parsed = raw; }
 
       const text = extractTranscriptText(parsed) || (typeof parsed === "string" ? parsed : "");
-      window.NG_TRANSCRIPT = text; // ✅ sets extracted text
+      window.NG_TRANSCRIPT = text; // âœ… sets extracted text
       console.log("[TL] NG_TRANSCRIPT set. chars:", (text || "").length);
+/* === NG_TRANSCRIPT_LINES_RENDER_V1_START (20260131) === */
+try {
+  // Preview
+  const prev = document.getElementById("ng-latest-transcript-preview");
+  if (prev) prev.textContent = (text || "").slice(0, 1200);
+
+  // Lines render
+  const wrap = document.getElementById("ng-lines-wrap");
+  const st = document.getElementById("ng-lines-status");
+  const draft = document.getElementById("ng-byte-draft-text");
+
+  if (wrap) {
+    wrap.innerHTML = "";
+    const lines = String(text || "")
+      .split(/\r?\n+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    if (st) st.textContent = `Lines: ${lines.length}`;
+
+    lines.forEach((ln, idx) => {
+      const row = document.createElement("div");
+      row.className = "ng-line";
+      row.style.cssText = "display:flex;gap:10px;align-items:flex-start;cursor:pointer;user-select:none;";
+      row.innerHTML = `
+        <input type="checkbox" data-ln="${idx}" style="width:auto; margin-top:2px;">
+        <div style="font-size:13px;line-height:1.35;">${ln.replace(/</g,"&lt;")}</div>
+      `;
+      row.addEventListener("click", (e) => {
+        // toggle checkbox on row click (except direct click on checkbox keeps default)
+        const cb = row.querySelector('input[type="checkbox"]');
+        if (e.target && e.target.tagName !== "INPUT") cb.checked = !cb.checked;
+
+        // update draft with checked lines
+        if (draft) {
+          const checked = Array.from(wrap.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(x => {
+              const i = parseInt(x.getAttribute("data-ln"), 10);
+              return lines[i] || "";
+            })
+            .filter(Boolean);
+          draft.value = checked.join("\n");
+          try { draft.dispatchEvent(new Event("input", { bubbles:true })); } catch(_){}
+        }
+      });
+      wrap.appendChild(row);
+    });
+  }
+} catch (e) {
+  console.warn("[TL] lines render failed", e);
+}
+/* === NG_TRANSCRIPT_LINES_RENDER_V1_END === */
+
+
     }
 
     function boot() {
@@ -697,7 +752,7 @@ return best;
     } else {
       boot();
     }
-})();  // ✅ close Transcript Loader IIFE
+})();  // âœ… close Transcript Loader IIFE
 
 
   // ---------------- export global + auto init ----------------
@@ -709,6 +764,492 @@ return best;
     initEditorialExtraction();
   }
 
+
+
+/* === NG_LINES_TO_BYTES_FINAL_FLOW_V1_START (20260131) === */
+(() => {
+  if (window.__NG_LINES_TO_BYTES_FINAL_FLOW_V1__) return;
+  window.__NG_LINES_TO_BYTES_FINAL_FLOW_V1__ = true;
+
+  // ---------- helpers ----------
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  const norm = (s) => String(s || "")
+    .replace(/\s+/g, " ")
+    .replace(/^byte\s*\d+\s*/i, "")
+    .replace(/^final\s*/i, "")
+    .replace(/^byte\s*\d+\s*final\s*/i, "")
+    .trim()
+    .toLowerCase();
+
+  function ensureFirstByteRow() {
+    // Ensure at least 1 byte row exists
+    if (!$('#ng-manual-bytes textarea.ng-byte-text')) {
+      $('#addByteBtn')?.click();
+    }
+    return $('#ng-manual-bytes textarea.ng-byte-text');
+  }
+
+  function getSelectedTranscriptLines() {
+    // Uses your rendered ng-line rows
+    return $$('#ng-lines-wrap input[type="checkbox"][data-ln]:checked')
+      .map(cb => cb.closest('.ng-line')?.textContent?.trim())
+      .filter(Boolean);
+  }
+
+  function getLastEditedByteTextarea() {
+    const ta = window.__NG_LAST_EDITED_BYTE__;
+    const v = (ta && ta.value) ? ta.value.trim() : "";
+    if (v) return ta;
+    return null;
+  }
+
+  function pickByteText() {
+    // Prefer last edited
+    const last = getLastEditedByteTextarea();
+    if (last) return { mode: "lastEdited", text: last.value.trim() };
+
+    // Fallback: last non-empty row
+    const tas = $$('#ng-manual-bytes textarea.ng-byte-text');
+    for (let i = tas.length - 1; i >= 0; i--) {
+      const v = (tas[i].value || "").trim();
+      if (v) return { mode: "lastNonEmpty", text: v };
+    }
+    return null;
+  }
+
+  function finalHost() {
+    return $('#ng-final-bytes-list-auto');
+  }
+
+  function getFinalTextsNormalized() {
+    const host = finalHost();
+    if (!host) return [];
+    return $$('#ng-final-bytes-list-auto .ng-final-card').map(c => norm(c.textContent));
+  }
+
+  function isDuplicateFinal(text) {
+    const n = norm(text);
+    if (!n) return true;
+    const finals = getFinalTextsNormalized();
+    return finals.some(x => x === n || x.includes(n) || n.includes(x));
+  }
+
+  function appendFinalCard(text) {
+    const host = finalHost();
+    if (!host) return { ok: false, why: "no finals host" };
+
+    const n = host.querySelectorAll('.ng-final-card').length + 1;
+
+    const card = document.createElement('div');
+    card.className = 'ng-final-card';
+    card.style.cssText = "border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0;background:#fff;";
+
+    const top = document.createElement('div');
+    top.style.cssText = "display:flex;justify-content:space-between;gap:10px;align-items:flex-start;";
+
+    const left = document.createElement('div');
+    left.style.cssText = "font-weight:700;font-size:12px;opacity:.8;";
+    left.textContent = `Byte ${n} Final`;
+
+    const body = document.createElement('div');
+    body.style.cssText = "white-space:pre-wrap; margin-top:6px; font-size:13px;";
+    body.textContent = text;
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = "flex:1;";
+    wrap.appendChild(left);
+    wrap.appendChild(body);
+
+    top.appendChild(wrap);
+    card.appendChild(top);
+    host.appendChild(card);
+
+    return { ok: true, n };
+  }
+
+  // ---------- 1) Track last edited byte textarea ----------
+  if (!window.__NG_LAST_EDITED_BYTE_TRACKER_V1__) {
+    window.__NG_LAST_EDITED_BYTE_TRACKER_V1__ = true;
+    document.addEventListener('input', (e) => {
+      const ta = e.target;
+      if (ta && ta.matches && ta.matches('#ng-manual-bytes textarea.ng-byte-text')) {
+        window.__NG_LAST_EDITED_BYTE__ = ta;
+      }
+    }, true);
+  }
+
+  // ---------- 2) Transcript selection -> fill FIRST byte row ----------
+  function pushSelectionToFirstByte() {
+    const lines = getSelectedTranscriptLines();
+    const txt = lines.join('\n');
+    const ta = ensureFirstByteRow();
+    if (!ta) return { ok: false, why: "no byte textarea" };
+    ta.value = txt;
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    return { ok: true, selected: lines.length, len: txt.length };
+  }
+
+  const linesWrap = $('#ng-lines-wrap');
+  if (linesWrap && !window.__NG_LINES_TO_BYTES_WIRE_V1__) {
+    window.__NG_LINES_TO_BYTES_WIRE_V1__ = true;
+    linesWrap.addEventListener('change', (e) => {
+      if (e.target && e.target.matches('input[type="checkbox"][data-ln]')) {
+        pushSelectionToFirstByte();
+      }
+    }, true);
+  }
+
+  // ---------- 3) Final Bytes -> bytesJSONOut sync (schema: {ts, bytes:[...]}) ----------
+  function syncFinalToJSONOut() {
+    const host = finalHost();
+    const out = $('#bytesJSONOut');
+    if (!host || !out) return { ok: false, why: "missing host/out" };
+
+    const cards = $$('#ng-final-bytes-list-auto .ng-final-card');
+    const bytes = cards.map((card) => {
+      // Remove "Byte N Final" labels from the beginning (best-effort)
+      let t = (card.textContent || "").trim();
+      t = t.replace(/^Byte\s*\d+\s*/i, '');
+      t = t.replace(/^Final\s*/i, '');
+      t = t.replace(/^Byte\s*\d+\s*Final\s*/i, '');
+      t = t.replace(/^Byte\s*\d+Final/i, ''); // in case no spaces
+      return { speaker: "", designation: "", text: t.trim() };
+    }).filter(b => b.text);
+
+    out.value = JSON.stringify({ ts: new Date().toISOString(), bytes }, null, 2);
+    out.dispatchEvent(new Event('input', { bubbles: true }));
+    return { ok: true, cards: cards.length, out_len: out.value.length };
+  }
+
+  // Observe finals host for changes
+  const host = finalHost();
+  if (host && window.MutationObserver && !window.__NG_FINAL_JSON_MO_V1__) {
+    window.__NG_FINAL_JSON_MO_V1__ = true;
+    const mo = new MutationObserver(() => { syncFinalToJSONOut(); });
+    mo.observe(host, { childList: true, subtree: true });
+    // initial sync (if anything exists)
+    syncFinalToJSONOut();
+  }
+
+  // ---------- 4) Add to Bytes fallback (only if app doesn't add) + duplicate guard ----------
+  const addBtn = $('#ng-add-final');
+  if (addBtn && !window.__NG_ADD_FINAL_FALLBACK_V1__) {
+    window.__NG_ADD_FINAL_FALLBACK_V1__ = true;
+
+    addBtn.addEventListener('click', () => {
+      const host0 = finalHost();
+      if (!host0) return;
+
+      const before = host0.querySelectorAll('.ng-final-card').length;
+
+      setTimeout(() => {
+        const after = host0.querySelectorAll('.ng-final-card').length;
+        if (after > before) {
+          // app added; just sync
+          syncFinalToJSONOut();
+          return;
+        }
+
+        const pick = pickByteText();
+        if (!pick || !pick.text) return;
+
+        if (isDuplicateFinal(pick.text)) {
+          // duplicate -> do nothing
+          return;
+        }
+
+        appendFinalCard(pick.text);
+        syncFinalToJSONOut();
+      }, 0);
+    }, true);
+  }
+
+  // Debug helper (optional)
+  window.NG_debugFlow = () => ({
+    selectedCount: $$('#ng-lines-wrap input[type="checkbox"][data-ln]:checked').length,
+    firstByteLen: ($('#ng-manual-bytes textarea.ng-byte-text')?.value || '').length,
+    finalsCards: $$('#ng-final-bytes-list-auto .ng-final-card').length,
+    jsonOutLen: ($('#bytesJSONOut')?.value || '').trim().length
+  });
+
+/* === NG_LINES_TO_BYTES_FINAL_FLOW_V1_END === */
 })();
 
+
+
+
+
+
+
+
+})();  // OUTER wrapper close for (function(){ at line 3
+
+
+/* === NG_PROMPT_INJECT_ON_GENERATE_V1_START (20260131) === */
+(() => {
+  if (window.__NG_PROMPT_INJECT_ON_GENERATE_V1__) return; window.__NG_PROMPT_INJECT_ON_GENERATE_V1__ = true; return;
+  window.__NG_PROMPT_INJECT_ON_GENERATE_V1__ = true;
+
+  function $(sel){ return document.querySelector(sel); }
+
+  function safeJSON(s){ try { return JSON.parse(s); } catch { return null; } }
+
+  function val(id){
+    const el = document.getElementById(id);
+    return (el && typeof el.value === "string") ? el.value.trim() : "";
+  }
+
+  function bytesFromOut(){
+    const out = document.getElementById("bytesJSONOut");
+    const s = (out && out.value) ? out.value.trim() : "";
+    if (!s) return [];
+    const o = safeJSON(s);
+    if (o && Array.isArray(o.bytes)) return o.bytes.filter(b => b && (b.text||"").trim());
+    return [];
+  }
+
+  function ensurePromptField(form){
+    let p = form.querySelector('input[name="prompt"], textarea[name="prompt"]');
+    if (!p) {
+      p = document.createElement("input");
+      p.type = "hidden";
+      p.name = "prompt";
+      form.appendChild(p);
+    }
+    return p;
+  }
+
+  function findGenerateBtn(){
+    const els = Array.from(document.querySelectorAll("button,input[type=submit],input[type=button]"));
+    return els.find(el => {
+      const t = (el.tagName === "INPUT" ? el.value : el.textContent) || "";
+      return String(t).includes("Generate DIGI_PACK");
+    });
+  }
+
+  const btn = findGenerateBtn();
+  if (!btn) return;
+
+  const form = btn.form || btn.closest("form");
+  if (!form) return;
+
+  btn.addEventListener("click", () => {
+    try {
+      const p = ensurePromptField(form);
+
+      const payload = {
+        topic: val("topic") || null,
+        platform: val("platform") || null,
+        angle: val("angle") || null,
+        story_type: val("storyType") || null,
+        what_happened: val("whatHappened") || null,
+        sources: val("sources") || null,
+        background: val("background") || null,
+        bytes: bytesFromOut(),
+        visuals: []  // visuals later; bytes fix is priority
+      };
+
+      p.value = JSON.stringify(payload);
+
+      // Optional debug (won't break if console not open)
+      try {
+        console.log("[NG_PROMPT_INJECT] bytes:", (payload.bytes||[]).length, "promptLen:", p.value.length);
+      } catch {}
+    } catch (e) {
+      try { console.warn("[NG_PROMPT_INJECT] failed", e); } catch {}
+    }
+  }, true);
+})();
+/* === NG_PROMPT_INJECT_ON_GENERATE_V1_END === */
+
+/* === NG_PROMPT_INJECT_ON_GENERATE_V2_START (20260131) === */
+(() => {
+  if (window.__NG_PROMPT_INJECT_ON_GENERATE_V2__) return;
+  window.__NG_PROMPT_INJECT_ON_GENERATE_V2__ = true;
+
+  const qs = (sel, root=document) => root.querySelector(sel);
+  const qsv = (sels, root=document) => {
+    for (const s of sels) {
+      const el = qs(s, root);
+      if (!el) continue;
+      const v = (el.value ?? el.textContent ?? "").toString().trim();
+      if (v !== "") return v;
+    }
+    return "";
+  };
+
+  function bytesFromBytesJSONOut() {
+    const ta = qs("#bytesJSONOut");
+    if (!ta) return [];
+    const raw = (ta.value || "").trim();
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+      if (parsed && Array.isArray(parsed.bytes)) return parsed.bytes;
+      if (parsed && parsed.latest && Array.isArray(parsed.latest.bytes)) return parsed.latest.bytes;
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function ensurePromptField(form) {
+    if (!form) return null;
+    let inp = form.querySelector('input[name="prompt"]');
+    if (!inp) {
+      inp = document.createElement("input");
+      inp.type = "hidden";
+      inp.name = "prompt";
+      form.appendChild(inp);
+    }
+    return inp;
+  }
+
+  function buildPromptPayload(form) {
+    const topic = qsv(["#topic", '[name="topic"]', "#ng-topic", "#storyTopic"], form) || qsv(["#topic", '[name="topic"]', "#ng-topic", "#storyTopic"]);
+    const platform = qsv(['[name="platform"]', "#platform"], form) || "Digital";
+    const angle = qsv(["#angle", '[name="angle"]'], form) || "";
+    const story_type = qsv(["#storyType", '[name="storyType"]', '[name="story_type"]'], form) || "developing";
+    const what_happened = qsv(["#whatHappened", '[name="whatHappened"]', '[name="what_happened"]'], form) || "";
+    const sources = qsv(["#sources", '[name="sources"]'], form) || "";
+    const background = qsv(["#background", '[name="background"]'], form) || null;
+
+    const bytes = bytesFromBytesJSONOut();
+    return {
+      topic: topic || "",
+      platform: platform || "Digital",
+      angle: angle || "",
+      story_type: story_type || "developing",
+      what_happened: what_happened || "",
+      sources: sources || "",
+      background: background || null,
+      bytes: Array.isArray(bytes) ? bytes : [],
+      visuals: []
+    };
+  }
+
+  function shouldHandleTarget(t) {
+    const el = t && (t.closest ? t.closest("button, input[type=submit], [role=button]") : null);
+    const id = (el && el.id ? el.id : "") + " " + (t && t.id ? t.id : "");
+    const txt = (el ? (el.innerText || el.value || "") : "").toString();
+    return /digi|pack|generate/i.test(id) || /generate/i.test(txt) || /digi\s*pack/i.test(txt);
+  }
+
+  function injectNow(form) {
+    const inp = ensurePromptField(form);
+    if (!inp) return;
+    const payload = buildPromptPayload(form);
+    inp.value = JSON.stringify(payload);
+    // debug stamp (safe)
+    window.NG_LAST_PROMPT_V2 = { ts: new Date().toISOString(), bytesLen: (payload.bytes||[]).length };
+    console.log("[NG_PROMPT_V2] injected prompt. bytesLen=", (payload.bytes||[]).length);
+  }
+
+  // Capture submit (most reliable)
+  document.addEventListener("submit", (e) => {
+    try {
+      const form = e.target;
+      if (!form || form.tagName !== "FORM") return;
+      // handle only if this form likely triggers digi-pack
+      const action = (form.getAttribute("action") || "").toLowerCase();
+      if (action.includes("digi-pack") || qs('input[name="prompt"]', form) || qs("#topic", form) || qs("#generate", form)) {
+        injectNow(form);
+      }
+    } catch(_) {}
+  }, true);
+
+  // Also capture click on Generate-like buttons
+  document.addEventListener("click", (e) => {
+    try {
+      if (!shouldHandleTarget(e.target)) return;
+      const form = e.target && e.target.closest ? e.target.closest("form") : null;
+      if (form) injectNow(form);
+    } catch(_) {}
+  }, true);
+
+})();
+/* === NG_PROMPT_INJECT_ON_GENERATE_V2_END (20260131) === */
+/* === NG_DIGIPACK_FETCH_PROMPT_OVERRIDE_V1_START (20260131) === */
+(() => {
+  if (window.__NG_DIGIPACK_FETCH_PROMPT_OVERRIDE_V1__) return;
+  window.__NG_DIGIPACK_FETCH_PROMPT_OVERRIDE_V1__ = true;
+
+  const origFetch = window.fetch;
+
+  function bytesFromBytesJSONOut() {
+    const ta = document.querySelector("#bytesJSONOut");
+    if (!ta) return [];
+    const raw = (ta.value || "").trim();
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+      if (parsed && Array.isArray(parsed.bytes)) return parsed.bytes;
+      if (parsed && parsed.latest && Array.isArray(parsed.latest.bytes)) return parsed.latest.bytes;
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function getPromptFromHiddenInput() {
+    const inp = document.querySelector('[name="prompt"]');
+    const v = (inp && inp.value ? inp.value : "").trim();
+    return v || "";
+  }
+
+  function normalizePromptString(promptStr) {
+    // promptStr is expected to be a JSON string
+    try {
+      const pobj = JSON.parse(promptStr);
+      const bytes = bytesFromBytesJSONOut();
+      if (pobj && Array.isArray(bytes) && bytes.length) pobj.bytes = bytes;
+      return JSON.stringify(pobj);
+    } catch (e) {
+      return promptStr; // leave as-is if not parseable
+    }
+  }
+
+  window.fetch = function(input, init) {
+    try {
+      const url =
+        (typeof input === "string" ? input :
+        (input && typeof input.url === "string" ? input.url : "")) || "";
+
+      const isDigiPack = /\/api\/digi-pack\b/i.test(url);
+
+      if (isDigiPack && init && typeof init.body === "string") {
+        const bodyStr = init.body.trim();
+        if (bodyStr.startsWith("{")) {
+          const bodyObj = JSON.parse(bodyStr);
+
+          // If request has "prompt", ensure it uses latest bytes
+          if (typeof bodyObj.prompt === "string") {
+            // Prefer hidden prompt if present (already has all fields)
+            const hidden = getPromptFromHiddenInput();
+            bodyObj.prompt = hidden ? normalizePromptString(hidden) : normalizePromptString(bodyObj.prompt);
+          } else {
+            // If prompt missing, try set from hidden
+            const hidden = getPromptFromHiddenInput();
+            if (hidden) bodyObj.prompt = normalizePromptString(hidden);
+          }
+
+          init = Object.assign({}, init, { body: JSON.stringify(bodyObj) });
+          console.log("[NG_FETCH_OVERRIDE] /api/digi-pack prompt overridden. bytesLen=",
+            (() => { try { return JSON.parse(bodyObj.prompt||"{}").bytes?.length || 0; } catch(_) { return 0; } })()
+          );
+        }
+      }
+    } catch (e) {
+      // swallow to avoid breaking fetch
+    }
+    return origFetch.apply(this, arguments);
+  };
+
+  console.log("[NG_FETCH_OVERRIDE] installed");
+})();
+/* === NG_DIGIPACK_FETCH_PROMPT_OVERRIDE_V1_END (20260131) === */
 

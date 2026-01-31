@@ -212,6 +212,39 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 }
 /* NG_TOOLBAR_LAYOUT_FIX_V1_END */
 </style>
+
+<!-- NG_STORYVIEW_FORCE_SHOW_V1_START (20260130) -->
+<style>
+  body.ng-show-storyview #ng-storyview{ display:block !important; }
+</style>
+<!-- NG_STORYVIEW_FORCE_SHOW_V1_END -->
+<!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_START (20260130) === -->
+<style>
+  /* Force Draft Byte box to have real layout box (fix 0x0 rect) */
+  #ng-byte-draft-box{
+    display:block !important;
+    position:relative !important;
+    width:100% !important;
+    min-height: 60px !important;
+    height:auto !important;
+    overflow: visible !important;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #ng-byte-draft-text{
+    display:block !important;
+    width:100% !important;
+    min-height: 90px !important;
+    height:auto !important;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+</style>
+<!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_END === -->
+
+
 </head>
 <!-- NG_MARKER: 2026-01-06_IST_TEST_123 -->
 
@@ -474,6 +507,22 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
   </div>
 </div>
 <!-- NG_BYTES_UNIFIED_DRAFT_V1_END -->
+<!-- NG_DRAFT_LIBRARY_PANEL_V1_START (20260130) -->
+<div id="ng-draft-library" class="panel" style="display:none;">
+  <b>Draft Library</b>
+  <div style="font-size:12px;opacity:.75;margin-top:6px;">
+    Saved drafts will appear here.
+  </div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+    <button type="button" id="ng-lib-refresh">Refresh</button>
+    <button type="button" id="ng-lib-clear">Clear Library</button>
+  </div>
+
+  <pre id="ng-lib-out" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
+</div>
+<!-- NG_DRAFT_LIBRARY_PANEL_V1_END -->
+
 
 
       <!-- hidden JSON sink for Final Bytes module -->
@@ -526,6 +575,16 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
   <div class="panel">
     <div><b>Response</b></div>
     <pre id="ngResponse">(no response yet)</pre>
+<!-- NG_STORYVIEW_PANEL_V1_START (20260130) -->
+<div id="ng-storyview" class="panel" style="display:none;">
+  <b>Story View</b>
+  <div style="font-size:12px;opacity:.75;margin-top:6px;">
+    Auto-preview of latest generated JSON (for quick editorial view).
+  </div>
+  <pre id="ng-storyview-out" style="margin-top:10px;white-space:pre-wrap;max-height:320px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
+</div>
+<!-- NG_STORYVIEW_PANEL_V1_END (20260130) -->
+
   </div>
 <div class="panel" id="ng-preview-prompt-panel">
 
@@ -999,10 +1058,32 @@ return out;
 
 <script src="ng_add_byte_multirow_v3.js"></script>
 
+
+<!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_START (20260130) -->
+<script src="./ng_toolbar_mini_v1.js"></script>
+<!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_END -->
+
+<!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_START (20260130) -->
+<script src="./ng_toolbar_actions_v1.js"></script>
+<!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_END -->
+
+<!-- NG_GENERATE_JS_V1_INCLUDE_START (20260130) -->
+<script src="./ng_generate_v1.js"></script>
+<!-- NG_GENERATE_JS_V1_INCLUDE_END -->
+
+<!-- NG_PROMPT_BUILDER_V1_INCLUDE_START (20260130) -->
+<script src="./ng_prompt_builder_v1.js"></script>
+<!-- NG_PROMPT_BUILDER_V1_INCLUDE_END -->
+<script src="/script1_dump.js?v=20260131" defer></script>
+
 </body>
 
 
 </html>
+
+
+
+
 
 
 
