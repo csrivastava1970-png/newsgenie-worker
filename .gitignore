@@ -1,0 +1,7 @@
+.wrangler/
+_backups/
+_local_backups/
+backups/
+logs/
+node_modules/
+*.bak
