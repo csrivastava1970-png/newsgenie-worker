@@ -39,3 +39,11 @@ _bytes_latest_poll_audit.txt
 public/index_fix_bodyclose_backup_*.html
 wrangler_backup_before_DO_*.toml
 _backups/
+# --- NG local temp / helper files (do not commit) ---
+public/__tmp_check.js
+public/ng_generate_v1.js
+public/ng_prompt_builder_v1.js
+public/ng_toolbar_actions_v1.js
+public/ng_toolbar_mini_v1.js
+tools/scan_unclosed.js
+tools/scan_unclosed_context.js
