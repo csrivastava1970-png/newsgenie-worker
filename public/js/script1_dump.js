@@ -1,4 +1,4 @@
-﻿
+
 /* === Editorial Extraction : Suggestions Panel + Transcript Auto-Ingest (Clean V3) === */
 (function () {
   "use strict";

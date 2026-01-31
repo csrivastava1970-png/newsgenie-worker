@@ -1,12 +1,136 @@
+﻿
+
+
+
 <!doctype html>
 <html lang="en">
+<!-- NG_BUILD_STAMP_START -->
+<meta name="ng-build-stamp" content="NG_BUILD_20260129_1045_IST">
+<script>
+  console.log("[NG_BUILD_STAMP]", "NG_BUILD_20260129_1045_IST");
+</script>
+<!-- NG_BUILD_STAMP_END -->
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NewsGenie Digital Producer</title>
 <link rel="icon" href="data:,">
+  <!-- NG_STD_UI_TOOLBAR_ROW_V2_START -->
 
-  <style>
+<style>
+  /* NG_ADVANCED_PANELS_V1 */
+  /* NG_ADV_ONLY_WRAP_V1 */
+  html[data-ng-std-ui="simple"] #ng-adv-only{ display:none !important; }
+  html[data-ng-std-ui="advanced"] #ng-adv-only{ display:block !important; }
+#ng-preview-prompt-panel { display:none !important; }
+
+
+  html[data-ng-std-ui="simple"] #ng-advanced-panels{ display:none !important; }
+  html[data-ng-std-ui="simple"] #ng-byte-draft-box{ display:none !important; }
+  html[data-ng-std-ui="advanced"] #ng-advanced-panels{ display:block; }
+
+  /* NG_STD_UI_TOOLBAR_ROW_V2
+     Goal: single-row toolbar (actions left, UI toggle right) — CSS-only, hang-free
+     Rules: NO DOM moving, NO MutationObserver, only CSS overrides.
+  */
+
+  /* 1) Layout: make page a simple grid so toolbar can be a row */
+  body{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-auto-rows: auto;
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: start;
+  }
+
+  /* Title full width */
+  h2{ grid-column: 1 / -1; grid-row: 1; }
+
+
+  /* 2) Actions row (left) */
+  #ng-dp-actions{
+  grid-column: 1 / 2;
+  grid-row: 2;
+
+    grid-column: 1 / 2;
+    align-self: center;
+
+    display: flex !important;
+    flex-wrap: nowrap !important;     /* override inline wrap */
+    gap: 8px !important;
+    align-items: center !important;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    min-width: 0;                    /* allow grid to size correctly */
+  }
+
+  body > #ng-dp-actions > button{
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* Hide horizontal scrollbar but keep scrolling */
+  #ng-dp-actions{ scrollbar-width: none; }              /* Firefox */
+  #ng-dp-actions::-webkit-scrollbar{ height: 0; }       /* Chrome/Edge */
+
+  /* 3) If toggle is inside some wrapper, flatten that wrapper (CSS-only) */
+ /* Flatten wrappers up to 4 levels so toggle becomes a grid item of body */
+body *:has(> #ng-std-ui-toggle-root){ display: contents !important; }
+body *:has(> * > #ng-std-ui-toggle-root){ display: contents !important; }
+body *:has(> * > * > #ng-std-ui-toggle-root){ display: contents !important; }
+body *:has(> * > * > * > #ng-std-ui-toggle-root){ display: contents !important; }
+
+
+  /* Toggle: force normal flow + place it on toolbar row (right) */
+  #ng-std-ui-toggle-root,
+  #ng-std-ui-toggle-root .ngpill{
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: auto !important;
+  }
+
+  #ng-std-ui-toggle-root{
+  grid-column: 2 / 3;
+  grid-row: 2;
+
+    grid-column: 2 / 3;
+    align-self: center;
+    justify-self: end;
+
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+
+    margin: 10px 0 !important;
+    white-space: nowrap !important;
+  }
+
+  #ng-std-ui-toggle-root .ngpill{
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  /* 4) Everything else should be full width below toolbar */
+  /* default: anything that becomes a grid item spans full width */
+body *{ grid-column: 1 / -1; }
+
+
+  /* 5) Responsive: on narrower screens, drop toggle below + allow actions wrap */
+ 
+<style>
     body { font-family: system-ui, Arial; margin: 16px; }
     .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     label { font-size: 12px; opacity: .8; display:block; margin-bottom:4px; }
@@ -19,17 +143,123 @@
     pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
     .status { font-size: 13px; }
     .muted { font-size:12px; opacity:.75; margin-top:6px; }
+#btnBytesJSON { display: none !important; }
+/* Force placement: Row-1 Title, Row-2 Toolbar (Actions + Toggle) */
+h2{
+  grid-column: 1 / -1 !important;
+  grid-row: 1 !important;
+}
+
+#ng-dp-actions{
+  grid-column: 1 / 2 !important;
+  grid-row: 2 !important;
+}
+
+#ng-std-ui-toggle-root{
+  grid-column: 2 / 3 !important;
+  grid-row: 2 !important;
+  justify-self: end !important;
+  align-self: center !important;
+}
+
+
   </style>
+<style>
+#ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
+
+/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_START */
+body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) #bytesWrap {
+  display: none !important;
+}
+body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) #bytesWrap {
+  display: block !important;
+}
+/* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_END */
+
+</style>
+<style id="ng-simple-hide-bytes-v1">
+  body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) .panel:has(#ng-sec-bytes){ display:none !important; }
+body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng-sec-bytes){ display:block !important; }
+
+</style>
+
+<style>
+/* NG_TOOLBAR_LAYOUT_FIX_V1_START */
+/* Layout-only: fixes shifted toolbar buttons without touching JS */
+#ng-std-ui-toolbar-row,
+#ng-std-ui-toggle-root,
+#ng-dp-actions,
+.ng-std-ui-toolbar-row,
+.ng-toolbar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+
+#ng-std-ui-toolbar-row > * ,
+#ng-std-ui-toggle-root > * ,
+#ng-dp-actions > * {
+  margin: 0 !important;
+}
+
+#ng-std-ui-toolbar-row button,
+#ng-std-ui-toggle-root button,
+#ng-dp-actions button {
+  position: static !important;
+  transform: none !important;
+}
+/* NG_TOOLBAR_LAYOUT_FIX_V1_END */
+</style>
+
+<!-- NG_STORYVIEW_FORCE_SHOW_V1_START (20260130) -->
+<style>
+  body.ng-show-storyview #ng-storyview{ display:block !important; }
+</style>
+<!-- NG_STORYVIEW_FORCE_SHOW_V1_END -->
+<!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_START (20260130) === -->
+<style>
+  /* Force Draft Byte box to have real layout box (fix 0x0 rect) */
+  #ng-byte-draft-box{
+    display:block !important;
+    position:relative !important;
+    width:100% !important;
+    min-height: 60px !important;
+    height:auto !important;
+    overflow: visible !important;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #ng-byte-draft-text{
+    display:block !important;
+    width:100% !important;
+    min-height: 90px !important;
+    height:auto !important;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+</style>
+<!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_END === -->
+
+
 </head>
+<!-- NG_MARKER: 2026-01-06_IST_TEST_123 -->
+
 
 <body>
-  <h2>NewsGenie Digital Producer</h2>
+
+
+<h2>NewsGenie Digital Producer</h2>
 
   <form id="digi-pack-form" onsubmit="return false;">
     <div class="row">
       <div>
         <label>Topic</label>
         <input name="topic" id="topic" placeholder="E.g., संसद प्रदूषण विवाद" required />
+
       </div>
 
       <div>
@@ -43,33 +273,12 @@
 
       <div>
         <label>Angle (optional)</label>
-        <input name="angle" id="angle" placeholder="E.g., विपक्ष बनाम सरकार" />
+        <input id="angle" name="angle" type="text" placeholder="Angle (optional) — 3–8 words" style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:10px;" />
+        
       </div>
     </div>
-<!-- ========================= -->
-<!-- Transcript JSON Loader -->
-<!-- ========================= -->
-<section style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-    <h3 style="margin:0; font-size:14px;">Load Transcript JSON (Reverie)</h3>
-    <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
-  </div>
 
-  <p style="margin:8px 0 10px; font-size:12px; opacity:.8;">
-    Paste Reverie output JSON here (display_text या text). Load करने पर localStorage में save भी होगा.
-  </p>
-
-  <textarea id="ta-transcript-json" rows="8"
-    style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
-    placeholder='Paste JSON here...'></textarea>
-
-  <div style="display:flex; gap:8px; margin-top:10px;">
-    <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
-    <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
-  </div>
-</section>
-
-    <div style="margin-top:10px;">
+    <!-- STORY BASICS (moved up) -->
       <label>Story Type</label>
       <select name="storyType" id="storyType" required>
         <option value="">Select</option>
@@ -83,6 +292,7 @@
     <div style="margin-top:10px;">
       <label>What Happened (mandatory)</label>
       <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
+
     </div>
 
     <div style="margin-top:10px;">
@@ -94,35 +304,250 @@
       <label>Background (optional but counts)</label>
       <textarea name="background" id="background" rows="3" placeholder="Context / past events / why it matters"></textarea>
     </div>
+    <!-- STORY BASICS END -->
 
-    <!-- BYTES -->
-    <div class="panel">
-      <b>Bytes (Speaker + Designation)</b>
+<!-- ========================= -->
+<!-- ========================= -->
+<!-- Transcript JSON Loader -->
+<!-- ========================= -->
+<section id="ng-transcript-loader" style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
+  <!-- Compact tools bar -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+      <h3 style="margin:0; font-size:14px;">Transcript Tools</h3>
+      <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
+      <button type="button" id="btn-refresh-latest-transcript" style="padding:8px 10px;border:1px solid #999;border-radius:10px;cursor:pointer;background:#f7f7f7;">Refresh Latest (API)</button>
+      <button type="button" id="btn-paste-transcript-json">Paste</button>
+      <button type="button" id="btn-import-transcript-json">Import</button>
+      <input type="file" id="file-transcript-json" accept=".json,application/json,.txt" style="display:none;">
+    </div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;">
-        <div style="font-size:12px;opacity:.75;">
-          Multiple bytes जोड़ सकते हैं. Transcript AI generate करेगा.
-        </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <span style="font-size:12px;opacity:.7;">Status:</span>
+      <span id="ng-latest-transcript-status" style="font-size:12px;opacity:.85;">(not loaded)</span>
+      <span id="transcript-load-hint" style="font-size:12px; opacity:.75;"></span>
+    </div>
+  </div>
+
+  <!-- Collapsible inbox (keeps UI light) -->
+  <details id="ng-transcript-inbox-details" style="margin-top:10px;">
+    <summary style="cursor:pointer; user-select:none; font-size:13px; opacity:.85;">Transcript Inbox</summary>
+
+    <div style="margin-top:10px;">
+      <div id="ng-transcript-inbox-hint" style="margin-top:8px;font-size:12px;opacity:.75;">Paste Reverie JSON here (display_text or text). Load saves to localStorage.</div>
+      <textarea id="ta-transcript-json" rows="8"
+        style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:12px; line-height:1.35; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
+        placeholder="Paste JSON here..."></textarea>
+
+      <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+        <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
+      </div>
+
+      <div id="ng-latest-transcript-preview"
+        style="display:none;white-space:pre-wrap;max-height:160px;overflow:auto;border:1px dashed #bbb;border-radius:12px;padding:10px;font-size:13px;opacity:.9; margin-top:10px;"></div>
+    </div>
+  </details>
+</section>
+
+<!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_START -->
+<div id="ng-superlight" style="margin-top:12px; display:grid; grid-template-columns: 1fr; gap:10px;">
+  <div class="panel" id="ng-sec-transcript-lines">
+    <b>Transcript Lines</b>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+      <button type="button" id="ng-lines-selectall">Select All</button>
+      <button type="button" id="ng-lines-clear">Clear Selection</button>
+      <span id="ng-lines-status" style="font-size:12px; opacity:.75;"></span>
+    </div>
+    <div id="ng-lines-wrap" style="margin-top:10px; display:flex; flex-direction:column; gap:8px; max-height:220px; overflow:auto; border:1px solid #eee; border-radius:12px; padding:10px;"></div>
+  </div>
+
+  </div>
+</div>
+<!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_END -->
+
+    <div id="ng-adv-only" style="margin-top:10px;">
+
+   <!-- BYTES -->
+<div class="panel" id="bytesWrap" data-ng-sec="bytes">
+  <b>Bytes</b>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+    <div style="font-size:12px;opacity:.75;">Add bytes from selection or paste/type manually.</div>
+  </div>
+
+  <!-- FINAL BYTES HOST (static) -->
+  <div style="margin-top:10px;font-weight:600;">Final Bytes</div>
+  <div id="ng-final-bytes-list-auto" style="margin-top:8px;"></div>
+
+  <script>
+
+</script>
+<script>
+/* NG_BYTES_WRAP_HEIGHT_FIX_V1_START */
+(function(){
+  if (window.__NG_BYTES_WRAP_HEIGHT_FIX_V1) return;
+  window.__NG_BYTES_WRAP_HEIGHT_FIX_V1 = true;
+
+  function apply(){
+    const w = document.querySelector("#bytes-wrap");
+    if (!w) return false;
+    // undo any accidental "height:0" style
+    w.style.height = "auto";
+    w.style.minHeight = "1px";
+    w.style.overflow = "visible";
+    return true;
+  }
+
+  if (apply()) return;
+  let n=0;
+  const t=setInterval(()=>{ n++; if (apply() || n>30) clearInterval(t); }, 200);
+})();
+ /* NG_BYTES_WRAP_HEIGHT_FIX_V1_END */
+</script>
+<script>
+/* NG_MANUAL_BYTES_UNHIDE_ON_ADD_V1_START */
+(function(){
+  if (window.__NG_MANUAL_BYTES_UNHIDE_ON_ADD_V1) return;
+  window.__NG_MANUAL_BYTES_UNHIDE_ON_ADD_V1 = true;
+
+  function unhide(){
+    const m = document.querySelector("#ng-manual-bytes");
+    if (m) m.style.display = "block";
+  }
+
+  // unhide once on load (safe)
+  setTimeout(unhide, 0);
+
+  // and whenever + Add Byte is clicked
+  document.addEventListener("click", (e)=>{
+    if (e.target && e.target.id === "addByteBtn") setTimeout(unhide, 0);
+  }, true);
+})();
+ /* NG_MANUAL_BYTES_UNHIDE_ON_ADD_V1_END */
+</script>
+<script>
+/* NG_MOVE_ADD_FINAL_BTN_V1_START */
+(function(){
+  if (window.__NG_MOVE_ADD_FINAL_BTN_V1) return;
+  window.__NG_MOVE_ADD_FINAL_BTN_V1 = true;
+
+  function move(){
+    const btn = document.querySelector("#ng-add-final");
+    const target = document.querySelector("#ng-manual-bytes");
+    const wrap = document.querySelector("#bytes-wrap");
+    if (!btn || !target || !wrap) return false;
+
+    // ensure manual bytes visible
+    target.style.display = "block";
+
+    // create a stable holder below bytes-wrap
+    let holder = document.querySelector("#ng-add-final-holder");
+    if (!holder){
+      holder = document.createElement("div");
+      holder.id = "ng-add-final-holder";
+      holder.style.cssText = "margin-top:10px; display:flex; justify-content:flex-end;";
+      wrap.insertAdjacentElement("afterend", holder);
+    }
+
+    // move only if not already there
+    if (!holder.contains(btn)) holder.appendChild(btn);
+
+    // ensure visible sizing
+    btn.style.display = "inline-block";
+    btn.style.visibility = "visible";
+    btn.style.opacity = "1";
+    return true;
+  }
+
+  if (move()) return;
+  let n=0;
+  const t=setInterval(()=>{ n++; if (move() || n>30) clearInterval(t); }, 200);
+})();
+ /* NG_MOVE_ADD_FINAL_BTN_V1_END */
+</script>
+<script>
+</script>
         <button type="button" class="btn" id="addByteBtn">+ Add Byte</button>
       </div>
 
-      <div id="bytesWrap" style="margin-top:10px;"></div>
+            
+<!-- NG_BYTES_UNIFIED_DRAFT_V1_START -->
+<div id="ng-byte-draft-area" style="margin-top:10px; display:none;">
+  <div id="ng-byte-draft-box" style="margin-top:10px;padding:10px;border:1px dashed #cbd5e1;border-radius:12px;">
+    <div style="font-size:12px;opacity:.8;margin-bottom:6px;">Draft Byte (select transcript lines OR paste/type manually)</div>
+
+    <textarea
+      id="ng-byte-draft-text"
+      rows="4"
+      style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;"
+      placeholder="Selected lines will appear here... (or paste/type)"
+    ></textarea>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+      <input
+        id="ng-byte-draft-speaker"
+        type="text"
+        placeholder="Speaker (manual)"
+        style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:220px;"
+      >
+      <input
+        id="ng-byte-draft-desig"
+        type="text"
+        placeholder="Designation (manual)"
+        style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:260px;"
+      >
     </div>
 
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
+      <button type="button" id="ng-make-byte" class="secondary">Make Draft from Selection</button>
+      <button type="button" id="ng-add-final" class="primary">Add to Bytes</button>
+      <button type="button" id="ng-clear-draft">Clear Draft</button>
+      <span id="ng-byte-draft-status" style="font-size:12px; opacity:.75;"></span>
+    </div>
+  </div>
+</div>
+<!-- NG_BYTES_UNIFIED_DRAFT_V1_END -->
+<!-- NG_DRAFT_LIBRARY_PANEL_V1_START (20260130) -->
+<div id="ng-draft-library" class="panel" style="display:none;">
+  <b>Draft Library</b>
+  <div style="font-size:12px;opacity:.75;margin-top:6px;">
+    Saved drafts will appear here.
+  </div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+    <button type="button" id="ng-lib-refresh">Refresh</button>
+    <button type="button" id="ng-lib-clear">Clear Library</button>
+  </div>
+
+  <pre id="ng-lib-out" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
+</div>
+<!-- NG_DRAFT_LIBRARY_PANEL_V1_END -->
+
+
+
+      <!-- hidden JSON sink for Final Bytes module -->
+      <textarea id="bytesJSONOut" style="display:none;"></textarea>
+      <div id="ng-manual-bytes" style="margin-top:10px; display:none;"><div id="bytes-wrap"></div></div>
+    </div>
     <!-- VISUALS -->
-    <div class="panel" id="step-visuals">
-      <b>Visuals</b>
-      <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
+    <!-- NG_STD_VISUALS_WRAP_V1_START -->
+<div id="visualsWrap" data-ng-sec="visuals">
+  <div class="panel" id="step-visuals">
+    <b>Visuals</b>
+    <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
-      <div id="visuals-wrap"></div>
+    <div id="visuals-wrap"></div>
 
-      <div style="margin-top:8px;">
-        <button type="button" id="add-visual">+ Add Visual</button>
-      </div>
+    <div style="margin-top:8px;">
+      <button type="button" id="add-visual">+ Add Visual</button>
     </div>
+  </div>
+</div>
+<!-- NG_STD_VISUALS_WRAP_V1_END -->
+
 
     <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
-      <button id="btnGenerate" type="submit" class="primary" onclick="generateDigiPack(event)" disabled>
+      <button id="btnGenerate" type="button" class="primary" onclick="generateDigiPack(event)" disabled>
         Generate DIGI_PACK
       </button>
 
@@ -132,22 +557,9 @@
     </div>
   </form>
 <!-- Editorial Extraction : Suggestions ONLY -->
-<section id="editorial-extraction" style="margin-top:16px;">
-  <h3 style="margin:0 0 8px 0;">Editorial Extraction</h3>
-
-  <div id="ee-empty" style="opacity:.7;font-size:13px;padding:10px;border:1px dashed #bbb;border-radius:10px;">
-    NG_TRANSCRIPT से suggested bytes यहाँ दिखेंगे.
-  </div>
-
-  <div id="ee-list" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;"></div>
-
-  <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-    <button type="button" id="ee-push">Push selected to Bytes</button>
-    <button type="button" id="ee-clear">Discard / Clear suggestions</button>
-  </div>
-</section>
 
 
+<div id="ng-advanced-panels">
   <div class="panel">
     <div class="status"><b>Status:</b> <span id="ngStatus">Idle</span></div>
     <div style="margin-top:8px;"><b>Log</b></div>
@@ -156,14 +568,26 @@
 
   <div class="panel">
     <div><b>Quick View</b></div>
-    <div id="ngQuick">(no quick view)</div>
+    <div id="ngQuick" style="white-space:pre-wrap; overflow:auto; max-height:220px;">(no quick view)</div>
+
   </div>
 
   <div class="panel">
     <div><b>Response</b></div>
     <pre id="ngResponse">(no response yet)</pre>
+<!-- NG_STORYVIEW_PANEL_V1_START (20260130) -->
+<div id="ng-storyview" class="panel" style="display:none;">
+  <b>Story View</b>
+  <div style="font-size:12px;opacity:.75;margin-top:6px;">
+    Auto-preview of latest generated JSON (for quick editorial view).
   </div>
-<div class="panel">
+  <pre id="ng-storyview-out" style="margin-top:10px;white-space:pre-wrap;max-height:320px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
+</div>
+<!-- NG_STORYVIEW_PANEL_V1_END (20260130) -->
+
+  </div>
+<div class="panel" id="ng-preview-prompt-panel">
+
   <div style="display:flex;align-items:center;justify-content:space-between;">
     <b>Preview Prompt (will be sent)</b>
     <button type="button" id="copy-prompt"
@@ -179,1093 +603,349 @@
            font-size:12px;"></textarea>
 </div>
 
+</div><!-- /#ng-advanced-panels -->
 <script>
-  const $ = (id) => document.getElementById(id);
-  let NG_BUSY = false;
+/* NG_ANGLE_WIRE_V1_START */
+(function(){
+  try{
+    var el = document.getElementById('angle');
+    if(!el) return;
 
-  function logLine(msg) {
-    const el = $("ngLog");
-    if (el) el.textContent += (msg + "\n");
-  }
-  function setStatus(status) {
-    const el = $("ngStatus");
-    if (el) el.textContent = status;
-  }
+    var key = 'ng_story_angle_v1';
 
-  function setGenStatus(txt, busy = false) {
-    const btn = $("btnGenerate");
-    const st = $("genStatus");
-    if (btn) btn.disabled = busy;
-    if (st) st.textContent = txt;
-  }
+    // restore
+    try{
+      var saved = localStorage.getItem(key) || '';
+      if(saved && !el.value) el.value = saved;
+    }catch(e){}
 
-  function renderResponse(data) {
-    const pre = document.getElementById("ngResponse");
-    if (!pre) return;
-    pre.textContent = (typeof data === "string") ? data : JSON.stringify(data, null, 2);
-  }
-
-  function safeTrim(v) { return (v ?? "").toString().trim(); }
-
-  function updatePromptPreview(promptObj) {
-    const box = document.getElementById("prompt-preview");
-    if (!box) return;
-    box.value = JSON.stringify(promptObj, null, 2);
-  }
-
-  // ---------- FormData helpers (getAll compatible) ----------
-  function collectBytes(fd) {
-    const speakers = fd.getAll("byte_speaker[]").map(safeTrim);
-    const designations = fd.getAll("byte_designation[]").map(safeTrim);
-
-    const out = [];
-    const n = Math.max(speakers.length, designations.length);
-    for (let i = 0; i < n; i++) {
-      const speaker = speakers[i] || "";
-      const designation = designations[i] || "";
-      if (speaker || designation) out.push({ speaker, designation });
-    }
-    return out;
-  }
-
-  function collectVisuals(fd) {
-    const shotTypes = fd.getAll("visual_shot_type[]").map(safeTrim);
-    const sources   = fd.getAll("visual_source[]").map(safeTrim);
-    const whats     = fd.getAll("visual_what[]").map(safeTrim);
-    const notes     = fd.getAll("visual_notes[]").map(safeTrim);
-
-    const out = [];
-    const n = Math.max(shotTypes.length, sources.length, whats.length, notes.length);
-    for (let i = 0; i < n; i++) {
-      const shot_type = shotTypes[i] || "";
-      const source = sources[i] || "";
-      const what = whats[i] || "";
-      const note = notes[i] || "";
-      if (shot_type || source || what || note) out.push({ shot_type, source, what, note });
-    }
-    return out;
-  }
-
-  function buildPromptFromForm() {
-    const form = document.getElementById("digi-pack-form");
-    if (!form) throw new Error("Form not found: digi-pack-form");
-
-    const fd = new FormData(form);
-
-    const topic = safeTrim(fd.get("topic"));
-    const platform = safeTrim(fd.get("platform")) || "Digital";
-    const angle = safeTrim(fd.get("angle"));
-
-    const story_type = safeTrim(
-      fd.get("story_type") ||
-      fd.get("storyType") ||
-      fd.get("story") ||
-      fd.get("type")
-    );
-
-    const what_happened = safeTrim(fd.get("what_happened") || fd.get("whatHappened"));
-    const sources = safeTrim(fd.get("sources"));
-    const background = safeTrim(fd.get("background"));
-
-    const bytes = collectBytes(fd);
-    const visuals = collectVisuals(fd);
-
-    return {
-      topic,
-      platform,
-      angle: angle || null,
-      story_type: story_type || null,
-      what_happened,
-      sources,
-      background: background || null,
-      bytes,
-      visuals
-    };
-  }
-
-  async function generateDigiPack(e) {
-    e?.preventDefault?.();
-
-    const genBtn = document.getElementById("btnGenerate") || document.getElementById("btn-generate");
-    if (genBtn) genBtn.disabled = true;
-
-    try {
-      const promptObj = buildPromptFromForm();
-      console.log("FINAL PROMPT →", promptObj);
-
-      if (!safeTrim(promptObj.topic)) throw new Error("Topic is required.");
-      if (!safeTrim(promptObj.what_happened)) throw new Error("What Happened is required.");
-      if (!safeTrim(promptObj.sources)) throw new Error("Sources is required.");
-
-      updatePromptPreview(promptObj);
-
-      const payload = { prompt: JSON.stringify(promptObj) };
-
-      setStatus("Calling /api/digi-pack ...");
-      logLine("POST /api/digi-pack");
-      logLine("Prompt chars: " + payload.prompt.length);
-
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000);
-
-      const res = await fetch("/api/digi-pack", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeout);
-
-      if (!res.ok) {
-        const t = await res.text().catch(() => "");
-        throw new Error("HTTP " + res.status + " " + t);
-      }
-
-      const data = await res.json();
-      if (typeof setResponse === "function") setResponse(data);
-      else renderResponse(data);
-
-      setStatus("Done");
-      logLine("Done ✅");
-    } catch (err) {
-      setStatus("Error");
-      logLine("Error: " + (err?.message || err));
-      alert(err?.message || err);
-    } finally {
-      if (genBtn) genBtn.disabled = false;
-    }
-  }
-
-  function getVal(name) {
-    const el = document.querySelector(`[name="${name}"]`);
-    return el ? (el.value || "").trim() : "";
-  }
-
-  function setGenerateState(enabled, msg) {
-    const btn = $("btnGenerate") || document.getElementById("btn-generate");
-    if (btn) btn.disabled = !enabled;
-    const s = $("genStatus");
-    if (s) s.textContent = msg || "";
-  }
-
-  function validateGenerate() {
-    const topic = getVal("topic");
-    const ok = !!topic;
-    if (!ok) { setGenerateState(false, "Topic required"); return false; }
-    setGenerateState(true, "Ready");
-    return true;
-  }
-
-  document.addEventListener("input", validateGenerate);
-  document.addEventListener("change", validateGenerate);
-
-  /* =========================
-     /* =========================
-   BYTES UI (Speaker + Designation)
-========================= */
-const MAX_BYTES = 8;
-
-function byteRowTemplate(i) {
-  return `
-    <div class="byte-row" data-byte-row="${i}">
-      <div class="row" style="grid-template-columns: 1fr 1fr auto; gap: 8px;">
-        <div>
-          <label>Speaker Name</label>
-          <input
-            type="text"
-            name="byte_speaker[]"
-            data-byte-field="speaker"
-            placeholder="E.g., जयराम रमेश"
-            autocomplete="off"
-          />
-        </div>
-        <div>
-          <label>Designation</label>
-          <input
-            type="text"
-            name="byte_designation[]"
-            data-byte-field="designation"
-            placeholder="कांग्रेस नेता"
-            autocomplete="off"
-          />
-        </div>
-        <div style="display:flex;align-items:flex-end;">
-          <button
-            type="button"
-            class="danger"
-            data-remove-byte="${i}"
-            title="Remove this byte"
-          >Remove</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function initBytesUI() {
-  // ✅ prevent double init
-  if (window.__NG_BYTES_INIT_DONE) return;
-  window.__NG_BYTES_INIT_DONE = true;
-
-  // ✅ FIX: your real IDs (from your console)
-  const wrap = document.getElementById("bytesWrap");
-  const addBtn = document.getElementById("addByteBtn");
-  if (!wrap || !addBtn) {
-    console.warn("[BYTES] Missing bytesWrap/addByteBtn", { wrap: !!wrap, addBtn: !!addBtn });
-    return;
-  }
-
-  // ✅ ensure button is usable
-  addBtn.disabled = false;
-
-  function getCount() {
-    return wrap.querySelectorAll("[data-byte-row]").length;
-  }
-
-  function updateRemoveButtonsState() {
-    const rows = Array.from(wrap.querySelectorAll("[data-byte-row]"));
-    const disable = rows.length <= 1;
-
-    rows.forEach((row) => {
-      const btn = row.querySelector("[data-remove-byte]");
-      if (!btn) return;
-
-      btn.disabled = disable;
-      btn.style.opacity = disable ? "0.5" : "1";
-      btn.style.cursor = disable ? "not-allowed" : "pointer";
-      btn.title = disable ? "At least 1 byte is required" : "Remove this byte";
-    });
-  }
-
-  function renumber() {
-    const rows = Array.from(wrap.querySelectorAll("[data-byte-row]"));
-    rows.forEach((row, idx) => {
-      const n = idx + 1;
-      row.setAttribute("data-byte-row", String(n));
-
-      const btn = row.querySelector("[data-remove-byte]");
-      if (btn) btn.setAttribute("data-remove-byte", String(n));
+    // persist
+    el.addEventListener('input', function(){
+      try{ localStorage.setItem(key, el.value || ''); }catch(e){}
     });
 
-    updateRemoveButtonsState();
-  }
+    window.NG_getAngle = function(){ return (el && el.value ? String(el.value).trim() : ''); };
 
-  function addByteRow() {
-    const n = getCount() + 1;
-    if (typeof MAX_BYTES !== "undefined" && n > MAX_BYTES) return;
-
-    // assumes byteRowTemplate(n) exists and creates:
-    // - a container with data-byte-row
-    // - inputs name="byte_speaker[]" and name="byte_designation[]"
-    // - a remove button having data-remove-byte
-    wrap.insertAdjacentHTML("beforeend", byteRowTemplate(n));
-    renumber();
-  }
-
-  // ✅ ensure 1st row exists
-  if (getCount() === 0) addByteRow();
-
-  // ✅ expose helpers for pushToBytes()
-  window.NG_addByteRow = addByteRow;
-  window.NG_getByteCount = getCount;
-
-  // ✅ add row button
-  addBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    addByteRow();
-  });
-
-  // ✅ remove (event delegation)
-  wrap.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-remove-byte]");
-    if (!btn) return;
-
-    e.preventDefault();
-
-    const row = btn.closest("[data-byte-row]");
-    if (!row) return;
-
-    if (getCount() <= 1) return; // keep minimum 1 row
-    row.remove();
-    renumber();
-  });
-
-  // initial state
-  renumber();
-}
-
-
-  /* =========================
-     VISUALS UI (FormData.getAll compatible)
-  ========================= */
-  function visualRowTemplate(i) {
-    return `
-      <div class="visual-row" data-visual-row="${i}" style="border:1px solid #e6e6e6;border-radius:12px;padding:10px;margin-top:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div class="v-row-label" style="font-weight:600;">Visual ${i}</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" data-action="gen-visual">Generate</button>
-            <button type="button" data-action="clear-visual">Clear</button>
-            <button type="button" data-action="remove-visual">Remove</button>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-          <div>
-            <label style="font-size:12px;opacity:.8;display:block;margin-bottom:4px;">Shot Type</label>
-            <select name="visual_shot_type[]" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;">
-              <option value="BROLL">B-roll</option>
-              <option value="ARCHIVE">Archive</option>
-              <option value="LOCATION">Location</option>
-              <option value="GRAPHIC">Graphic</option>
-              <option value="SCREEN">Screen</option>
-            </select>
-          </div>
-
-          <div>
-            <label style="font-size:12px;opacity:.8;display:block;margin-bottom:4px;">Source</label>
-            <input type="text" name="visual_source[]" placeholder="Reporter / Agency / Archive"
-              style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" />
-          </div>
-        </div>
-
-        <div style="margin-top:8px;">
-          <label style="font-size:12px;opacity:.8;display:block;margin-bottom:4px;">What to show</label>
-          <input type="text" name="visual_what[]" placeholder="E.g., दुकान पर छापा, सील पैक, अस्पताल, लैब, दस्तावेज़"
-            style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" />
-        </div>
-
-        <div style="margin-top:8px;">
-          <label style="font-size:12px;opacity:.8;display:block;margin-bottom:4px;">Notes (optional)</label>
-          <input type="text" name="visual_notes[]" placeholder="E.g., 3-5 sec, blur face, avoid brand"
-            style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" />
-        </div>
-      </div>
-    `;
-  }
-
-  function initVisualsUI() {
-    const wrap = document.getElementById("visuals-wrap");
-    const addBtn = document.getElementById("add-visual");
-    if (!wrap || !addBtn) return;
-
-    function getCount() {
-      return wrap.querySelectorAll("[data-visual-row]").length;
+    if(typeof window.NG_getStoryMeta === 'function' && !window.NG_getStoryMeta.__ng_angle_wrapped){
+      var _orig = window.NG_getStoryMeta;
+      var _wrap = function(){
+        var o = {};
+        try { o = _orig() || {}; } catch(e){ o = {}; }
+        o.angle = window.NG_getAngle();
+        return o;
+      };
+      _wrap.__ng_angle_wrapped = true;
+      window.NG_getStoryMeta = _wrap;
+    } else if(typeof window.NG_getStoryMeta !== 'function'){
+      window.NG_getStoryMeta = function(){ return { angle: window.NG_getAngle() }; };
     }
-
-    function renumber() {
-      const rows = Array.from(wrap.querySelectorAll("[data-visual-row]"));
-      rows.forEach((row, idx) => {
-        row.setAttribute("data-visual-row", String(idx + 1));
-        const label = row.querySelector(".v-row-label");
-        if (label) label.textContent = "Visual " + (idx + 1);
-        const rm = row.querySelector('button[data-action="remove-visual"]');
-        if (rm) rm.disabled = (idx === 0);
-      });
-    }
-
-    function addVisualRow() {
-      const n = getCount() + 1;
-      wrap.insertAdjacentHTML("beforeend", visualRowTemplate(n));
-      renumber();
-    }
-
-    if (getCount() === 0) addVisualRow();
-    addBtn.addEventListener("click", addVisualRow);
-
-    // event delegation (ONLY visuals actions)
-    wrap.addEventListener("click", (e) => {
-      const btn = e.target.closest('button[data-action]');
-      if (!btn) return;
-
-      const row = btn.closest("[data-visual-row]");
-      if (!row) return;
-
-      const action = btn.getAttribute("data-action");
-
-      if (action === "remove-visual") {
-        if (getCount() <= 1) return;
-        row.remove();
-        renumber();
-        return;
-      }
-
-      if (action === "clear-visual") {
-        row.querySelectorAll("input").forEach(i => (i.value = ""));
-        const sel = row.querySelector('select[name="visual_shot_type[]"]');
-        if (sel) sel.value = "BROLL";
-        return;
-      }
-
-      if (action === "gen-visual") {
-        const sel  = row.querySelector('select[name="visual_shot_type[]"]');
-        const what = row.querySelector('input[name="visual_what[]"]');
-        const src  = row.querySelector('input[name="visual_source[]"]');
-
-        const type = sel ? sel.value : "BROLL";
-
-        if (what && !what.value.trim()) {
-          what.value =
-            type === "ARCHIVE"  ? "फाइल फुटेज / पुरानी क्लिप" :
-            type === "LOCATION" ? "लोकेशन शॉट / साइनबोर्ड / एरिया विजुअल" :
-            type === "GRAPHIC"  ? "टाइमलाइन / नंबर / मैप प्लेट" :
-            type === "SCREEN"   ? "वेबसाइट/दस्तावेज़ स्क्रीन" :
-                                  "B-roll (जांच/रिएक्शन/डिटेल शॉट)";
-        }
-        if (src && !src.value.trim()) src.value = "Reporter/Archive";
-        return;
-      }
-    });
+  }catch(e){
+    console.warn('NG_ANGLE_WIRE_V1 error', e);
   }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    validateGenerate();
-    initBytesUI();
-    initVisualsUI();
-  });
-
-  ;(function initPromptPreviewCopy() {
-    const btn = document.getElementById("copy-prompt");
-    const box = document.getElementById("prompt-preview");
-    if (!btn || !box) return;
-
-    btn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(box.value || "");
-        if (typeof logLine === "function") logLine("Preview prompt copied ✅");
-      } catch {
-        box.focus();
-        box.select();
-        document.execCommand("copy");
-        if (typeof logLine === "function") logLine("Preview prompt copied (fallback) ✅");
-      }
-    });
-  })();
+})();
 </script>
+<!-- NG_ANGLE_WIRE_V1_END -->
 
+
+<!-- NG_FALLBACKS_CONSOLIDATED_V1_START -->
 <script>
 /* === Editorial Extraction : Suggestions Panel + Transcript Auto-Ingest (Clean V3) === */
+"use strict";
 
-  "use strict";
+/* Consolidated fallbacks (single copy). Logic unchanged; structure tidied. */
+(function(){
+  if (window.__NG_FALLBACKS_CONSOLIDATED_V1__) return;
+  window.__NG_FALLBACKS_CONSOLIDATED_V1__ = true;
+})();
 
-  // ---------------- utils ----------------
-  function esc(s) {
-    return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-    }[m]));
-  }
-  function norm(s) { return String(s ?? "").replace(/\s+/g, " ").trim(); }
-  function normKey(s) {
-    return norm(s).toLowerCase()
-      .replace(/[“”"']/g, "")
-      .replace(/[^\p{L}\p{N}\s]/gu, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
 
-  // optional speaker→designation map
-  window.__NG_SPEAKER_MAP = window.__NG_SPEAKER_MAP || {
-    "किरण रिजिजू": "केंद्रीय मंत्री",
-    "जयराम रमेश": "कांग्रेस नेता"
+  /* ===============================
+     NG_refreshFinalBytes (RESTORE)
+     =============================== */
+  window.NG_refreshFinalBytes = async function NG_refreshFinalBytes(){
+    try {
+      const host =
+        document.querySelector("#ng-final-bytes-list-auto") ||
+        document.querySelector("#ng-final-bytes-host") ||
+        document.querySelector("#finalBytesList") ||
+        document.querySelector("#final-bytes-list") ||
+        document.querySelector("[data-ng-final-bytes-host]");
+
+      if (!host) {
+        console.warn("[NG_refreshFinalBytes] host not found");
+        return { ok:false, reason:"host_not_found" };
+      }
+
+      const r = await fetch("/api/bytes/latest", { cache: "no-store" });
+      const data = await r.json().catch(()=>null);
+
+      const bytes =
+        (data && Array.isArray(data.bytes) && data.bytes) ||
+        (data && data.latest && Array.isArray(data.latest.bytes) && data.latest.bytes) ||
+        [];
+
+      // Optional: also update any JSON textarea if present
+      const ta =
+        document.querySelector("#finalBytesJSONOut") ||
+        document.querySelector("#ng-final-bytes-json") ||
+        document.querySelector("[data-ng-final-bytes-json]");
+
+      if (ta && "value" in ta) {
+        try { ta.value = JSON.stringify(bytes, null, 2); } catch(e){}
+      }
+
+      // Render cards
+      host.innerHTML = "";
+      const frag = document.createDocumentFragment();
+
+      bytes.forEach((b, idx) => {
+        const sp = String(b?.speaker ?? "").trim();
+        const de = String(b?.designation ?? "").trim();
+        const tx = String(b?.text ?? "").trim();
+        if (!tx) return;
+
+        const card = document.createElement("div");
+        card.className = "ng-final-card";
+        card.style.cssText = "border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0;background:#fff;";
+
+        const top = document.createElement("div");
+        top.style.cssText = "display:flex;justify-content:space-between;gap:10px;align-items:flex-start;";
+
+        const who = document.createElement("div");
+        who.style.cssText = "font-size:12px;opacity:.85;";
+        who.textContent = (sp || de) ? `${sp}${(sp && de) ? " — " : ""}${de}` : `Byte ${idx+1}`;
+
+        const tag = document.createElement("div");
+        tag.style.cssText = "font-size:11px;opacity:.6;";
+        tag.textContent = "Final";
+
+        const quote = document.createElement("div");
+        quote.style.cssText = "margin-top:6px;font-size:13px;line-height:1.35;white-space:pre-wrap;";
+        quote.textContent = tx;
+
+        top.appendChild(who);
+        top.appendChild(tag);
+        card.appendChild(top);
+        card.appendChild(quote);
+
+        frag.appendChild(card);
+      });
+
+      host.appendChild(frag);
+      return { ok:true, count: bytes.length };
+    } catch (e) {
+      console.warn("[NG_refreshFinalBytes] failed", e);
+      return { ok:false, error: String(e?.message || e) };
+    }
   };
 
-  // ---------------- extraction helpers ----------------
-  function guessSpeakerFromText(text) {
-    const t = norm(text);
+  /* ===============================
+     NG_ADD_BYTE_FALLBACK_V1
+     =============================== */
+  (function(){
+    if (window.__NG_ADD_BYTE_FALLBACK_V1) return;
+    window.__NG_ADD_BYTE_FALLBACK_V1 = true;
 
-    // "नाम (पद): बयान..."
-    const m2 = t.match(/^(.{2,40})\s*\((.{2,40})\)\s*[:：]\s*(.+)$/);
-    if (m2) return { speaker: norm(m2[1]), designation: norm(m2[2]), text: norm(m2[3]) };
+    function escAttr(s){ return String(s??"").replace(/"/g,"&quot;"); }
 
-    // "नाम: बयान..."
-    const m = t.match(/^([^:：]{2,40})\s*[:：]\s*(.+)$/);
-    if (m) return { speaker: norm(m[1]), text: norm(m[2]) };
+    function addRow(){
+      const wrap = document.querySelector("#bytes-wrap");
+      if (!wrap) return;
+const defSp = "";
+const defDe = "";
 
-    // "नाम ने कहा/बताया... (कि) ..."
-    const m3 = t.match(
-      /^([^\s:：]{2,20}(?:\s+[^\s:：]{2,20}){0,2})\s+(?:ने\s+(?:कहा|बोले|बताया|आरोप\s+लगाया|दावा\s+किया|तंज\s+कसा)|का\s+कहना\s+है)\s*(?:कि\s*)?(.+)$/
-    );
-    if (m3) {
-      const sp = norm(m3[1]);
-      const rest = norm(m3[2] || "");
-      if (sp && !/^(उन्होंने|उसने|हमने|आपने|इन्होंने|उनका|उसका)$/u.test(sp)) {
-        return { speaker: sp, text: rest || t };
-      }
+      const row = document.createElement("div");
+      row.className = "ng-byte-row";
+      row.style.cssText = "display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;align-items:start;";
+
+      row.innerHTML = `
+        <input class="ng-byte-speaker" placeholder="Speaker" value="${escAttr(defSp)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
+        <input class="ng-byte-desig" placeholder="Designation" value="${escAttr(defDe)}" style="padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;">
+        
+        <textarea class="ng-byte-text" placeholder="Quote / Byte text" rows="3" style="grid-column:1 / -1; padding:10px;border:1px solid #e5e7eb;border-radius:10px;"></textarea>
+<button type="button" class="danger ng-byte-remove" style="grid-column:1 / -1; justify-self:end; padding:8px 12px;border-radius:10px;border:1px solid #ef4444;background:#fff;">Remove</button>
+
+      `;
+
+      row.querySelector(".ng-byte-remove").addEventListener("click", () => row.remove());
+      wrap.appendChild(row);
     }
 
-    return { text: t };
-  }
+    function bind(){
+  if (window.__NG_ADD_BYTE_MULTIROW_V3__) return true;
+  if (window.__NG_ADD_BYTE_MULTIROW_V3_2__) return true;
 
-  function scoreLine(line) {
-    const t = (line.text || "").trim();
-    const len = t.length;
-    let score = 0;
+  const btn = document.querySelector("#addByteBtn");
+  const wrap = document.querySelector("#bytes-wrap");
+  if (!btn || !wrap) return false;
 
-    if (len >= 18 && len <= 140) score += 3;
-    else if (len >= 10 && len <= 220) score += 1.5;
-    else if (len < 8) score -= 4;
-    else score -= 0.2;
+  if (!btn.dataset.ngBoundFallback) {
 
-    if (line.speaker) score += 1.6;
-    if (/[“”"']/.test(t)) score += 1.2;
-    if (/[?!]/.test(t)) score += 0.4;
-
-    if (/(कहा|बोले|बताया|स्पष्ट|साफ|जवाब|तैयार|आरोप|तंज|सरकार|विपक्ष|जांच|सवाल|चुनाव|संसद|देश|जनता)/.test(t)) score += 2;
-    if (/(नहीं|गलत|झूठ|सबूत|कार्रवाई|मांग|इस्तीफा|हमला|बचाव)/.test(t)) score += 1;
-    if (/[0-9०-९]/.test(t)) score += 0.6;
-
-    if (/(धन्यवाद|नमस्कार|स्वागत|आप देख रहे|देखिए|दोस्तों|चलिये|अब हम)/.test(t)) score -= 4;
-
-    return score;
-  }
-
-  function extractReverieText(root) {
-    if (!root) return "";
-    if (typeof root === "string") return root.trim();
-
-    const cands = [
-      root.display_text, root.text,
-      root.result?.display_text, root.result?.text,
-      root.output?.display_text, root.output?.text,
-      root.data?.display_text, root.data?.text,
-      root.response?.display_text, root.response?.text,
-      root.success && root.text ? root.text : null
-    ];
-    for (const c of cands) if (typeof c === "string" && c.trim()) return c.trim();
-    return "";
-  }
-
-  function mapArrToLines(arr) {
-    const out = [];
-    for (const it of arr || []) {
-      let txt = "";
-      if (typeof it === "string") txt = it;
-      else if (it && typeof it === "object") {
-        txt = it.text || it.transcript || it.utterance || it.sentence || it.content || it.line || "";
+        btn.dataset.ngBoundFallback = "1";
+        btn.addEventListener("click", () => {
+          setTimeout(() => {
+            const any = wrap.querySelector(".ng-byte-row, textarea, input");
+            if (!any) addRow();
+            else {
+              const hasRow = wrap.querySelector(".ng-byte-row, textarea.ng-byte-text");
+              if (!hasRow) addRow();
+            }
+          }, 0);
+        }, true);
       }
-      txt = norm(txt);
-      if (!txt) continue;
-
-      const g = guessSpeakerFromText(txt);
-      let speaker = norm(g.speaker || it?.speaker || it?.name || "");
-      let designation = norm(g.designation || it?.designation || it?.title || "");
-      let text = norm(g.text || txt);
-
-      if (speaker && !designation) designation = window.__NG_SPEAKER_MAP[speaker] || "";
-
-      out.push({ speaker, designation, text });
+      return true;
     }
-    return out;
-  }
 
-  function looksLikeTranscriptArr(arr) {
-    let hits = 0, totalLen = 0;
-    for (const it of arr || []) {
-      const txt = (typeof it === "string")
-        ? it
-        : (it?.text || it?.transcript || it?.utterance || it?.sentence || it?.content || it?.line);
-      if (typeof txt === "string" && txt.trim()) {
-        hits++;
-        totalLen += txt.trim().length;
+    if (bind()) return;
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      if (bind() || tries > 25) clearInterval(t);
+    }, 200);
+  })();
+
+  /* ===============================
+     NG_ADD_FINAL_SYNC_FALLBACK_V1
+     =============================== */
+  (function(){
+    if (window.__NG_ADD_FINAL_SYNC_FALLBACK_V1) return;
+    window.__NG_ADD_FINAL_SYNC_FALLBACK_V1 = true;
+
+    function collectBytes(){
+      const wrap = document.querySelector("#bytes-wrap");
+      if (!wrap) return [];
+      const rows = [...wrap.querySelectorAll(".ng-byte-row")];
+      const out = [];
+      for (const r of rows){
+        const sp = (r.querySelector(".ng-byte-speaker")?.value || "").trim();
+        const de = (r.querySelector(".ng-byte-desig")?.value || "").trim();
+        const tx = (r.querySelector(".ng-byte-text")?.value || "").trim();
+        if (!tx) continue;
+        out.push({ speaker: sp, designation: de, text: tx });
       }
+      return out;
     }
-    const avg = hits ? totalLen / hits : 0;
-    return hits >= 2 && avg >= 10;
-  }
 
-  function collectCandidateLines(root, opts) {
-    const maxNodes = Number(opts?.maxNodes || 9000);
-
-    // Prefer full text
-    const fullText = extractReverieText(root);
-    if (fullText) {
-      const normalized = String(fullText)
-        .replace(/\r/g, "\n")
-        .replace(/[ \t]+/g, " ")
-        .replace(/\n{3,}/g, "\n\n")
-        .replace(/([।.?!])\s+/g, "$1\n")
-        .trim();
-
-      const parts = normalized
-        .split("\n")
-        .map(s => (s || "").trim())
-        .filter(s => s.length >= 12)
-        .slice(0, 80);
-
-      return parts.map(p => {
-        const g = guessSpeakerFromText(p);
-        const speaker = norm(g.speaker || "");
-        const designation = norm(g.designation || (speaker ? (window.__NG_SPEAKER_MAP[speaker] || "") : ""));
-        const text = norm(g.text || p);
-        return { speaker, designation, text };
+    async function post(bytes){
+      const r = await fetch("/api/bytes/latest",{
+        method:"POST",
+        headers: {"content-type":"application/json"},
+        body: JSON.stringify({ bytes, source:"ui_add_final_fallback_v1", ts:new Date().toISOString() })
       });
+      return r.json().catch(()=>null);
     }
 
-    // Direct arrays
-    const directCandidates = [];
-    if (Array.isArray(root?.segments)) directCandidates.push(root.segments);
-    if (Array.isArray(root?.result?.segments)) directCandidates.push(root.result.segments);
-    if (Array.isArray(root?.data?.segments)) directCandidates.push(root.data.segments);
-    if (Array.isArray(root?.utterances)) directCandidates.push(root.utterances);
-    if (Array.isArray(root?.sentences)) directCandidates.push(root.sentences);
-    if (Array.isArray(root?.results)) directCandidates.push(root.results);
-
-    for (const arr of directCandidates) {
-      if (Array.isArray(arr) && looksLikeTranscriptArr(arr)) return mapArrToLines(arr);
-    }
-
-    // BFS scan for best transcript-like array
-    const queue = [root];
-    let nodes = 0;
-    const arrays = [];
-
-    while (queue.length && nodes < maxNodes) {
-      const v = queue.shift();
-      nodes++;
-      if (!v) continue;
-
-      if (Array.isArray(v)) {
-        if (looksLikeTranscriptArr(v)) arrays.push(v);
-        for (const it of v) if (it && typeof it === "object") queue.push(it);
-        continue;
-      }
-      if (typeof v === "object") {
-        for (const k in v) {
-          if (!Object.prototype.hasOwnProperty.call(v, k)) continue;
-          const it = v[k];
-          if (it && typeof it === "object") queue.push(it);
+    async function syncNow(){
+      try{
+        const bytes = collectBytes();
+        await post(bytes);
+        // after sync, refresh final cards too (best-effort)
+        if (typeof window.NG_refreshFinalBytes === "function") {
+          setTimeout(() => window.NG_refreshFinalBytes(), 0);
         }
+      }catch(e){
+        console.warn("[NG_ADD_FINAL_SYNC_FALLBACK_V1] sync failed", e);
       }
     }
 
-    return mapArrToLines(arrays[0] || []);
-  }
+    window.NG_syncFinalBytesNow = syncNow;
 
-  function pickBestLines(lines, min = 6, max = 10) {
-    const seenText = new Set();
-    const bestPerSpeaker = new Map();
-    const rest = [];
-
-    for (const ln of (lines || [])) {
-      const tKey = normKey(ln.text);
-      if (!tKey || tKey.length < 8) continue;
-      if (seenText.has(tKey)) continue;
-      seenText.add(tKey);
-
-      const scored = { ...ln, __score: scoreLine(ln) };
-      if (scored.__score < -2.5) continue;
-
-      const sp = norm(scored.speaker);
-      if (sp) {
-        const prev = bestPerSpeaker.get(sp);
-        if (!prev || scored.__score > prev.__score) bestPerSpeaker.set(sp, scored);
-        else rest.push(scored);
-      } else {
-        rest.push(scored);
+    document.addEventListener("click", (e)=>{
+      if (e.target && e.target.id === "ng-add-final"){
+        setTimeout(syncNow, 0);
       }
-    }
-
-    const picked = Array.from(bestPerSpeaker.values()).sort((a, b) => b.__score - a.__score);
-    rest.sort((a, b) => b.__score - a.__score);
-
-    for (const r of rest) {
-      if (picked.length >= max) break;
-      picked.push(r);
-    }
-    return picked.slice(0, Math.max(min, Math.min(max, picked.length)));
-  }
-
-  // ---------------- BYTES helpers (used by push) ----------------
-  function getAddByteButton() {
-    return (
-      document.getElementById("addByteBtn") ||
-      document.getElementById("add-byte") ||
-      document.querySelector('[data-action="add-byte"]')
-    );
-  }
-
-  function getByteFields() {
-    const wrap = document.getElementById("bytesWrap") || document;
-    const speakers = [...wrap.querySelectorAll('input[name="byte_speaker[]"]')];
-    const desigs   = [...wrap.querySelectorAll('input[name="byte_designation[]"]')];
-    const texts    = [...wrap.querySelectorAll('textarea[name="byte_text[]"], input[name="byte_text[]"]')];
-    return { wrap, speakers, desigs, texts };
-  }
-
-  function ensureByteRows(targetCount) {
-    const addBtn = getAddByteButton();
-    if (!addBtn) return;
-
-    let safety = 40;
-    while (safety-- > 0) {
-      const { speakers } = getByteFields();
-      if (speakers.length >= targetCount) break;
-
-      if (typeof window.NG_addByteRow === "function") window.NG_addByteRow();
-      else addBtn.click();
-    }
-  }
-
-  function existingByteSet() {
-    const { speakers, desigs, texts } = getByteFields();
-    const set = new Set();
-    const n = Math.max(speakers.length, desigs.length, texts.length);
-
-    for (let i = 0; i < n; i++) {
-      const sp = normKey(speakers[i]?.value || "");
-      const ds = normKey(desigs[i]?.value || "");
-      const tx = normKey(texts[i]?.value || "");
-      if (sp || ds || tx) set.add(`${sp}|${ds}|${tx}`);
-    }
-    return set;
-  }
-
-  function findFirstEmptySlot() {
-    const { speakers, desigs, texts } = getByteFields();
-    const n = Math.max(speakers.length, desigs.length, texts.length);
-
-    for (let i = 0; i < n; i++) {
-      const sp = norm(speakers[i]?.value || "");
-      const ds = norm(desigs[i]?.value || "");
-      const tx = norm(texts[i]?.value || "");
-      if (!sp && !ds && !tx) return i;
-      if (!sp && !ds) return i;
-    }
-    return n;
-  }
-
-  function fillSlot(i, item) {
-    ensureByteRows(i + 1);
-    const f = getByteFields();
-    if (f.speakers[i]) f.speakers[i].value = item?.speaker || "";
-    if (f.desigs[i])   f.desigs[i].value   = item?.designation || "";
-    if (f.texts[i])    f.texts[i].value    = item?.text || "";
-  }
-
-  // ---------------- UI init ----------------
-function initEditorialExtraction() {
-  if (window.__NG_EE_INIT_DONE) return;
-  window.__NG_EE_INIT_DONE = true;
-
-  const eeList  = document.getElementById("ee-list");
-  const eeEmpty = document.getElementById("ee-empty");
-  const btnPush = document.getElementById("ee-push");
-  const btnClear= document.getElementById("ee-clear");
-
-  if (!eeList || !btnPush || !btnClear) {
-    console.warn("[EE] Missing ee-list/ee-push/ee-clear");
-    return;
-  }
-
-  let suggestions = [];
-
-  function showEmpty(on) {
-    if (!eeEmpty) return;
-    eeEmpty.style.display = on ? "block" : "none";
-  }
-
-  function updateButtons() {
-    const total   = eeList.querySelectorAll('input[type="checkbox"][data-i]').length;
-    const checked = eeList.querySelectorAll('input[type="checkbox"][data-i]:checked').length;
-    btnPush.disabled  = (checked === 0);
-    btnClear.disabled = (total === 0);
-  }
-
-  // --- Bytes helpers (bulletproof, DOM-driven) ---
-  function bytesWrapEl() {
-    return document.getElementById("bytesWrap") || document.getElementById("bytes-wrap");
-  }
-
-  function addByteButtonEl() {
-    return (
-      document.getElementById("addByteBtn") ||
-      document.getElementById("add-byte") ||
-      document.getElementById("addByte")
-    );
-  }
-
-  function getByteInputs() {
-    const wrap = bytesWrapEl();
-    if (!wrap) return { sp: [], ds: [], tx: [] };
-    const sp = Array.from(wrap.querySelectorAll('input[name="byte_speaker[]"]'));
-    const ds = Array.from(wrap.querySelectorAll('input[name="byte_designation[]"]'));
-    const tx = Array.from(wrap.querySelectorAll('textarea[name="byte_text[]"], input[name="byte_text[]"]'));
-    return { sp, ds, tx };
-  }
-
-  function ensureByteRows(minRows) {
-    let { sp, ds } = getByteInputs();
-    let n = Math.max(sp.length, ds.length);
-    let safety = 0;
-
-    while (n < minRows && safety++ < 30) {
-      if (typeof window.NG_addByteRow === "function") {
-        window.NG_addByteRow();
-      } else {
-        const addBtn = addByteButtonEl();
-        if (addBtn) addBtn.click();
-        else break;
+      if (e.target && e.target.classList && e.target.classList.contains("ng-byte-remove")){
+        setTimeout(syncNow, 0);
       }
-      ({ sp, ds } = getByteInputs());
-      n = Math.max(sp.length, ds.length);
-    }
-    return n;
-  }
+    }, true);
+  })();
 
-  function findFirstEmptySlot() {
-    const { sp, ds } = getByteInputs();
-    const n = Math.max(sp.length, ds.length);
-    for (let i = 0; i < n; i++) {
-      const a = (sp[i]?.value || "").trim();
-      const b = (ds[i]?.value || "").trim();
-      if (!a && !b) return i;
-    }
-    return n; // append
-  }
+})();
+</script>
+<!-- NG_FALLBACKS_CONSOLIDATED_V1_END -->
 
-  function normKeyLocal(s) {
-    return (s || "")
-      .toString()
-      .trim()
-      .replace(/\s+/g, " ")
-      .toLowerCase();
-  }
 
-  function existingByteSet() {
-    const set = new Set();
-    const { sp, ds, tx } = getByteInputs();
-    const n = Math.max(sp.length, ds.length, tx.length);
-    for (let i = 0; i < n; i++) {
-      const speaker = (sp[i]?.value || "").trim();
-      const desig   = (ds[i]?.value || "").trim();
-      const text    = (tx[i]?.value || "").trim();
-      if (!speaker && !desig && !text) continue;
-      set.add(`${normKeyLocal(speaker)}|${normKeyLocal(desig)}|${normKeyLocal(text)}`);
-    }
-    return set;
-  }
+<script> /* NG_FINAL_BYTES_UI_POLL_V1_START */ (function () {
+  if (window.__NG_FINAL_BYTES_UI_POLL_V1_INSTALLED) return;
+  window.__NG_FINAL_BYTES_UI_POLL_V1_INSTALLED = true;
 
-  // ✅ return true/false
-  function fillSlot(slotIndex, item) {
-    ensureByteRows(slotIndex + 1);
+  function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-    const { sp, ds, tx } = getByteInputs();
-    if (!sp[slotIndex] || !ds[slotIndex]) return false;
-
-    const speaker = (item?.speaker || "").toString().trim();
-    const desig   = (item?.designation || "").toString().trim();
-    const text    = (item?.text || "").toString().trim();
-
-    if (!speaker || !desig) return false;
-
-    const spWas = (sp[slotIndex].value || "").trim();
-    const dsWas = (ds[slotIndex].value || "").trim();
-
-    // don't overwrite
-    if (spWas || dsWas) return false;
-
-    sp[slotIndex].value = speaker;
-    ds[slotIndex].value = desig;
-
-    if (tx && tx[slotIndex] && !((tx[slotIndex].value || "").trim()) && text) {
-      tx[slotIndex].value = text;
+  function ensureHost() {
+    let host = document.querySelector("#ng-final-bytes-list-auto");
+    if (!host) {
+      const TARGET = document.querySelector("#bytes-wrap") || document.querySelector("#bytesWrap") || document.querySelector("#ng-adv-only") || document.body;
+      host = document.createElement("div");
+      host.id = "ng-final-bytes-list-auto";
+      host.style.cssText = "margin-top:10px;";
+      TARGET.appendChild(host);
     }
 
-    // trigger input events
-    try { sp[slotIndex].dispatchEvent(new Event("input", { bubbles: true })); } catch(e){}
-    try { ds[slotIndex].dispatchEvent(new Event("input", { bubbles: true })); } catch(e){}
-    if (tx && tx[slotIndex]) { try { tx[slotIndex].dispatchEvent(new Event("input", { bubbles: true })); } catch(e){} }
+    let label = document.querySelector("#ng-final-bytes-count-label");
+    if (!label) {
+      label = document.createElement("div");
+      label.id = "ng-final-bytes-count-label";
+      label.style.cssText = "font-size:12px;opacity:.85;margin:6px 0 10px 0;display:block;";
+      host.insertBefore(label, host.firstChild);
+    }
 
-    return true;
+    let cards = document.querySelector("#ng-final-bytes-cards-v1");
+    if (!cards) {
+      cards = document.createElement("div");
+      cards.id = "ng-final-bytes-cards-v1";
+      cards.style.cssText = "margin-top:10px; display:flex; flex-direction:column; gap:8px;";
+      host.appendChild(cards);
+    }
+
+    // Add a manual refresh button (explicit user action)
+    let btn = document.querySelector("#ng-final-bytes-refresh-btn");
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "ng-final-bytes-refresh-btn";
+      btn.textContent = "Refresh Final Bytes";
+      btn.style.cssText = "padding:6px 10px;border-radius:10px;border:1px solid #999;background:#f7f7f7;cursor:pointer;font-size:12px;";
+      label.insertAdjacentElement("afterend", btn);
+      btn.addEventListener("click", () => {
+        try { window.NG_refreshFinalBytes && window.NG_refreshFinalBytes(); } catch(e){}
+      }, true);
+    }
+
+    return { host, label, cards };
   }
 
-  function render(list) {
-    suggestions = Array.isArray(list) ? list : [];
+  function render(bytes) {
+    const ui = ensureHost();
+    const arr = Array.isArray(bytes) ? bytes : [];
+    ui.label.textContent = `Final Bytes • ${arr.length}`;
 
-    // ✅ keep suggestions in memory for pushToBytes
-    window.__NG_EE_SUGGEST = suggestions;
-    window.__NG_EE_SUGGESTIONS = suggestions; // backward alias
+    const draftStatus = document.querySelector("#ng-byte-draft-status");
+    if (draftStatus) draftStatus.textContent = `Final Bytes • ${arr.length}`;
 
-    eeList.innerHTML = "";
-
-    if (!suggestions.length) {
-      showEmpty(true);
-      btnPush.disabled = true;
-      btnClear.disabled = true;
+    if (!arr.length) {
+      ui.cards.innerHTML = `<div style="font-size:12px;opacity:.6;border:1px dashed #e2e8f0;border-radius:12px;padding:10px;">Final Bytes empty</div>`;
       return;
     }
 
-    showEmpty(false);
-
-    suggestions.forEach((b, i) => {
-      const speaker = esc(b.speaker || "Unknown");
-      const desig   = esc(b.designation || "");
-      const text    = esc(b.text || "");
-
-      const card = document.createElement("label");
-      card.style.cssText =
-        "border:1px solid #ddd;border-radius:12px;padding:10px;display:block;margin:10px 0;cursor:pointer;";
-
-      card.innerHTML = `
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <input type="checkbox" data-i="${i}" style="margin-top:3px;">
-          <div style="flex:1;">
-            <div style="font-weight:700;">${speaker}</div>
-            <div style="opacity:.75;font-size:12px;margin-top:2px;">${desig}</div>
-            <div style="margin-top:8px;line-height:1.35;">${text}</div>
-          </div>
-        </div>
-      `;
-      eeList.appendChild(card);
-    });
-
-    updateButtons();
+    ui.cards.innerHTML = arr.map((b, i) => {
+      const sp = esc(b.speaker || "");
+      const des = esc(b.designation || "");
+      const tx = esc(b.text || "");
+      const head = (sp || des) ? `<div style="font-size:12px;opacity:.85;margin-bottom:6px;"><b>${sp || "—"}</b>${des ? ` • ${des}` : ""}</div>` : "";
+      return `<div class="ng-final-card" data-idx="${i}" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
+        ${head}
+        <div style="font-size:14px;line-height:1.3;">${tx || "<span style='opacity:.6'>—</span>"}</div>
+      </div>`;
+    }).join("");
   }
 
-  function clearAll() {
-    render([]);
-  }
-
-  function getCheckedIndices() {
-    return [...eeList.querySelectorAll('input[type="checkbox"][data-i]:checked')]
-      .map(cb => Number(cb.getAttribute("data-i")))
-      .filter(n => Number.isFinite(n) && n >= 0);
-  }
-
-  function pushToBytes() {
-    const idxs = getCheckedIndices();
-    if (!idxs.length) return;
-
-    const dupeSet = existingByteSet();
-    const pushedRun = new Set();
-    let pushed = 0;
-
-    for (const idx of idxs) {
-      const item = suggestions[idx];
-      if (!item) continue;
-
-      const speaker = (item.speaker || "").toString().trim();
-      const desig   = (item.designation || "").toString().trim();
-      const text    = (item.text || "").toString().trim();
-
-      const key = `${normKeyLocal(speaker)}|${normKeyLocal(desig)}|${normKeyLocal(text)}`;
-
-      // ✅ no duplicates: already in bytes OR already pushed in this click
-      if (dupeSet.has(key) || pushedRun.has(key)) continue;
-
-      // find next empty slot and ensure rows
-      const slot = findFirstEmptySlot();
-      ensureByteRows(slot + 1);
-
-      const ok = fillSlot(slot, { speaker, designation: desig, text });
-
-      // ✅ only if filled successfully: uncheck + count + add to sets
-      if (ok) {
-        const cb = eeList.querySelector(`input[type="checkbox"][data-i="${idx}"]`);
-        if (cb) cb.checked = false;
-
-        dupeSet.add(key);
-        pushedRun.add(key);
-        pushed++;
-      }
-    }
-
-    if (pushed) console.log("[EE] Pushed to Bytes:", pushed);
-    updateButtons();
-  }
-
-  // bind once
-  if (!window.__NG_EE_WIRED) {
-    window.__NG_EE_WIRED = true;
-
-    eeList.addEventListener("change", updateButtons);
-
-    btnPush.addEventListener("click", (e) => {
-      e.preventDefault();
-      pushToBytes();
-    });
-
-    btnClear.addEventListener("click", (e) => {
-      e.preventDefault();
-      clearAll();
-    });
-  }
-
-  // expose renderer
-  window.NG_setEditorialSuggestions = render;
-
-  // initial empty
-  render([]);
-  console.log("[EE] initEditorialExtraction READY");
-}
-
-  // ---------------- ingest + hook NG_TRANSCRIPT ----------------
-  window.NG_ingestTranscript = function (reverieJsonOrText) {
-    const rawLines = collectCandidateLines(reverieJsonOrText, { maxNodes: 9000 });
-    const best = pickBestLines(rawLines, 6, 10).map(x => ({
-      speaker: x.speaker || "",
-      designation: x.designation || "",
-      text: x.text || ""
-    }));
-
-    // ✅ keep latest suggestions in memory (for pushToBytes fallback)
-window.__NG_EE_SUGGEST = Array.isArray(best) ? best : [];
-
-if (typeof window.NG_setEditorialSuggestions === "function") {
-  window.NG_setEditorialSuggestions(best);
-}
-
-// ✅ after render, ensure push button state is correct
-syncEePushBtn();
-
-console.log("[EE] Transcript → suggestions:", best.length);
-return best;
-
-
-  (function hookTranscriptSetter() {
-    if (window.__NG_TRANSCRIPT_HOOKED) return;
-    window.__NG_TRANSCRIPT_HOOKED = true;
-
-    let _t = window.NG_TRANSCRIPT;
-    let _lastSig = "";
-
-    function sigOf(v) {
-      try {
-        if (v == null) return "";
-        if (typeof v === "string") return "str:" + v.slice(0, 120);
-        return "obj:" + JSON.stringify(v).slice(0, 240);
-      } catch {
-        return "unk";
-      }
-    }
-
-    function ingestSoon(v, reason) {
-      const sig = sigOf(v);
-      if (!sig || sig === _lastSig) return;
-      _lastSig = sig;
-
-      setTimeout(() => {
-        try {
-          if (typeof window.NG_ingestTranscript === "function") window.NG_ingestTranscript(v);
-        } catch (e) {
-          console.error("[EE] ingest error:", e);
-        }
-      }, 0);
-
-      console.log("[EE] NG_TRANSCRIPT ingest (" + reason + ")");
-    }
-
+  // STRICT: only allow GET when explicitly requested (one-shot flag)
+  async function tick(reason) {
     try {
-      Object.defineProperty(window, "NG_TRANSCRIPT", {
-        configurable: true,
-        get: function () { return _t; },
-        set: function (v) { _t = v; ingestSoon(v, "setter"); }
-      });
-    } catch (e) {
-      console.warn("[EE] NG_TRANSCRIPT hook failed (non-configurable).", e);
-    }
+      if (!window.__NG_ALLOW_BYTES_LATEST_ONCE) return;
+      window.__NG_ALLOW_BYTES_LATEST_ONCE = false;
 
+<<<<<<< HEAD
     if (_t) ingestSoon(_t, "boot");
   })();
 
@@ -1356,8 +1036,143 @@ return best;
 }
 
 }  // ✅ added: missing closing brace for script #2
-</script>
+=======
+      const r = await fetch("/api/bytes/latest", { method: "GET", cache: "no-store" });
+      const j = await r.json();
+      const bytes = (j && (j.bytes || (j.latest && j.latest.bytes))) || [];
+      render(bytes);
+    } catch (e) {}
+  }
 
+  // Public API: call this only from explicit UI actions
+/* DISABLED: overwrote NG_refreshFinalBytes
+window.NG_refreshFinalBytes_DISABLED = function(){
+    window.__NG_ALLOW_BYTES_LATEST_ONCE = true;
+    return tick("manual");
+}
+*/
+
+  // NO auto-run, NO visibilitychange, NO global click hooks
+  // You can trigger refresh after POST success manually if needed (see next note).
+
+})();  /* NG_FINAL_BYTES_UI_POLL_V1_END */ </script>
+
+<!-- NG_SMOKE_TEST_BUTTON_V1_START -->
+<button id="ng-smoke-test"
+  style="position:fixed;right:16px;bottom:16px;z-index:9999;
+         padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;
+         background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.08);
+         font-size:12px;cursor:pointer;">
+  Smoke Test
+</button>
+
+<script>
+(function(){
+  const btn = document.getElementById("ng-smoke-test");
+  if (!btn || btn.dataset.bound) return;
+  btn.dataset.bound = "1";
+
+  async function run(){
+    const out = { ts: new Date().toISOString(), checks: [] };
+
+    function ok(name, extra){ out.checks.push({ name, ok:true, ...extra }); }
+    function bad(name, extra){ out.checks.push({ name, ok:false, ...extra }); }
+
+    // Check: build stamp
+    const stamp = document.querySelector('meta[name="ng-build-stamp"]')?.getAttribute('content') || null;
+    stamp ? ok("build_stamp", { stamp }) : bad("build_stamp");
+
+    // Check: health
+    try{
+      const h = await fetch("/api/health", { cache:"no-store" }).then(r=>r.json());
+      h?.ok ? ok("api_health", { h }) : bad("api_health", { h });
+    }catch(e){ bad("api_health", { error: String(e?.message||e) }); }
+
+    // Check: bytes latest
+    try{
+      const b = await fetch("/api/bytes/latest", { cache:"no-store" }).then(r=>r.json());
+      const n = Array.isArray(b?.bytes) ? b.bytes.length : (Array.isArray(b?.latest?.bytes) ? b.latest.bytes.length : 0);
+      ok("api_bytes_latest", { count: n, payload: b });
+    }catch(e){ bad("api_bytes_latest", { error: String(e?.message||e) }); }
+
+    // Check: refresh function + render host
+    const host = document.querySelector("#ng-final-bytes-list-auto");
+    host ? ok("final_bytes_host") : bad("final_bytes_host");
+
+    if (typeof window.NG_refreshFinalBytes === "function") ok("NG_refreshFinalBytes_exists");
+    else bad("NG_refreshFinalBytes_exists");
+
+    // Try render
+    try{
+      if (typeof window.NG_refreshFinalBytes === "function") {
+        const r = await window.NG_refreshFinalBytes();
+        const cards = document.querySelectorAll(".ng-final-card").length;
+        ok("NG_refreshFinalBytes_run", { ret: r, cards });
+      }
+    }catch(e){ bad("NG_refreshFinalBytes_run", { error: String(e?.message||e) }); }
+
+ console.log("[NG_SMOKE_TEST]", out);
+// Show results on-page (no console dependency) — DEV ONLY (box)
+const __NG_SMOKE_ON__ = new URLSearchParams(location.search).get("smoke") === "1";
+
+/*
+  DEV-ONLY: hide Smoke button on normal URLs.
+  NOTE: Best practice is to ALSO hide on page-load (outside run()).
+  This line ensures that once run() executes, the button state is correct.
+*/
+const __btn = document.getElementById("ng-smoke-btn");
+if (__btn) __btn.style.display = __NG_SMOKE_ON__ ? "inline-flex" : "none";
+
+// DEV-OFF: no box/no further work
+if (!__NG_SMOKE_ON__) return out;
+
+
+// DEV-ON: show box
+let box = document.getElementById("ng-smoke-out");
+if (!box) {
+  box = document.createElement("pre");
+  box.id = "ng-smoke-out";
+  box.style.cssText =
+    "position:fixed;right:16px;bottom:64px;z-index:9999;max-width:520px;max-height:320px;" +
+    "overflow:auto;padding:10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;" +
+    "box-shadow:0 6px 18px rgba(0,0,0,.08);font-size:11px;white-space:pre-wrap;";
+  document.body.appendChild(box);
+}
+
+box.style.cursor = "pointer";
+box.textContent = "[NG_SMOKE_TEST]\n" + JSON.stringify(out, null, 2);
+box.onclick = () => box.remove();
+
+return out;
+
+}
+
+
+  btn.addEventListener("click", run);
+})();
+>>>>>>> recovery-branch
+</script>
+<!-- NG_SMOKE_TEST_BUTTON_V1_END -->
+
+<script src="ng_add_byte_multirow_v3.js"></script>
+
+
+<!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_START (20260130) -->
+<script src="./ng_toolbar_mini_v1.js"></script>
+<!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_END -->
+
+<!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_START (20260130) -->
+<script src="./ng_toolbar_actions_v1.js"></script>
+<!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_END -->
+
+<!-- NG_GENERATE_JS_V1_INCLUDE_START (20260130) -->
+<script src="./ng_generate_v1.js"></script>
+<!-- NG_GENERATE_JS_V1_INCLUDE_END -->
+
+<!-- NG_PROMPT_BUILDER_V1_INCLUDE_START (20260130) -->
+<script src="./ng_prompt_builder_v1.js"></script>
+<!-- NG_PROMPT_BUILDER_V1_INCLUDE_END -->
+<script src="/script1_dump.js?v=20260131" defer></script>
 
 <script>
 /* Patch Override ... */
@@ -1365,4 +1180,40 @@ return best;
 
 
 </body>
+
+
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

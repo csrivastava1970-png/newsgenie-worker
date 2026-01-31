@@ -1,7 +1,54 @@
+# .wrangler
 .wrangler/
+
+# Backups
 _backups/
 _local_backups/
 backups/
+
+# Logs
 logs/
+
+# Node modules
 node_modules/
+
+# Ignore temp files
 *.bak
+
+# local backups
+backups/
+.wrangler/
+logs/
+
+start_ng.cmd.bak
+backups/
+*.bak*
+
+# Secrets / local env
+.dev.vars
+
+# --- NewsGenie local backups / scratch ---
+public/index_backup_*.html
+src/index_backup_*.js
+public/ng_*_backup_*.js
+public/ng_latest_transcript_ui*.js
+_local_backups/
+final/
+_snip_transcript_handlers.txt
+
+# ---- NewsGenie local artifacts (auto-generated) ----
+_ng_bytes_scan_*.log
+public/index_backup_*.html
+public/index.html.bak_*
+public/*.bak_*
+public/*_FAIL.js.bak_*
+public/script*.bak_*
+public/_script*.bak_*
+backups/
+*.log
+
+# local backups / logs
+_bytes_latest_poll_audit.txt
+public/index_fix_bodyclose_backup_*.html
+wrangler_backup_before_DO_*.toml
+_backups/
