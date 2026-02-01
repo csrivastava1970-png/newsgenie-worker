@@ -126,6 +126,25 @@ export default {
 
     const url = new URL(request.url);
     const path = url.pathname;
+/* === NG_STUB_MISSING_UI_JS_V1_START (20260201) === */
+if (
+  path === "/ng_toolbar_actions_v1.js" ||
+  path === "/js/ng_toolbar_actions_v1.js" ||
+  path === "/ng_prompt_builder_v1.js" ||
+  path === "/js/ng_prompt_builder_v1.js"
+) {
+  const body =
+    path.includes("toolbar_actions")
+      ? "// TEMP STUB: ng_toolbar_actions_v1.js (missing)\nwindow.__NG_TOOLBAR_ACTIONS_STUB__=true;\n"
+      : "// TEMP STUB: ng_prompt_builder_v1.js (missing)\nwindow.__NG_PROMPT_BUILDER_STUB__=true;\n";
+
+  return new Response(body, {
+    status: 200,
+    headers: { "content-type": "application/javascript; charset=utf-8" },
+  });
+}
+/* === NG_STUB_MISSING_UI_JS_V1_END === */
+
 
     // --- /api/bytes/latest via Durable Object (persistent) ---
     if (url.pathname === "/api/bytes/latest") {
@@ -139,6 +158,18 @@ export default {
     if (request.method === "OPTIONS") {
       return new globalThis.Response(null, { status: 204, headers: corsHeaders(request) });
     }
+    // --- NG_ASSETS_FALLBACK_V1_START (20260201) ---
+    // If this is not an API route, try serving static assets from /public
+    // This prevents "Promise did not resolve to Response" on missing return paths.
+    try {
+      const p = new URL(request.url).pathname || "/";
+      const isApi = p === "/health" || p.startsWith("/api/");
+      if (!isApi && env && env.ASSETS && typeof env.ASSETS.fetch === "function") {
+        return env.ASSETS.fetch(request);
+      }
+    } catch (e) { /* ignore */ }
+    // --- NG_ASSETS_FALLBACK_V1_END ---
+
 
 
     const has_openai_key = !!(env && env.OPENAI_API_KEY);
@@ -179,6 +210,7 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
   return new Response(JSON.stringify({ ok: true, latest, text, ts: new Date().toISOString() }), { status: 200, headers });
 }
 // NG_PATCH_END:TRANSCRIPT_LATEST_V1
+    
     // Digi-pack API
     if (path === "/api/digi-pack" && request.method === "POST") {
       const body = await readJson(request);
@@ -186,7 +218,6 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
 
       const mode = String(env?.GEN_MODE || "echo").toLowerCase();
       const model = String(env?.OPENAI_MODEL || "gpt-4o");
-
       const max_output_tokens = Number(env?.MAX_OUTPUT_TOKENS || 2200);
 
       // Echo mode (old behavior)
@@ -198,6 +229,7 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
             path,
             mode,
             model,
+            max_output_tokens,
             entry_marker: ENTRY_MARKER,
             has_openai_key,
             received: promptObj,
@@ -207,18 +239,30 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
         );
       }
 
-            if (!has_openai_key) {
-        return json({ ok: false, path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OPENAI_API_KEY missing" });
+      // OpenAI mode requested but key missing
+      if (!has_openai_key) {
+        return json(
+          { ok: false, ts: new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OPENAI_API_KEY missing" },
+          400,
+          corsHeaders(request)
+        );
       }
 
+      // If openai mode is enabled but implementation is incomplete, fail safely.
+      return json(
+        { ok: false, ts: new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OpenAI mode not configured in this build" },
+        501,
+        corsHeaders(request)
+      );
+    }
 
-    // fallback
+    // Final fallback (guarantee Response for every request)
     return json(
       { ok: false, ts: new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error: "Not found" },
       404,
       corsHeaders(request)
     );
   }
-  // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
-}
-}
+};
+
+

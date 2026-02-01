@@ -649,15 +649,10 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
 <!-- NG_FALLBACKS_CONSOLIDATED_V1_START -->
 <script>
-/* === Editorial Extraction : Suggestions Panel + Transcript Auto-Ingest (Clean V3) === */
-"use strict";
-
 /* Consolidated fallbacks (single copy). Logic unchanged; structure tidied. */
 (function(){
   if (window.__NG_FALLBACKS_CONSOLIDATED_V1__) return;
   window.__NG_FALLBACKS_CONSOLIDATED_V1__ = true;
-})();
-
 
   /* ===============================
      NG_refreshFinalBytes (RESTORE)
@@ -945,98 +940,6 @@ const defDe = "";
       if (!window.__NG_ALLOW_BYTES_LATEST_ONCE) return;
       window.__NG_ALLOW_BYTES_LATEST_ONCE = false;
 
-<<<<<<< HEAD
-    if (_t) ingestSoon(_t, "boot");
-  })();
-
-  // ---------------- Transcript JSON Loader ----------------
-  (function initTranscriptJsonLoader() {
-    const LS_KEY = "NG_REVERIE_TRANSCRIPT_JSON_V1";
-    function $(id){ return document.getElementById(id); }
-
-    function extractTranscriptText(obj) {
-      if (typeof obj === "string") return obj;
-
-      if (obj && typeof obj.display_text === "string" && obj.display_text.trim()) return obj.display_text;
-      if (obj && typeof obj.text === "string" && obj.text.trim()) return obj.text;
-
-      const cands = [obj?.result, obj?.output, obj?.data, obj?.transcript, obj?.transcription].filter(Boolean);
-      for (const c of cands) {
-        if (typeof c?.display_text === "string" && c.display_text.trim()) return c.display_text;
-        if (typeof c?.text === "string" && c.text.trim()) return c.text;
-      }
-
-      const segs =
-        obj?.segments || obj?.result?.segments || obj?.output?.segments || obj?.data?.segments ||
-        obj?.utterances || obj?.result?.utterances || obj?.items;
-
-      if (Array.isArray(segs) && segs.length) {
-        const parts = segs.map(s =>
-          (typeof s?.display_text === "string" && s.display_text.trim()) ? s.display_text :
-          (typeof s?.text === "string" && s.text.trim()) ? s.text :
-          (typeof s?.utterance === "string" && s.utterance.trim()) ? s.utterance :
-          ""
-        ).filter(Boolean);
-        if (parts.length) return parts.join("\n");
-      }
-
-      return "";
-    }
-
-    function loadFromTextarea() {
-      const ta = $("ta-transcript-json");
-      if (!ta) return;
-
-      const raw = (ta.value || "").trim();
-      if (!raw) return;
-
-      try { localStorage.setItem(LS_KEY, raw); } catch {}
-
-      let parsed;
-      try { parsed = JSON.parse(raw); } catch { parsed = raw; }
-
-      const text = extractTranscriptText(parsed) || (typeof parsed === "string" ? parsed : "");
-      window.NG_TRANSCRIPT = text; // ✅ sets extracted text
-      console.log("[TL] NG_TRANSCRIPT set. chars:", (text || "").length);
-    }
-
-    function boot() {
-      const ta = $("ta-transcript-json");
-      const btn = $("btn-load-transcript-json");
-
-      try {
-        const saved = localStorage.getItem(LS_KEY);
-        if (ta && saved && !ta.value.trim()) ta.value = saved;
-      } catch {}
-
-      if (btn && !btn.__NG_BOUND) {
-        btn.__NG_BOUND = true;
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          loadFromTextarea();
-        });
-      }
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", boot, { once: true });
-    } else {
-      boot();
-    }
-})();  // ✅ close Transcript Loader IIFE
-
-
-  // ---------------- export global + auto init ----------------
-  window.initEditorialExtraction = initEditorialExtraction;
-
- if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
-} else {
-  initEditorialExtraction();
-}
-
-}  // ✅ added: missing closing brace for script #2
-=======
       const r = await fetch("/api/bytes/latest", { method: "GET", cache: "no-store" });
       const j = await r.json();
       const bytes = (j && (j.bytes || (j.latest && j.latest.bytes))) || [];
@@ -1150,7 +1053,6 @@ return out;
 
   btn.addEventListener("click", run);
 })();
->>>>>>> recovery-branch
 </script>
 <!-- NG_SMOKE_TEST_BUTTON_V1_END -->
 
@@ -1174,17 +1076,10 @@ return out;
 <!-- NG_PROMPT_BUILDER_V1_INCLUDE_END -->
 <script src="/script1_dump.js?v=20260131" defer></script>
 
-<script>
-/* Patch Override ... */
-
-
-
 </body>
 
 
 </html>
-
-
 
 
 
