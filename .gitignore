@@ -39,3 +39,6 @@ _bytes_latest_poll_audit.txt
 public/index_fix_bodyclose_backup_*.html
 wrangler_backup_before_DO_*.toml
 _backups/
+
+backup/
+
