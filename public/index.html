@@ -163,7 +163,22 @@ h2{
 }
 
 
-  </style>
+  
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
+</style>
 <style>
 #ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
 
@@ -176,11 +191,41 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) #bytesWrap {
 }
 /* NG_STD_UI_SIMPLE_HIDE_BYTES_V1_END */
 
+
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
 </style>
 <style id="ng-simple-hide-bytes-v1">
   body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) .panel:has(#ng-sec-bytes){ display:none !important; }
 body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng-sec-bytes){ display:block !important; }
 
+
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
 </style>
 
 <style>
@@ -211,11 +256,41 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
   transform: none !important;
 }
 /* NG_TOOLBAR_LAYOUT_FIX_V1_END */
+
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
 </style>
 
 <!-- NG_STORYVIEW_FORCE_SHOW_V1_START (20260130) -->
 <style>
   body.ng-show-storyview #ng-storyview{ display:block !important; }
+
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
 </style>
 <!-- NG_STORYVIEW_FORCE_SHOW_V1_END -->
 <!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_START (20260130) === -->
@@ -241,15 +316,73 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     visibility: visible !important;
     opacity: 1 !important;
   }
+
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
 </style>
 <!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_END === -->
 
 
-</head>
+<!-- NG_DRAFT_LIBRARY_VISIBILITY_LOCK_CSS_V1_START (20260202) -->
+<style>
+  /* Draft Library panel: show in Advanced, hide in Simple (CSS-only override) */
+  html[data-ng-std-ui='advanced'] #ng-draft-library { display:block !important; }
+  html[data-ng-std-ui='simple']   #ng-draft-library { display:none !important; }
+
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
+</style>
+<!-- NG_DRAFT_LIBRARY_VISIBILITY_LOCK_CSS_V1_END -->
+
 <!-- NG_MARKER: 2026-01-06_IST_TEST_123 -->
 
 
-<body>
+<!-- NG_HIDE_VIEW_DIGIPACK_V4_START (20260202) -->
+<style>
+  /* Hide View DIGI_PACK button in ALL modes (we auto-show preview after Generate) */
+  #btnViewDigiPack { display:none !important; }
+
+/* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
+#ng-bytes-controls-row{
+  display:flex;
+  flex-direction:column; /* mobile-first */
+  gap:8px;
+  align-items:flex-start;
+  margin:10px 0 12px;
+}
+@media (min-width: 600px){
+  #ng-bytes-controls-row{
+    flex-direction:row; /* optional: wide screens */
+    align-items:center;
+  }
+}
+</style>
+<!-- NG_HIDE_VIEW_DIGIPACK_V4_END -->
+
 
 
 <h2>NewsGenie Digital Producer</h2>
@@ -552,6 +685,9 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
       </button>
 
       <button type="button" class="secondary" onclick="clearUI()">Clear</button>
+
+<button id="btnCopyDigiPack" type="button" class="secondary" disabled title="Shift+Click: Copy JSON">Copy</button>
+<button id="btnViewDigiPack" type="button" class="secondary" disabled>View DIGI_PACK</button>
 
       <span id="genStatus" style="font-size:13px; opacity:.8;"></span>
     </div>
@@ -860,7 +996,6 @@ const defDe = "";
     }, true);
   })();
 
-})();
 </script>
 <!-- NG_FALLBACKS_CONSOLIDATED_V1_END -->
 
@@ -944,10 +1079,11 @@ const defDe = "";
     try {
       if (!window.__NG_ALLOW_BYTES_LATEST_ONCE) return;
       window.__NG_ALLOW_BYTES_LATEST_ONCE = false;
+    } catch (e) { /* ignore */ }
+  }
 
-<<<<<<< HEAD
-    if (_t) ingestSoon(_t, "boot");
-  })();
+  try { if (typeof _t !== "undefined" && _t) ingestSoon(_t, "boot"); } catch (e) {}
+})();
 
   // ---------------- Transcript JSON Loader ----------------
   (function initTranscriptJsonLoader() {
@@ -1027,22 +1163,19 @@ const defDe = "";
 
 
   // ---------------- export global + auto init ----------------
-  window.initEditorialExtraction = initEditorialExtraction;
+  if (typeof initEditorialExtraction === "function") {
+    window.initEditorialExtraction = initEditorialExtraction;
 
- if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
-} else {
-  initEditorialExtraction();
-}
-
-}  // ✅ added: missing closing brace for script #2
-=======
-      const r = await fetch("/api/bytes/latest", { method: "GET", cache: "no-store" });
-      const j = await r.json();
-      const bytes = (j && (j.bytes || (j.latest && j.latest.bytes))) || [];
-      render(bytes);
-    } catch (e) {}
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
+    } else {
+      initEditorialExtraction();
+    }
+  } else {
+    // initEditorialExtraction not present in this build; skip safely
   }
+
+
 
   // Public API: call this only from explicit UI actions
 /* DISABLED: overwrote NG_refreshFinalBytes
@@ -1055,16 +1188,29 @@ window.NG_refreshFinalBytes_DISABLED = function(){
   // NO auto-run, NO visibilitychange, NO global click hooks
   // You can trigger refresh after POST success manually if needed (see next note).
 
-})();  /* NG_FINAL_BYTES_UI_POLL_V1_END */ </script>
+/* NG_FINAL_BYTES_UI_POLL_V1_END */ </script>
 
 <!-- NG_SMOKE_TEST_BUTTON_V1_START -->
-<button id="ng-smoke-test"
-  style="position:fixed;right:16px;bottom:16px;z-index:9999;
-         padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;
-         background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.08);
-         font-size:12px;cursor:pointer;">
-  Smoke Test
-</button>
+<!-- NG_SMOKE_VIS_TOGGLE_V1_START (20260203) -->
+<script>
+(function(){
+  function apply(){
+    try{
+      var b = document.getElementById("ng-smoke-test");
+      if (!b) return;
+      var on = (new URLSearchParams(location.search).get("smoke") === "1");
+      // force with !important to override any CSS or later scripts
+      b.style.setProperty("display", on ? "inline-flex" : "none", "important");
+    }catch(e){}
+  }
+  apply();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", apply, { once:true });
+  }
+  setTimeout(apply, 200);
+})();
+</script>
+<!-- NG_SMOKE_VIS_TOGGLE_V1_END -->
 
 <script>
 (function(){
@@ -1120,8 +1266,8 @@ const __NG_SMOKE_ON__ = new URLSearchParams(location.search).get("smoke") === "1
   NOTE: Best practice is to ALSO hide on page-load (outside run()).
   This line ensures that once run() executes, the button state is correct.
 */
-const __btn = document.getElementById("ng-smoke-btn");
-if (__btn) __btn.style.display = __NG_SMOKE_ON__ ? "inline-flex" : "none";
+const __btn = document.getElementById("ng-smoke-test");
+// (NG_CLEANUP_20260203) display handled by NG_SMOKE_VIS_TOGGLE_V1
 
 // DEV-OFF: no box/no further work
 if (!__NG_SMOKE_ON__) return out;
@@ -1150,7 +1296,6 @@ return out;
 
   btn.addEventListener("click", run);
 })();
->>>>>>> recovery-branch
 </script>
 <!-- NG_SMOKE_TEST_BUTTON_V1_END -->
 
@@ -1174,13 +1319,141 @@ return out;
 
 <script>
 /* Patch Override ... */
+</script>
 
+<script>
+/* NG_MOVE_ADD_TO_BYTES_V1 (20260203) */
+(() => {
+  function move() {
+    const holder = document.getElementById("ng-add-final-holder");
+    const btn = document.getElementById("ng-add-final");
+    if (!holder || !btn) return;
 
+    // Prefer placing near Final Bytes area
+    const target =
+      document.getElementById("ng-final-bytes-list-auto") ||
+      document.getElementById("bytesWrap") ||
+      document.getElementById("ng-manual-bytes");
 
+    if (!target) return;
+
+    // Put holder at top of target (or just before +Add Byte if it exists)
+    const addByteBtn = target.querySelector('button, input[type="button"], input[type="submit"]');
+    if (addByteBtn && addByteBtn !== btn && addByteBtn.parentElement === target) {
+      target.insertBefore(holder, addByteBtn);
+    } else {
+      target.insertBefore(holder, target.firstChild);
+    }
+
+    // Make it look like a normal in-panel action (no floating feel)
+    holder.style.display = "flex";
+    holder.style.justifyContent = "flex-start";
+    holder.style.margin = "8px 0 10px";
+    btn.style.position = "static";
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", move, { once: true });
+  } else {
+    move();
+  }
+})();
+</script>
+
+<script>
+/* NG_BYTES_CONTROLS_ROW_V2 (20260203) */
+(() => {
+  function findTitle(root, label){
+    const want = (label||"").toLowerCase();
+    const nodes = Array.from(root.querySelectorAll("h1,h2,h3,h4,h5,b,strong,div,span,p"))
+      .filter(n => (n.textContent||"").trim().toLowerCase() === want);
+    return nodes[0] || null;
+  }
+
+  function arrange() {
+    const bytesWrap = document.getElementById("bytesWrap");
+    const addByteBtn = document.getElementById("addByteBtn");
+    const addFinalBtn = document.getElementById("ng-add-final");
+    const addFinalHolder = document.getElementById("ng-add-final-holder");
+
+    if (!bytesWrap || !addByteBtn || !addFinalBtn) return;
+
+    // Create/reuse a controls row (but place it correctly between headings)
+    let row = document.getElementById("ng-bytes-controls-row");
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "ng-bytes-controls-row";
+      row.style.display = "flex";
+      row.style.gap = "10px";
+      row.style.alignItems = "center";
+      row.style.justifyContent = "flex-start";
+      row.style.margin = "10px 0 12px";
+    }
+
+    // Desired order: Bytes title -> controls row -> Final Bytes title
+    const bytesTitle = findTitle(bytesWrap, "Bytes");
+    const finalTitle = findTitle(bytesWrap, "Final Bytes");
+
+    if (finalTitle) {
+      bytesWrap.insertBefore(row, finalTitle);
+    } else if (bytesTitle) {
+      bytesTitle.insertAdjacentElement("afterend", row);
+    } else {
+      bytesWrap.insertBefore(row, bytesWrap.firstChild);
+    }
+
+    // Put +Add Byte first, then Add to Bytes
+    row.appendChild(addByteBtn);
+    row.appendChild(addFinalBtn);
+
+    // Neutralize holder alignment (if any old CSS exists)
+    if (addFinalHolder) {
+      addFinalHolder.style.display = "block";
+      addFinalHolder.style.margin = "0";
+      addFinalHolder.style.justifyContent = "flex-start";
+    }
+
+    addFinalBtn.style.position = "static";
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", arrange, { once: true });
+  } else {
+    arrange();
+  }
+})();
+</script>
 </body>
 
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
