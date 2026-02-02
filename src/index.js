@@ -26,7 +26,7 @@ function corsHeaders(req) {
 }
 
 async function readJson(req) {
-  const txt = await req.text();
+  const txt = await req.clone().text();
   if (!txt) return {};
   const clean = txt.replace(/^\uFEFF/, ""); // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ strip UTF-8 BOM
   try { return JSON.parse(clean); } catch { return { _raw: txt }; }
@@ -38,7 +38,7 @@ function safeParsePrompt(body) {
   // 1) { prompt: "{...json...}" }
   // 2) { prompt: {...} }
   // 3) {...} (already the prompt object)
-  let p = body?.prompt ?? body ?? {};
+  let p = (body && typeof body === "object" && typeof body.story === "string" && body.story.trim()) ? body : (body?.prompt ?? body ?? {});
   if (typeof p === "string") {
     try { return JSON.parse(p); } catch { return { text: p }; }
   }
@@ -187,8 +187,7 @@ if (
 // NG_PATCH_START:TRANSCRIPT_LATEST_V1
 // Transcript latest (GET/POST; in-memory store; always returns Response)
 if ((path === "/api/transcript/latest" || path === "/transcript/latest") && request.method === "POST") {
-  const body = await readJson(request);
-  const text = (body && body.text != null) ? String(body.text) : "";
+  const body = await readJson(request);const text = (body && body.text != null) ? String(body.text) : "";
   const latest = {
     text,
     source: (body && body.source != null) ? String(body.source) : null,
@@ -212,11 +211,7 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
 // NG_PATCH_END:TRANSCRIPT_LATEST_V1
     
     // Digi-pack API
-    if (path === "/api/digi-pack" && request.method === "POST") {
-      const body = await readJson(request);
-      const promptObj = safeParsePrompt(body);
-
-      const mode = String(env?.GEN_MODE || "echo").toLowerCase();
+    if (path === "/api/digi-pack" && request.method === "POST") {      const body = await readJson(request);const promptObj = safeParsePrompt(body);const mode = String(env?.GEN_MODE || "echo").toLowerCase();
       const model = String(env?.OPENAI_MODEL || "gpt-4o");
       const max_output_tokens = Number(env?.MAX_OUTPUT_TOKENS || 2200);
 
@@ -248,12 +243,208 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
         );
       }
 
-      // If openai mode is enabled but implementation is incomplete, fail safely.
-      return json(
-        { ok: false, ts: new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OpenAI mode not configured in this build" },
-        501,
-        corsHeaders(request)
-      );
+      /* === NG_OPENAI_DIGIPACK_V1_START (20260202) === */
+      // OpenAI mode: call OpenAI Chat Completions (server-side)
+      try {
+        const story = String(promptObj?.story || "").trim();
+        const lang = String(promptObj?.lang || "hi").trim();
+        const format = String(promptObj?.format || "DIGI_PACK").trim();
+
+        if (!story) {
+          return json(
+            { ok: false, ts: new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error: "Missing story", },
+            400,
+            corsHeaders(request)
+          );
+        }
+
+        const sys = [
+          "You are NewsGenie Digital Producer.",
+          "Generate a newsroom-ready digital pack from the given story.",
+          "Return STRICT JSON only (no markdown).",
+          "Language: " + lang + ".",
+          "Pack type: " + format + ".",
+          "Keep it factual; do not invent names, dates, places not in the input."
+        ].join(" ");
+
+        const userMsg = [
+          "STORY:",
+          story,
+          "",
+          "OUTPUT_JSON_SCHEMA:",
+          "{",
+          '  "headline": "string",',
+          '  "summary": "string",',
+          '  "key_points": ["string"],',
+          '  "web_article": {"title":"string","body":"string","seo_keywords":["string"]},',
+          '  "video_script": {"anchor_intro":"string","vo":"string","outro":"string"},',
+          '  "youtube": {"title":"string","description":"string","tags":["string"]},',
+          '  "reel": {"hook":"string","script":"string","cta":"string"},',
+          '  "social": {"x":["string"],"instagram_caption":"string","whatsapp":"string"}',
+          "}"
+        ].join("\n");
+
+        const payload = {
+          model,
+          temperature: 0.2,
+          max_tokens: max_output_tokens,
+          messages: [
+            { role: "system", content: sys },
+            { role: "user", content: userMsg }
+          ]
+        };
+
+        const r = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "authorization": `Bearer ${env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const j = await r.json().catch(() => ({}));
+
+        if (!r.ok) {
+          return json(
+            {
+              ok: false,
+              ts: new Date().toISOString(),
+              path,
+              entry_marker: ENTRY_MARKER,
+              has_openai_key,
+              error: "OpenAI request failed",
+              status: r.status,
+              details: j
+            },
+            502,
+            corsHeaders(request)
+          );
+        }
+
+        const content = String(j?.choices?.[0]?.message?.content || "").trim();
+
+                // ---- parse JSON + build copy-ready text ----
+        let output_json = null;
+        let parse_ok = false;
+        let parse_error = null;
+
+        try {
+          output_json = JSON.parse(content);
+          parse_ok = true;
+        } catch (e) {
+          parse_ok = false;
+          parse_error = String(e?.message || e);
+        }
+
+        const safeStr = (v) => (typeof v === "string" ? v.trim() : "");
+        const safeArr = (v) => (Array.isArray(v) ? v.map(x => safeStr(x)).filter(Boolean) : []);
+
+        let copy_text = "";
+        if (parse_ok && output_json) {
+          const h = safeStr(output_json.headline);
+          const s = safeStr(output_json.summary);
+          const kp = safeArr(output_json.key_points);
+
+          const wa = output_json.web_article || {};
+          const vs = output_json.video_script || {};
+          const yt = output_json.youtube || {};
+          const rl = output_json.reel || {};
+          const so = output_json.social || {};
+
+          const xPosts = safeArr(so.x);
+
+          copy_text = [
+            "=== HEADLINE ===",
+            h || "(missing)",
+            "",
+            "=== SUMMARY ===",
+            s || "(missing)",
+            "",
+            "=== KEY POINTS ===",
+            kp.length ? kp.map((p, i) => `${i + 1}. ${p}`).join("\n") : "(missing)",
+            "",
+            "=== WEB ARTICLE ===",
+            "Title: " + (safeStr(wa.title) || "(missing)"),
+            "",
+            (safeStr(wa.body) || "(missing)"),
+            "",
+            "SEO Keywords: " + (safeArr(wa.seo_keywords).join(", ") || "(missing)"),
+            "",
+            "=== VIDEO SCRIPT ===",
+            "Anchor Intro:",
+            safeStr(vs.anchor_intro) || "(missing)",
+            "",
+            "VO:",
+            safeStr(vs.vo) || "(missing)",
+            "",
+            "Outro:",
+            safeStr(vs.outro) || "(missing)",
+            "",
+            "=== YOUTUBE ===",
+            "Title: " + (safeStr(yt.title) || "(missing)"),
+            "Description:",
+            safeStr(yt.description) || "(missing)",
+            "",
+            "Tags: " + (safeArr(yt.tags).join(", ") || "(missing)"),
+            "",
+            "=== REEL ===",
+            "Hook: " + (safeStr(rl.hook) || "(missing)"),
+            "Script:",
+            safeStr(rl.script) || "(missing)",
+            "",
+            "CTA: " + (safeStr(rl.cta) || "(missing)"),
+            "",
+            "=== SOCIAL ===",
+            "X:",
+            xPosts.length ? xPosts.map((p, i) => `- ${p}`).join("\n") : "(missing)",
+            "",
+            "Instagram Caption:",
+            safeStr(so.instagram_caption) || "(missing)",
+            "",
+            "WhatsApp:",
+            safeStr(so.whatsapp) || "(missing)"
+          ].join("\n");
+        }
+
+        return json(
+          {
+            ok: true,
+            ts: new Date().toISOString(),
+            path,
+            mode: "openai",
+            model,
+            max_output_tokens,
+            entry_marker: ENTRY_MARKER,
+            has_openai_key,
+            output_text: content,        // raw model text (should be JSON string)
+            parse_ok,
+            parse_error,
+            output_json,                 // parsed object (if parse_ok)
+            copy_text,                   // copy-ready text (if parse_ok)
+            usage: j?.usage || null
+          },
+          200,
+          corsHeaders(request)
+        );
+
+      } catch (e) {
+        return json(
+          {
+            ok: false,
+            ts: new Date().toISOString(),
+            path,
+            entry_marker: ENTRY_MARKER,
+            has_openai_key,
+            error: "OpenAI runtime error",
+            message: String(e?.message || e)
+          },
+          500,
+          corsHeaders(request)
+        );
+      }
+/* === NG_OPENAI_DIGIPACK_V1_END (20260202) === */
+
     }
 
     // Final fallback (guarantee Response for every request)
@@ -264,5 +455,9 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
     );
   }
 };
+
+
+
+
 
 
