@@ -1227,15 +1227,22 @@ try {
           const bodyObj = JSON.parse(bodyStr);
 
           // If request has "prompt", ensure it uses latest bytes
-          if (typeof bodyObj.prompt === "string") {
-            // Prefer hidden prompt if present (already has all fields)
-            const hidden = getPromptFromHiddenInput();
-            bodyObj.prompt = hidden ? normalizePromptString(hidden) : normalizePromptString(bodyObj.prompt);
-          } else {
-            // If prompt missing, try set from hidden
-            const hidden = getPromptFromHiddenInput();
-            if (hidden) bodyObj.prompt = normalizePromptString(hidden);
-          }
+// If client already sent story, do NOT override prompt (server requires story)
+const hasStory = !!(bodyObj && bodyObj.story && String(bodyObj.story).trim());
+if (!hasStory) {
+  if (typeof bodyObj.prompt === "string") {
+    // Prefer hidden prompt if present (already has all fields)
+    const hidden = getPromptFromHiddenInput();
+    bodyObj.prompt = hidden
+      ? normalizePromptString(hidden)
+      : normalizePromptString(bodyObj.prompt);
+  } else {
+    // If prompt missing, try set from hidden
+    const hidden = getPromptFromHiddenInput();
+    if (hidden) bodyObj.prompt = normalizePromptString(hidden);
+  }
+} // end guard
+
 
           init = Object.assign({}, init, { body: JSON.stringify(bodyObj) });
           console.log("[NG_FETCH_OVERRIDE] /api/digi-pack prompt overridden. bytesLen=",

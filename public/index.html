@@ -29,6 +29,23 @@
   html[data-ng-std-ui="simple"] #ng-advanced-panels{ display:none !important; }
   html[data-ng-std-ui="simple"] #ng-byte-draft-box{ display:none !important; }
   html[data-ng-std-ui="advanced"] #ng-advanced-panels{ display:block; }
+/* === NG_SOFT_NUDGE_V1_START (20260204) === */
+#ngQuick.ng-soft-nudge {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.12) !important;
+
+  border-radius: 8px;
+  transition: box-shadow 180ms ease-in-out;
+}
+#ngQuick {
+  transition: box-shadow 180ms ease-in-out;
+}
+
+html body #ngQuick.ng-soft-nudge{
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.12) !important;
+}
+
+/* === NG_SOFT_NUDGE_V1_END === */
 
   /* NG_STD_UI_TOOLBAR_ROW_V2
      Goal: single-row toolbar (actions left, UI toggle right) — CSS-only, hang-free
@@ -178,6 +195,11 @@ h2{
     align-items:center;
   }
 }
+
+/* NG_STD_UI_SIMPLE_HIDE_RESPONSE_V1 */
+html[data-ng-std-ui="simple"] #ngResponse { display:none !important; }
+html[data-ng-std-ui="simple"] #ng-response-panel { display:none !important; }
+
 </style>
 <style>
 #ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
@@ -226,6 +248,114 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     align-items:center;
   }
 }
+
+/* === NG_OUTPUT_TABS_CSS_V1_START (20260204) === */
+html[data-ng-outtab="story"] #ng-log-panel-wrap{ display:block !important; }
+html[data-ng-outtab="story"] #ng-quick-panel-wrap{ display:none !important; }
+html[data-ng-outtab="story"] #ng-response-panel-wrap{ display:block !important; }
+
+html[data-ng-outtab="quick"] #ng-log-panel-wrap{ display:none !important; }
+html[data-ng-outtab="quick"] #ng-quick-panel-wrap{ display:block !important; }
+html[data-ng-outtab="quick"] #ng-response-panel-wrap{ display:none !important; }
+
+html[data-ng-outtab="log"] #ng-log-panel-wrap{ display:block !important; }
+html[data-ng-outtab="log"] #ng-quick-panel-wrap{ display:none !important; }
+html[data-ng-outtab="log"] #ng-response-panel-wrap{ display:none !important; }
+
+html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
+html[data-ng-outtab="raw"] #ng-quick-panel-wrap{ display:none !important; }
+html[data-ng-outtab="raw"] #ng-response-panel-wrap{ display:block !important; }
+
+/* tabs look */
+#ng-output-tabs .btn{ padding:6px 10px; border-radius:999px; }
+html[data-ng-outtab="story"] #ng-tab-story,
+html[data-ng-outtab="quick"] #ng-tab-quick,
+html[data-ng-outtab="log"] #ng-tab-log,
+html[data-ng-outtab="raw"] #ng-tab-raw{
+  font-weight:700;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.12);
+}
+
+/* tabs replace accordion summaries */
+#ng-log-details > summary,
+#ng-quick-details > summary,
+#ng-response-details > summary{ display:none !important; }
+
+/* keep details open */
+#ng-log-details, #ng-quick-details, #ng-response-details{ open: true; }
+#ng-output-headrow{
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 6px 0;
+  z-index: 5;
+}
+
+
+/* === NG_STORYVIEW_POLISH_V1_START (20260204) === */
+#ng-storyview{
+  border-radius: 14px;
+}
+#ng-storyview b{
+  display:block;
+  margin-bottom: 6px;
+}
+#ng-storyview-out{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  tab-size: 2;
+
+  /* sizing: let CSS control height */
+  height: 60vh !important;
+  max-height: none !important;
+  min-height: 260px;
+
+  overflow: auto !important;
+  padding: 12px 14px;
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.12) !important;
+}
+
+/* === NG_STORYVIEW_POLISH_V1_END === */
+/* === NG_TABS_DISABLED_STYLE_V1_START (20260205) === */
+#ng-output-tabs .btn:disabled{
+  opacity: .45;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+/* === NG_OUTPUT_HEADROW_COMPACT_V1_START (20260205) === */
+#ng-output-headrow{
+  padding: 4px 0 !important;
+  gap: 10px !important;
+}
+
+#ng-output-headrow .status{
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+#ng-output-tabs{
+  gap: 6px !important;
+}
+
+#ng-output-tabs .btn{
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+}
+/* === NG_OUTPUT_HEADROW_COMPACT_V1_END === */
+
+/* === NG_TABS_DISABLED_STYLE_V1_END === */
+
+
+/* === NG_OUTPUT_TABS_CSS_V1_END === */
+
 </style>
 
 <style>
@@ -642,10 +772,18 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 <!-- NG_BYTES_UNIFIED_DRAFT_V1_END -->
 <!-- NG_DRAFT_LIBRARY_PANEL_V1_START (20260130) -->
 <div id="ng-draft-library" class="panel" style="display:none;">
-  <b>Draft Library</b>
-  <div style="font-size:12px;opacity:.75;margin-top:6px;">
-    Saved drafts will appear here.
-  </div>
+  <details id="ng-draft-lib-details">
+    <summary style="cursor:pointer; font-weight:700;">Draft Library</summary>
+
+    <div style="margin-top:10px;">
+      <button type="button" id="ng-lib-refresh">Refresh</button>
+      <button type="button" id="ng-lib-clear">Clear Library</button>
+
+      <pre id="ng-lib-out" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
+    </div>
+  </details>
+</div>
+
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
     <button type="button" id="ng-lib-refresh">Refresh</button>
@@ -663,20 +801,26 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
       <div id="ng-manual-bytes" style="margin-top:10px; display:none;"><div id="bytes-wrap"></div></div>
     </div>
     <!-- VISUALS -->
-    <!-- NG_STD_VISUALS_WRAP_V1_START -->
+<!-- NG_STD_VISUALS_WRAP_V1_START -->
 <div id="visualsWrap" data-ng-sec="visuals">
   <div class="panel" id="step-visuals">
-    <b>Visuals</b>
-    <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
+    <details id="ng-visuals-details">
+      <summary style="cursor:pointer; font-weight:700;">Visuals</summary>
 
-    <div id="visuals-wrap"></div>
+      <div style="margin-top:10px;">
+        <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
-    <div style="margin-top:8px;">
-      <button type="button" id="add-visual">+ Add Visual</button>
-    </div>
+        <div id="visuals-wrap"></div>
+
+        <div style="margin-top:8px;">
+          <button type="button" id="add-visual">+ Add Visual</button>
+        </div>
+      </div>
+    </details>
   </div>
 </div>
 <!-- NG_STD_VISUALS_WRAP_V1_END -->
+
 
 
     <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
@@ -696,27 +840,59 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
 
 <div id="ng-advanced-panels">
-  <div class="panel">
-    <div class="status"><b>Status:</b> <span id="ngStatus">Idle</span></div>
-    <div style="margin-top:8px;"><b>Log</b></div>
-    <pre id="ngLog"></pre>
-  </div>
-
-  <div class="panel">
-    <div><b>Quick View</b></div>
-    <div id="ngQuick" style="white-space:pre-wrap; overflow:auto; max-height:220px;">(no quick view)</div>
+  <div class="panel" id="ng-log-panel-wrap"><div id="ng-output-headrow" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+  <div class="status" style="margin:0;"><b>Status:</b> <span id="ngStatus">Idle</span></div>
+  <div id="ng-output-tabs" style="display:flex; gap:8px; flex-wrap:wrap; margin:0;">
+    <button type="button" class="btn" id="ng-tab-story">Story</button>
+    <button type="button" class="btn" id="ng-tab-quick">Quick</button>
+    <button type="button" class="btn" id="ng-tab-log">Log</button>
+    <button type="button" class="btn" id="ng-tab-raw">JSON</button>
 
   </div>
+</div>
 
-  <div class="panel">
-    <div><b>Response</b></div>
-    <pre id="ngResponse">(no response yet)</pre>
+
+
+
+  <details id="ng-log-details">
+    <summary style="cursor:pointer; font-weight:700;">Log</summary>
+    <pre id="ngLog" style="margin-top:10px; max-height:160px; overflow:auto;"></pre>
+  </details>
+</div>
+
+  </div>
+
+  <div class="panel" id="ng-quick-panel-wrap">
+  <div id="ng-quick-panel">
+
+  <details id="ng-quick-details">
+    <summary style="cursor:pointer; font-weight:700;">Quick View</summary>
+    <div id="ngQuick" style="margin-top:10px; white-space:pre-wrap; overflow:auto; max-height:180px;">(no quick view)</div>
+  </details>
+</div>
+
+
+  </div>
+
+ <div class="panel" id="ng-response-panel-wrap">
+  <div id="ng-response-panel">
+
+  <details id="ng-response-details">
+    <summary style="cursor:pointer; font-weight:700;">Response</summary>
+    <pre id="ngResponse" style="margin-top:10px;">(no response yet)</pre>
+  </details>
+</div>
+
 <!-- NG_STORYVIEW_PANEL_V1_START (20260130) -->
 <div id="ng-storyview" class="panel" style="display:none;">
   <b>Story View</b>
   <div style="font-size:12px;opacity:.75;margin-top:6px;">
     Auto-preview of latest generated JSON (for quick editorial view).
   </div>
+<!-- NG_STORYVIEW_FORMATTED_V1_START -->
+<div id="ng-storyview-formatted" style="margin-top:10px;"></div>
+<!-- NG_STORYVIEW_FORMATTED_V1_END -->
+
   <pre id="ng-storyview-out" style="margin-top:10px;white-space:pre-wrap;max-height:320px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
 </div>
 <!-- NG_STORYVIEW_PANEL_V1_END (20260130) -->
@@ -1361,7 +1537,8 @@ return out;
 </script>
 
 <script>
-/* NG_BYTES_CONTROLS_ROW_V2 (20260203) */
+/* NG_BYTES_CONTROLS_ROW_V5 (20260203) */
+/* Best practice: JS only places elements; CSS controls layout */
 (() => {
   function findTitle(root, label){
     const want = (label||"").toLowerCase();
@@ -1374,26 +1551,22 @@ return out;
     const bytesWrap = document.getElementById("bytesWrap");
     const addByteBtn = document.getElementById("addByteBtn");
     const addFinalBtn = document.getElementById("ng-add-final");
-    const addFinalHolder = document.getElementById("ng-add-final-holder");
-
     if (!bytesWrap || !addByteBtn || !addFinalBtn) return;
 
-    // Create/reuse a controls row (but place it correctly between headings)
+    // stable controls container
     let row = document.getElementById("ng-bytes-controls-row");
     if (!row) {
       row = document.createElement("div");
       row.id = "ng-bytes-controls-row";
-      row.style.display = "flex";
-      row.style.gap = "10px";
-      row.style.alignItems = "center";
-      row.style.justifyContent = "flex-start";
-      row.style.margin = "10px 0 12px";
     }
 
-    // Desired order: Bytes title -> controls row -> Final Bytes title
+    // CSS is source of truth (remove legacy inline styles if any)
+    row.removeAttribute("style");
+
     const bytesTitle = findTitle(bytesWrap, "Bytes");
     const finalTitle = findTitle(bytesWrap, "Final Bytes");
 
+    // Desired order: Bytes -> controls -> Final Bytes
     if (finalTitle) {
       bytesWrap.insertBefore(row, finalTitle);
     } else if (bytesTitle) {
@@ -1402,18 +1575,9 @@ return out;
       bytesWrap.insertBefore(row, bytesWrap.firstChild);
     }
 
-    // Put +Add Byte first, then Add to Bytes
+    // Inside controls: +Add Byte then Add to Bytes
     row.appendChild(addByteBtn);
     row.appendChild(addFinalBtn);
-
-    // Neutralize holder alignment (if any old CSS exists)
-    if (addFinalHolder) {
-      addFinalHolder.style.display = "block";
-      addFinalHolder.style.margin = "0";
-      addFinalHolder.style.justifyContent = "flex-start";
-    }
-
-    addFinalBtn.style.position = "static";
   }
 
   if (document.readyState === "loading") {
@@ -1423,10 +1587,132 @@ return out;
   }
 })();
 </script>
+
+<!-- === NG_UI_LOG_RINGBUFFER_V1_START (20260203) === -->
+<script>
+(function(){
+  if (window.__NG_UI_LOG_RINGBUFFER_V1__) return;
+  window.__NG_UI_LOG_RINGBUFFER_V1__ = true;
+
+  var MAX = 10;
+  var buf = [];
+
+  function safeStr(x){
+    try {
+      if (x instanceof Error) return (x.stack || x.message || String(x));
+      if (typeof x === "string") return x;
+      if (x == null) return "";
+      if (typeof x === "object") return JSON.stringify(x);
+      return String(x);
+    } catch(e){
+      try { return String(x); } catch(_){ return ""; }
+    }
+  }
+
+  function push(level, args){
+    var ts = new Date().toISOString().slice(11,19); // HH:MM:SS
+    var msg = Array.prototype.slice.call(args || []).map(safeStr).join(" ");
+    var tag = level === "error" ? "[ERR]" : (level === "warn" ? "[WARN]" : "[LOG]");
+    var line = ts + " " + tag + " " + msg;
+    buf.push(line);
+    if (buf.length > MAX) buf = buf.slice(buf.length - MAX);
+    render();
+  }
+
+  function render(){
+    var el = document.getElementById("ngLog");
+    if (!el) return;
+    el.textContent = buf.join("\n");
+  }
+
+  // Hook console methods (do not break original console)
+  try {
+    var origLog = console.log.bind(console);
+    var origWarn = console.warn.bind(console);
+    var origErr = console.error.bind(console);
+
+    console.log = function(){ try { origLog.apply(console, arguments); } catch(e){} push("log", arguments); };
+    console.warn = function(){ try { origWarn.apply(console, arguments); } catch(e){} push("warn", arguments); };
+    console.error = function(){ try { origErr.apply(console, arguments); } catch(e){} push("error", arguments); };
+  } catch(e) {}
+
+  // In case logs happen before DOM element exists
+  setTimeout(render, 0);
+  setTimeout(render, 250);
+})();
+</script>
+<!-- === NG_UI_LOG_RINGBUFFER_V1_END === -->
+<script>
+/* === NG_OUTPUT_TABS_JS_V1_START (20260204) === */
+(function(){
+  if (window.__NG_OUTPUT_TABS_JS_V1__) return;
+  window.__NG_OUTPUT_TABS_JS_V1__ = true;
+function NG_setOutputReady(on){
+  try{
+    const q = document.getElementById("ng-tab-quick");
+    const l = document.getElementById("ng-tab-log");
+    const r = document.getElementById("ng-tab-raw");
+    if (q) q.disabled = !on;
+    if (l) l.disabled = !on;
+    if (r) r.disabled = !on;
+  }catch(e){}
+}
+window.NG_setOutputReady = NG_setOutputReady;
+
+
+  function setTab(t){
+window.setTab = setTab;
+
+    try{ document.documentElement.setAttribute("data-ng-outtab", t); }catch(e){}
+    if (t === "story") {
+      try{
+        document.body.classList.add("ng-show-storyview");
+        var p = document.getElementById("ng-storyview");
+        if (p) p.style.display = "block";
+        if (typeof window.NG_fillStoryView === "function") window.NG_fillStoryView();
+      }catch(e){}
+    }
+  }
+
+  function boot(){
+  var bStory = document.getElementById("ng-tab-story");
+  var bQuick = document.getElementById("ng-tab-quick");
+  var bLog   = document.getElementById("ng-tab-log");
+  var bRaw   = document.getElementById("ng-tab-raw");
+
+  if (bStory) bStory.addEventListener("click", function(){ setTab("story"); });
+  if (bQuick) bQuick.addEventListener("click", function(){ setTab("quick"); });
+  if (bLog)   bLog.addEventListener("click", function(){ setTab("log"); });
+  if (bRaw)   bRaw.addEventListener("click", function(){ setTab("raw"); });
+
+  // default: disable optional tabs until first output exists
+  try{ if (typeof NG_setOutputReady === "function") NG_setOutputReady(false); }catch(e){}
+
+  // default tab
+  setTab("quick");
+
+  // sync: toolbar Story View button
+  document.addEventListener("click", function(e){
+    var id = e && e.target && e.target.id;
+    if (id === "ng-ui-storyview") setTab("story");
+  }, true);
+}
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once:true });
+  } else {
+    boot();
+  }
+})();
+
+</script>
+<!-- === NG_OUTPUT_TABS_JS_V1_END === -->
+
+
 </body>
 
 
 </html>
+
 
 
 

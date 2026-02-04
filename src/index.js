@@ -211,7 +211,20 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
 // NG_PATCH_END:TRANSCRIPT_LATEST_V1
     
     // Digi-pack API
-    if (path === "/api/digi-pack" && request.method === "POST") {      const body = await readJson(request);const promptObj = safeParsePrompt(body);const mode = String(env?.GEN_MODE || "echo").toLowerCase();
+    if (path === "/api/digi-pack" && request.method === "POST") {      
+  const body = await readJson(request);
+  const promptObj = safeParsePrompt(body);
+
+  // --- NG_MODE_RESOLVE_V1 (20260205) ---
+  // prefer request body mode; fallback to env; finally echo
+  const reqModeRaw =
+    (body && (body.mode || body.run_mode || body.MODE)) ||
+    (promptObj && (promptObj.mode || promptObj.run_mode || promptObj.MODE)) ||
+    (env?.GEN_MODE) ||
+    "echo";
+  const mode = String(reqModeRaw).toLowerCase().trim();
+  // --- /NG_MODE_RESOLVE_V1 ---
+
       const model = String(env?.OPENAI_MODEL || "gpt-4o");
       const max_output_tokens = Number(env?.MAX_OUTPUT_TOKENS || 2200);
 
