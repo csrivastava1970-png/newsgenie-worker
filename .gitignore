@@ -55,3 +55,8 @@ _backups/
 
 backup/
 
+
+# --- ignore noisy legacy backups in public/ (2026-02-05) ---
+public/*.bak_*
+public/_script*_FAIL.js*
+public/_script*.bak_*
