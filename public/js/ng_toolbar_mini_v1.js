@@ -126,7 +126,7 @@
 
       if (id === "ng-ui-simple") return setMode("simple");
       if (id === "ng-ui-advanced") return setMode("advanced");
-      if (id === "ng-ui-storyview") return toggleStoryView();
+      if (id === "ng-ui-storyview" || id === "ng-tab-story") return toggleStoryView();
       if (id === "ng-ui-commit") return; // removed in UI redesign
 
     });
@@ -547,9 +547,6 @@ try {
   if (window.__NG_STORYVIEW_TOGGLE_DOC_V2__) return;
   window.__NG_STORYVIEW_TOGGLE_DOC_V2__ = true;
 function fillStoryView(){
-// export for Generate auto-open (safe global hook)
-window.NG_fillStoryView = fillStoryView;
-
   const out = document.getElementById("ng-storyview-out");
     // --- Prefer formatted DigiPack cards in StoryView ---
   try {
@@ -773,7 +770,7 @@ console.log("[NG_STORYVIEW] NG_fillStoryView exported");
 
   document.addEventListener("click", function(e){
     const id = e.target && e.target.id;
-    if (id === "ng-ui-storyview") {
+    if (id === "ng-ui-storyview" || id === "ng-tab-story") {
       forceAdvancedPanelsVisible();
 document.body.classList.toggle("ng-show-storyview");
 
@@ -793,6 +790,8 @@ document.body.classList.toggle("ng-show-storyview");
   }, true);
 })();
 /* NG_STORYVIEW_TOGGLE_DOC_V2_END (2026-01-30) */
+
+
 
 
 
