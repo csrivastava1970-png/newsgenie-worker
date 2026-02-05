@@ -512,18 +512,77 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 }
 </style>
 <!-- NG_HIDE_VIEW_DIGIPACK_V4_END -->
+<style>
+/* === NG_MINI_MODE_BTN_CSS_V1_START (20260205) === */
+/* Segmented pill toggle for REAL / ECHO */
+#ngRealModeWrap{
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.02);
+}
+
+#ngRealModeWrap button{
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+#ngRealModeWrap button + button{
+  border-left: 1px solid rgba(0,0,0,0.14);
+}
+
+#ngRealModeWrap .ng-mode-active{
+  opacity: 1;
+  font-weight: 800;
+  background: rgba(0,0,0,0.08);
+}
+
+#ngRealModeWrap .ng-mode-idle{
+  opacity: 0.6;
+  font-weight: 600;
+  background: transparent;
+}
+
+#ngRealModeWrap button:hover{
+  background: rgba(0,0,0,0.06);
+}
+/* === NG_MINI_MODE_BTN_CSS_V1_END === */
+</style>
+</head>
+<body>
+  <!-- NG_LEGACY_TOOLBAR_ROOTS_V1_START (20260205) -->
+  <div id="ng-toolbar-root"></div>
+  <div id="ng-std-ui-toggle-root"></div>
+  <!-- NG_LEGACY_TOOLBAR_ROOTS_V1_END -->
+
+
 
 
 
 <h2>NewsGenie Digital Producer</h2>
 
   <form id="digi-pack-form" onsubmit="return false;">
+
+
+
+
+
     <div class="row">
+
+
       <div>
         <label>Topic</label>
         <input name="topic" id="topic" placeholder="E.g., संसद प्रदूषण विवाद" required />
 
       </div>
+
+
 
       <div>
         <label>Platform</label>
@@ -533,6 +592,8 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
           <option value="TV">TV</option>
         </select>
       </div>
+
+
 
       <div>
         <label>Angle (optional)</label>
@@ -552,16 +613,22 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
       </select>
     </div>
 
+
+
     <div style="margin-top:10px;">
       <label>What Happened (mandatory)</label>
       <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
 
     </div>
 
+
+
     <div style="margin-top:10px;">
       <label>Sources / References (mandatory)</label>
       <textarea name="sources" id="sources" rows="3" placeholder="Links / documents / official statements" required></textarea>
     </div>
+
+
 
     <div style="margin-top:10px;">
       <label>Background (optional but counts)</label>
@@ -575,7 +642,11 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 <!-- ========================= -->
 <section id="ng-transcript-loader" style="margin-top:12px; padding:12px; border:1px solid #ddd; border-radius:12px;">
   <!-- Compact tools bar -->
+
+
   <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+
+
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
       <h3 style="margin:0; font-size:14px;">Transcript Tools</h3>
       <button type="button" id="btn-load-transcript-json" class="primary">Load</button>
@@ -584,6 +655,8 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
       <button type="button" id="btn-import-transcript-json">Import</button>
       <input type="file" id="file-transcript-json" accept=".json,application/json,.txt" style="display:none;">
     </div>
+
+
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <span style="font-size:12px;opacity:.7;">Status:</span>
@@ -596,15 +669,23 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
   <details id="ng-transcript-inbox-details" style="margin-top:10px;">
     <summary style="cursor:pointer; user-select:none; font-size:13px; opacity:.85;">Transcript Inbox</summary>
 
+
+
     <div style="margin-top:10px;">
+
+
       <div id="ng-transcript-inbox-hint" style="margin-top:8px;font-size:12px;opacity:.75;">Paste Reverie JSON here (display_text or text). Load saves to localStorage.</div>
       <textarea id="ta-transcript-json" rows="8"
         style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:12px; line-height:1.35; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
         placeholder="Paste JSON here..."></textarea>
 
+
+
       <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
         <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
       </div>
+
+
 
       <div id="ng-latest-transcript-preview"
         style="display:none;white-space:pre-wrap;max-height:160px;overflow:auto;border:1px dashed #bbb;border-radius:12px;padding:10px;font-size:13px;opacity:.9; margin-top:10px;"></div>
@@ -613,14 +694,22 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 </section>
 
 <!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_START -->
+
+
 <div id="ng-superlight" style="margin-top:12px; display:grid; grid-template-columns: 1fr; gap:10px;">
+
+
   <div class="panel" id="ng-sec-transcript-lines">
     <b>Transcript Lines</b>
+
+
     <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px;">
       <button type="button" id="ng-lines-selectall">Select All</button>
       <button type="button" id="ng-lines-clear">Clear Selection</button>
       <span id="ng-lines-status" style="font-size:12px; opacity:.75;"></span>
     </div>
+
+
     <div id="ng-lines-wrap" style="margin-top:10px; display:flex; flex-direction:column; gap:8px; max-height:220px; overflow:auto; border:1px solid #eee; border-radius:12px; padding:10px;"></div>
   </div>
 
@@ -628,18 +717,30 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 </div>
 <!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_END -->
 
+
+
     <div id="ng-adv-only" style="margin-top:10px;">
 
    <!-- BYTES -->
+
+
 <div class="panel" id="bytesWrap" data-ng-sec="bytes">
   <b>Bytes</b>
 
+
+
   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+
+
     <div style="font-size:12px;opacity:.75;">Add bytes from selection or paste/type manually.</div>
   </div>
 
   <!-- FINAL BYTES HOST (static) -->
+
+
   <div style="margin-top:10px;font-weight:600;">Final Bytes</div>
+
+
   <div id="ng-final-bytes-list-auto" style="margin-top:8px;"></div>
 
   <script>
@@ -735,8 +836,14 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 
             
 <!-- NG_BYTES_UNIFIED_DRAFT_V1_START -->
+
+
 <div id="ng-byte-draft-area" style="margin-top:10px; display:none;">
+
+
   <div id="ng-byte-draft-box" style="margin-top:10px;padding:10px;border:1px dashed #cbd5e1;border-radius:12px;">
+
+
     <div style="font-size:12px;opacity:.8;margin-bottom:6px;">Draft Byte (select transcript lines OR paste/type manually)</div>
 
     <textarea
@@ -745,6 +852,8 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
       style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;"
       placeholder="Selected lines will appear here... (or paste/type)"
     ></textarea>
+
+
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
       <input
@@ -761,6 +870,8 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
       >
     </div>
 
+
+
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
       <button type="button" id="ng-make-byte" class="secondary">Make Draft from Selection</button>
       <button type="button" id="ng-add-final" class="primary">Add to Bytes</button>
@@ -771,9 +882,13 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 </div>
 <!-- NG_BYTES_UNIFIED_DRAFT_V1_END -->
 <!-- NG_DRAFT_LIBRARY_PANEL_V1_START (20260130) -->
+
+
 <div id="ng-draft-library" class="panel" style="display:none;">
   <details id="ng-draft-lib-details">
     <summary style="cursor:pointer; font-weight:700;">Draft Library</summary>
+
+
 
     <div style="margin-top:10px;">
       <button type="button" id="ng-lib-refresh">Refresh</button>
@@ -783,6 +898,8 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
     </div>
   </details>
 </div>
+
+
 
 
   <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
@@ -798,19 +915,33 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 
       <!-- hidden JSON sink for Final Bytes module -->
       <textarea id="bytesJSONOut" style="display:none;"></textarea>
+
+
       <div id="ng-manual-bytes" style="margin-top:10px; display:none;"><div id="bytes-wrap"></div></div>
     </div>
     <!-- VISUALS -->
 <!-- NG_STD_VISUALS_WRAP_V1_START -->
+
+
 <div id="visualsWrap" data-ng-sec="visuals">
+
+
   <div class="panel" id="step-visuals">
     <details id="ng-visuals-details">
       <summary style="cursor:pointer; font-weight:700;">Visuals</summary>
 
+
+
       <div style="margin-top:10px;">
+
+
         <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
+
+
         <div id="visuals-wrap"></div>
+
+
 
         <div style="margin-top:8px;">
           <button type="button" id="add-visual">+ Add Visual</button>
@@ -820,6 +951,8 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
   </div>
 </div>
 <!-- NG_STD_VISUALS_WRAP_V1_END -->
+
+
 
 
 
@@ -839,9 +972,17 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 <!-- Editorial Extraction : Suggestions ONLY -->
 
 
+
+
 <div id="ng-advanced-panels">
+
+
   <div class="panel" id="ng-log-panel-wrap"><div id="ng-output-headrow" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+
+
   <div class="status" style="margin:0;"><b>Status:</b> <span id="ngStatus">Idle</span></div>
+
+
   <div id="ng-output-tabs" style="display:flex; gap:8px; flex-wrap:wrap; margin:0;">
     <button type="button" class="btn" id="ng-tab-story">Story</button>
     <button type="button" class="btn" id="ng-tab-quick">Quick</button>
@@ -862,11 +1003,17 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 
   </div>
 
+
+
   <div class="panel" id="ng-quick-panel-wrap">
+
+
   <div id="ng-quick-panel">
 
   <details id="ng-quick-details">
     <summary style="cursor:pointer; font-weight:700;">Quick View</summary>
+
+
     <div id="ngQuick" style="margin-top:10px; white-space:pre-wrap; overflow:auto; max-height:180px;">(no quick view)</div>
   </details>
 </div>
@@ -874,7 +1021,11 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 
   </div>
 
+
+
  <div class="panel" id="ng-response-panel-wrap">
+
+
   <div id="ng-response-panel">
 
   <details id="ng-response-details">
@@ -884,12 +1035,18 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 </div>
 
 <!-- NG_STORYVIEW_PANEL_V1_START (20260130) -->
+
+
 <div id="ng-storyview" class="panel" style="display:none;">
   <b>Story View</b>
+
+
   <div style="font-size:12px;opacity:.75;margin-top:6px;">
     Auto-preview of latest generated JSON (for quick editorial view).
   </div>
 <!-- NG_STORYVIEW_FORMATTED_V1_START -->
+
+
 <div id="ng-storyview-formatted" style="margin-top:10px;"></div>
 <!-- NG_STORYVIEW_FORMATTED_V1_END -->
 
@@ -898,7 +1055,11 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 <!-- NG_STORYVIEW_PANEL_V1_END (20260130) -->
 
   </div>
+
+
 <div class="panel" id="ng-preview-prompt-panel">
+
+
 
   <div style="display:flex;align-items:center;justify-content:space-between;">
     <b>Preview Prompt (will be sent)</b>
@@ -1245,6 +1406,8 @@ const defDe = "";
       const head = (sp || des) ? `<div style="font-size:12px;opacity:.85;margin-bottom:6px;"><b>${sp || "—"}</b>${des ? ` • ${des}` : ""}</div>` : "";
       return `<div class="ng-final-card" data-idx="${i}" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
         ${head}
+
+
         <div style="font-size:14px;line-height:1.3;">${tx || "<span style='opacity:.6'>—</span>"}</div>
       </div>`;
     }).join("");
@@ -1339,32 +1502,9 @@ const defDe = "";
 
 
   // ---------------- export global + auto init ----------------
-  if (typeof initEditorialExtraction === "function") {
-    window.initEditorialExtraction = initEditorialExtraction;
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initEditorialExtraction, { once: true });
-    } else {
-      initEditorialExtraction();
-    }
-  } else {
-    // initEditorialExtraction not present in this build; skip safely
-  }
-
-
-
-  // Public API: call this only from explicit UI actions
-/* DISABLED: overwrote NG_refreshFinalBytes
-window.NG_refreshFinalBytes_DISABLED = function(){
-    window.__NG_ALLOW_BYTES_LATEST_ONCE = true;
-    return tick("manual");
-}
-*/
-
-  // NO auto-run, NO visibilitychange, NO global click hooks
-  // You can trigger refresh after POST success manually if needed (see next note).
-
-/* NG_FINAL_BYTES_UI_POLL_V1_END */ </script>
+  
+</script>
 
 <!-- NG_SMOKE_TEST_BUTTON_V1_START -->
 <!-- NG_SMOKE_VIS_TOGGLE_V1_START (20260203) -->
@@ -1708,10 +1848,45 @@ window.setTab = setTab;
 <!-- === NG_OUTPUT_TABS_JS_V1_END === -->
 
 
+
+
+
+
 </body>
+<script id="ng-runtime-flags">
+/* NG_EE_AUTOINIT_DISABLED_V1_START (20260205)
+   EE disabled intentionally (no UI / no init)
+*/
+window.__NG_DISABLE_EE__ = true;
+try { console.log('[EE] autoinit disabled by NG_EE_AUTOINIT_DISABLED_V1'); } catch(e) {}
+/* NG_EE_AUTOINIT_DISABLED_V1_END */
 
-
+/* NG_FINAL_BYTES_UI_POLL_NOTES_V1_START (20260205)
+Public API: call this only from explicit UI actions
+DISABLED: overwrote NG_refreshFinalBytes
+window.NG_refreshFinalBytes_DISABLED = function(){
+  window.__NG_ALLOW_BYTES_LATEST_ONCE = true;
+  return tick("manual");
+}
+// NO auto-run, NO visibilitychange, NO global click hooks
+// You can trigger refresh after POST success manually if needed (see next note).
+NG_FINAL_BYTES_UI_POLL_NOTES_V1_END */
+</script>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

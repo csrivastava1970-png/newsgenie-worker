@@ -1,4 +1,4 @@
-/* NG_TOOLBAR_MINI_JS_V1_START (2026-01-30) */
+﻿/* NG_TOOLBAR_MINI_JS_V1_START (2026-01-30) */
 (() => {
   if (window.__NG_TOOLBAR_MINI_JS_V1__) return;
   window.__NG_TOOLBAR_MINI_JS_V1__ = true;
@@ -136,9 +136,86 @@
 
   function mount() {
     // Avoid duplicates if HTML already has it
-    if (q('#ng-std-ui-toolbar-mini')) return;
+    if (q('#ng-std-ui-toolbar-mini')) {
+  try {
+    var moveMini = function() {
+      try {
+        var existing = q('#ng-std-ui-toolbar-mini');
+        var root = document.getElementById('ng-toolbar-root')
+                || document.getElementById('ng-std-ui-toggle-root');
+        if (existing && root && existing.parentElement !== root) {
+          root.insertBefore(existing, root.firstChild || null);
+        }
+      } catch(e) {}
+    };
+
+    // Try now
+    moveMini();
+
+    // Try again after DOM is ready (root may be below this script)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function(){
+        moveMini();
+        try { requestAnimationFrame(moveMini); } catch(e) {}
+        try { setTimeout(moveMini, 0); } catch(e) {}
+        try { setTimeout(moveMini, 80); } catch(e) {}
+      }, { once: true });
+    } else {
+      try { requestAnimationFrame(moveMini); } catch(e) {}
+      try { setTimeout(moveMini, 0); } catch(e) {}
+      try { setTimeout(moveMini, 80); } catch(e) {}
+    }
+  } catch(e) {}
+  return;
+}
 
     const tb = buildToolbar();
+
+/* NG_FORCE_MINI_TO_TOOLBAR_ROOT_V1_START (20260205) */
+try {
+  var root = document.getElementById('ng-toolbar-root') || document.getElementById('ng-std-ui-toggle-root');
+  var existing = document.getElementById('ng-std-ui-toolbar-mini');
+  // If toolbar container already exists elsewhere, move it into root.
+  if (root && existing && existing.parentElement !== root) {
+    root.insertBefore(existing, root.firstChild || null);
+  }
+  // If we just built tb and it isn't in the right place, put it in root.
+  if (root && tb && tb.parentElement !== root) {
+    root.insertBefore(tb, root.firstChild || null);
+  }
+} catch(e) {}
+/* NG_FORCE_MINI_TO_TOOLBAR_ROOT_V1_END */
+/* NG_FORCE_MINI_WATCHDOG_V1_START (20260205) */
+try {
+  var __ngMoveMini = function() {
+    try {
+      var root = document.getElementById('ng-toolbar-root') || document.getElementById('ng-std-ui-toggle-root');
+      var mini = document.getElementById('ng-std-ui-toolbar-mini');
+      if (root && mini && mini.parentElement !== root) root.insertBefore(mini, root.firstChild || null);
+    } catch(e) {}
+  };
+
+  // settle-time moves (in case later code re-homes it)
+  try { setTimeout(__ngMoveMini, 0); } catch(e) {}
+  try { setTimeout(__ngMoveMini, 50); } catch(e) {}
+  try { setTimeout(__ngMoveMini, 200); } catch(e) {}
+  try { requestAnimationFrame(__ngMoveMini); } catch(e) {}
+
+  // watchdog: if anything moves it away, move back (cheap + specific)
+  if (!window.__NG_MINI_WATCHDOG_ON) {
+    window.__NG_MINI_WATCHDOG_ON = true;
+    try {
+      var mo = new MutationObserver(function(){ __ngMoveMini(); });
+      var r = document.getElementById('ng-toolbar-root');
+var s = document.getElementById('ng-superlight');
+if (r) mo.observe(r, { childList:true, subtree:true });
+if (s) mo.observe(s, { childList:true, subtree:true });
+if (!r && !s) mo.observe(document.documentElement, { childList:true, subtree:true });
+      window.__NG_MINI_WATCHDOG = mo;
+    } catch(e) {}
+  }
+} catch(e) {}
+/* NG_FORCE_MINI_WATCHDOG_V1_END */
 
     const anchor = safeAnchor();
 
@@ -194,16 +271,32 @@
 
   }
   function paint(){
-    var b = document.getElementById("ngRealModeBtn");
-    if (!b) return;
-    var real = isReal();
-    b.textContent = real ? "REAL" : "ECHO";
-    b.title = real ? "Real Mode ON (OpenAI allowed)" : "Echo Mode (no tokens)";
-    b.setAttribute("data-state", real ? "real" : "echo");
-  }
+  var b = document.getElementById("ngRealModeBtn");
+  var eb = document.getElementById("ngEchoModeBtn");
+  if (!b) return;
 
-  // Attach near your mini toolbar anchor
-  var anchor = document.getElementById("ng-std-ui-toolbar-mini") || document.getElementById("ng-dp-actions") || ((typeof safeAnchor === "function") ? safeAnchor() : document.body);
+  var real = isReal();
+
+  // Labels are FIXED (no swapping)
+  b.textContent = "REAL";
+  b.title = real ? "Real Mode ON (OpenAI allowed)" : "Switch to Real Mode (OpenAI allowed)";
+  b.setAttribute("data-state", real ? "active" : "idle");
+
+  // Class-based styling
+  b.classList.remove("ng-mode-active","ng-mode-idle");
+  b.classList.add(real ? "ng-mode-active" : "ng-mode-idle");
+
+  try{
+    if (eb){
+      eb.textContent = "ECHO";
+      eb.title = "Force Echo Mode (no tokens)";
+      eb.setAttribute("data-state", real ? "idle" : "active");
+      eb.classList.remove("ng-mode-active","ng-mode-idle");
+      eb.classList.add(real ? "ng-mode-idle" : "ng-mode-active");
+    }
+  }catch(e){}
+}// Attach near your mini toolbar anchor
+  var anchor = document.getElementById("ng-toolbar-root") || document.getElementById("ng-std-ui-toggle-root") || document.getElementById("ng-std-ui-toolbar-mini") || document.getElementById("ng-dp-actions") || ((typeof safeAnchor === "function") ? safeAnchor() : document.body);
 
 
   if (!anchor) anchor = document.body;
@@ -229,6 +322,21 @@
   var btn = document.createElement("button");
   btn.type = "button";
   btn.id = "ngRealModeBtn";
+
+/* NG_ECHO_BTN_V1_START (20260205) */
+var echoBtn = document.createElement("button");
+echoBtn.type = "button";
+echoBtn.id = "ngEchoModeBtn";
+echoBtn.textContent = "ECHO";
+echoBtn.style.padding = "4px 10px";
+echoBtn.style.fontSize = "12px";
+echoBtn.style.marginLeft = "6px";
+echoBtn.title = "Force Echo Mode (no tokens)";
+echoBtn.addEventListener("click", function(ev){
+  try { ev.preventDefault(); ev.stopPropagation(); } catch(e) {}
+  try { setReal(false); } catch(e) {}
+});
+/* NG_ECHO_BTN_V1_END */
   btn.style.padding = "4px 10px";
   btn.style.fontSize = "12px";
   btn.style.borderRadius = "999px";
@@ -250,6 +358,9 @@ btn.style.lineHeight = "1.2";
   });
 
   wrap.appendChild(btn);
+/* NG_ECHO_BTN_PLACE_V1_START (20260205) */
+try { wrap.appendChild(echoBtn); } catch(e) {}
+/* NG_ECHO_BTN_PLACE_V1_END */
 
   // Insert into toolbar if present; otherwise fallback near anchor
 try {
@@ -682,6 +793,15 @@ document.body.classList.toggle("ng-show-storyview");
   }, true);
 })();
 /* NG_STORYVIEW_TOGGLE_DOC_V2_END (2026-01-30) */
+
+
+
+
+
+
+
+
+
 
 
 
