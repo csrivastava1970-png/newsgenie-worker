@@ -1,4 +1,4 @@
-﻿
+
 
 
 
@@ -31,7 +31,7 @@
   html[data-ng-std-ui="advanced"] #ng-advanced-panels{ display:block; }
 
   /* NG_STD_UI_TOOLBAR_ROW_V2
-     Goal: single-row toolbar (actions left, UI toggle right) — CSS-only, hang-free
+     Goal: single-row toolbar (actions left, UI toggle right) � CSS-only, hang-free
      Rules: NO DOM moving, NO MutationObserver, only CSS overrides.
   */
 
@@ -258,7 +258,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
     <div class="row">
       <div>
         <label>Topic</label>
-        <input name="topic" id="topic" placeholder="E.g., संसद प्रदूषण विवाद" required />
+        <input name="topic" id="topic" placeholder="E.g., ???? ??????? ?????" required />
 
       </div>
 
@@ -273,7 +273,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
       <div>
         <label>Angle (optional)</label>
-        <input id="angle" name="angle" type="text" placeholder="Angle (optional) — 3–8 words" style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:10px;" />
+        <input id="angle" name="angle" type="text" placeholder="Angle (optional) � 3�8 words" style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:10px;" />
         
       </div>
     </div>
@@ -291,7 +291,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
     <div style="margin-top:10px;">
       <label>What Happened (mandatory)</label>
-      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
+      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2�4 lines ??? ???? ????" required></textarea>
 
     </div>
 
@@ -708,7 +708,7 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
 
         const who = document.createElement("div");
         who.style.cssText = "font-size:12px;opacity:.85;";
-        who.textContent = (sp || de) ? `${sp}${(sp && de) ? " — " : ""}${de}` : `Byte ${idx+1}`;
+        who.textContent = (sp || de) ? `${sp}${(sp && de) ? " � " : ""}${de}` : `Byte ${idx+1}`;
 
         const tag = document.createElement("div");
         tag.style.cssText = "font-size:11px;opacity:.6;";
@@ -912,10 +912,10 @@ const defDe = "";
   function render(bytes) {
     const ui = ensureHost();
     const arr = Array.isArray(bytes) ? bytes : [];
-    ui.label.textContent = `Final Bytes • ${arr.length}`;
+    ui.label.textContent = `Final Bytes � ${arr.length}`;
 
     const draftStatus = document.querySelector("#ng-byte-draft-status");
-    if (draftStatus) draftStatus.textContent = `Final Bytes • ${arr.length}`;
+    if (draftStatus) draftStatus.textContent = `Final Bytes � ${arr.length}`;
 
     if (!arr.length) {
       ui.cards.innerHTML = `<div style="font-size:12px;opacity:.6;border:1px dashed #e2e8f0;border-radius:12px;padding:10px;">Final Bytes empty</div>`;
@@ -926,10 +926,10 @@ const defDe = "";
       const sp = esc(b.speaker || "");
       const des = esc(b.designation || "");
       const tx = esc(b.text || "");
-      const head = (sp || des) ? `<div style="font-size:12px;opacity:.85;margin-bottom:6px;"><b>${sp || "—"}</b>${des ? ` • ${des}` : ""}</div>` : "";
+      const head = (sp || des) ? `<div style="font-size:12px;opacity:.85;margin-bottom:6px;"><b>${sp || "�"}</b>${des ? ` � ${des}` : ""}</div>` : "";
       return `<div class="ng-final-card" data-idx="${i}" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
         ${head}
-        <div style="font-size:14px;line-height:1.3;">${tx || "<span style='opacity:.6'>—</span>"}</div>
+        <div style="font-size:14px;line-height:1.3;">${tx || "<span style='opacity:.6'>�</span>"}</div>
       </div>`;
     }).join("");
   }
@@ -1015,7 +1015,7 @@ window.NG_refreshFinalBytes_DISABLED = function(){
     }catch(e){ bad("NG_refreshFinalBytes_run", { error: String(e?.message||e) }); }
 
  console.log("[NG_SMOKE_TEST]", out);
-// Show results on-page (no console dependency) — DEV ONLY (box)
+// Show results on-page (no console dependency) � DEV ONLY (box)
 const __NG_SMOKE_ON__ = new URLSearchParams(location.search).get("smoke") === "1";
 
 /*
@@ -1056,23 +1056,23 @@ return out;
 </script>
 <!-- NG_SMOKE_TEST_BUTTON_V1_END -->
 
-<script src="ng_add_byte_multirow_v3.js"></script>
+<script src="js/ng_add_byte_multirow_v3.js"></script>
 
 
 <!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_START (20260130) -->
-<script src="./ng_toolbar_mini_v1.js"></script>
+<script src="js/ng_toolbar_mini_v1.js"></script>
 <!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_END -->
 
 <!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_START (20260130) -->
-<script src="./ng_toolbar_actions_v1.js"></script>
+<script src="js/ng_toolbar_actions_v1.js"></script>
 <!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_END -->
 
 <!-- NG_GENERATE_JS_V1_INCLUDE_START (20260130) -->
-<script src="./ng_generate_v1.js"></script>
+<script src="js/ng_generate_v1.js"></script>
 <!-- NG_GENERATE_JS_V1_INCLUDE_END -->
 
 <!-- NG_PROMPT_BUILDER_V1_INCLUDE_START (20260130) -->
-<script src="./ng_prompt_builder_v1.js"></script>
+<script src="js/ng_prompt_builder_v1.js"></script>
 <!-- NG_PROMPT_BUILDER_V1_INCLUDE_END -->
 <script src="/script1_dump.js?v=20260131" defer></script>
 
