@@ -200,6 +200,92 @@ h2{
 html[data-ng-std-ui="simple"] #ngResponse { display:none !important; }
 html[data-ng-std-ui="simple"] #ng-response-panel { display:none !important; }
 
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
+/* === NG_OUTTABS_VISIBILITY_FIX_V1_START (20260206) === */
+/* Make outtab selector robust: works if attribute is on <html> OR <body> OR any root wrapper */
+html[data-ng-outtab], body[data-ng-outtab], [data-ng-outtab] {}
+
+/* Ensure the response wrapper is allowed to show when any outtab is active */
+html[data-ng-outtab] #ng-response-panel-wrap,
+body[data-ng-outtab] #ng-response-panel-wrap,
+[data-ng-outtab] #ng-response-panel-wrap{
+  display: block !important;
+}
+
+/* Show ONLY the selected output panel (Story/Quick/Log/JSON) */
+html[data-ng-outtab="story"] #ng-storyview,
+body[data-ng-outtab="story"] #ng-storyview,
+[data-ng-outtab="story"] #ng-storyview{ display:block !important; }
+
+html[data-ng-outtab="quick"] #ng-quick-panel,
+body[data-ng-outtab="quick"] #ng-quick-panel,
+[data-ng-outtab="quick"] #ng-quick-panel{ display:block !important; }
+
+html[data-ng-outtab="log"] #ng-log-panel,
+body[data-ng-outtab="log"] #ng-log-panel,
+[data-ng-outtab="log"] #ng-log-panel{ display:block !important; }
+
+html[data-ng-outtab="json"] #ng-json-panel,
+body[data-ng-outtab="json"] #ng-json-panel,
+[data-ng-outtab="json"] #ng-json-panel{ display:block !important; }
+
+/* Hide others by default (safe even if already hidden elsewhere) */
+#ng-storyview, #ng-quick-panel, #ng-log-panel, #ng-json-panel{
+  display:none;
+}
+
+/* === Height fix so Story panel cannot collapse === */
+#ng-storyview{
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:360px !important;
+}
+
+#ng-storyview-out,
+#ng-storyview-formatted{
+  flex: 1 1 auto !important;
+  height: 80vh !important;
+  min-height:260px !important;
+  overflow:auto !important;
+}
+
+/* === NG_OUTTABS_VISIBILITY_FIX_V1_END === */
+/* === NG_HIDE_RAW_NGRESPONSE_V1_START (20260206) === */
+#ngResponse { display:none !important; }
+/* === NG_HIDE_RAW_NGRESPONSE_V1_END === */
+/* === NG_JSON_TAB_MAPPING_V1_START (20260206) === */
+html[data-ng-outtab="json"] #ng-json-panel-wrap,
+body[data-ng-outtab="json"] #ng-json-panel-wrap,
+[data-ng-outtab="json"] #ng-json-panel-wrap{
+  display:block !important;
+}
+/* === NG_JSON_TAB_MAPPING_V1_END === */
+
+
+/* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_START (20260206) === */
+#ng-storyview-formatted { display:none !important; }
+/* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_END === */
+
 </style>
 <style>
 #ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
@@ -228,6 +314,27 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) #bytesWrap {
     align-items:center;
   }
 }
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
 </style>
 <style id="ng-simple-hide-bytes-v1">
   body:has(#ng-std-ui-toggle-root [data-ng-mode="simple"].active) .panel:has(#ng-sec-bytes){ display:none !important; }
@@ -249,113 +356,55 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) .panel:has(#ng
   }
 }
 
-/* === NG_OUTPUT_TABS_CSS_V1_START (20260204) === */
-html[data-ng-outtab="story"] #ng-log-panel-wrap{ display:block !important; }
+/* === NG_OUTPUT_TABS_CSS_V1_START (20260206) === */
+/* Tabs drive visibility via: html[data-ng-outtab="story|quick|raw|log"] */
+
+/* STORY = show StoryView, hide Response/Quick/Log */
+html[data-ng-outtab="story"] #ng-storyview{ display:block !important; }
+html[data-ng-outtab="story"] #ng-response-panel-wrap{ display:none !important; }
 html[data-ng-outtab="story"] #ng-quick-panel-wrap{ display:none !important; }
-html[data-ng-outtab="story"] #ng-response-panel-wrap{ display:block !important; }
+html[data-ng-outtab="story"] #ng-log-panel-wrap{ display:none !important; }
 
-html[data-ng-outtab="quick"] #ng-log-panel-wrap{ display:none !important; }
-html[data-ng-outtab="quick"] #ng-quick-panel-wrap{ display:block !important; }
+/* QUICK = show Quick only */
+html[data-ng-outtab="quick"] #ng-storyview{ display:none !important; }
 html[data-ng-outtab="quick"] #ng-response-panel-wrap{ display:none !important; }
+html[data-ng-outtab="quick"] #ng-quick-panel-wrap{ display:block !important; }
+html[data-ng-outtab="quick"] #ng-log-panel-wrap{ display:none !important; }
 
-html[data-ng-outtab="log"] #ng-log-panel-wrap{ display:block !important; }
-html[data-ng-outtab="log"] #ng-quick-panel-wrap{ display:none !important; }
+/* LOG = show Log only */
+html[data-ng-outtab="log"] #ng-storyview{ display:none !important; }
 html[data-ng-outtab="log"] #ng-response-panel-wrap{ display:none !important; }
+html[data-ng-outtab="log"] #ng-quick-panel-wrap{ display:none !important; }
+html[data-ng-outtab="log"] #ng-log-panel-wrap{ display:block !important; }
 
-html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
-html[data-ng-outtab="raw"] #ng-quick-panel-wrap{ display:none !important; }
+/* RAW = show Response (raw JSON), hide others */
+html[data-ng-outtab="raw"] #ng-storyview{ display:none !important; }
 html[data-ng-outtab="raw"] #ng-response-panel-wrap{ display:block !important; }
+html[data-ng-outtab="raw"] #ng-quick-panel-wrap{ display:none !important; }
+html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
+/* === NG_OUTPUT_TABS_CSS_V1_END (20260206) === */
 
-/* tabs look */
-#ng-output-tabs .btn{ padding:6px 10px; border-radius:999px; }
-html[data-ng-outtab="story"] #ng-tab-story,
-html[data-ng-outtab="quick"] #ng-tab-quick,
-html[data-ng-outtab="log"] #ng-tab-log,
-html[data-ng-outtab="raw"] #ng-tab-raw{
-  font-weight:700;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.12);
-}
-
-/* tabs replace accordion summaries */
-#ng-log-details > summary,
-#ng-quick-details > summary,
-#ng-response-details > summary{ display:none !important; }
-
-/* keep details open */
-#ng-log-details, #ng-quick-details, #ng-response-details{ open: true; }
-#ng-output-headrow{
-  position: sticky;
-  top: 0;
-  background: #fff;
-  padding: 6px 0;
-  z-index: 5;
-}
-
-
-/* === NG_STORYVIEW_POLISH_V1_START (20260204) === */
-#ng-storyview{
-  border-radius: 14px;
-}
-#ng-storyview b{
-  display:block;
-  margin-bottom: 6px;
-}
-#ng-storyview-out{
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-  font-size: 13px;
-  line-height: 1.4;
-  white-space: pre-wrap;
-  tab-size: 2;
-
-  /* sizing: let CSS control height */
-  height: 60vh !important;
-  max-height: none !important;
-  min-height: 260px;
-
-  overflow: auto !important;
-  padding: 12px 14px;
-  border-radius: 12px;
-
-  background: rgba(0,0,0,0.02);
-  border: 1px solid rgba(0,0,0,0.12) !important;
-}
-
-/* === NG_STORYVIEW_POLISH_V1_END === */
-/* === NG_TABS_DISABLED_STYLE_V1_START (20260205) === */
-#ng-output-tabs .btn:disabled{
-  opacity: .45;
-  cursor: not-allowed;
-  box-shadow: none !important;
-}
-/* === NG_OUTPUT_HEADROW_COMPACT_V1_START (20260205) === */
-#ng-output-headrow{
-  padding: 4px 0 !important;
-  gap: 10px !important;
-}
-
-#ng-output-headrow .status{
-  font-size: 13px;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-tabs{
-  gap: 6px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
 }
-
-#ng-output-tabs .btn{
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  line-height: 1;
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
 }
-/* === NG_OUTPUT_HEADROW_COMPACT_V1_END === */
-
-/* === NG_TABS_DISABLED_STYLE_V1_END === */
-
-
-/* === NG_OUTPUT_TABS_CSS_V1_END === */
-
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
 </style>
 
 <style>
@@ -401,6 +450,27 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
     align-items:center;
   }
 }
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
 </style>
 
 <!-- NG_STORYVIEW_FORCE_SHOW_V1_START (20260130) -->
@@ -421,6 +491,27 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
     align-items:center;
   }
 }
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
 </style>
 <!-- NG_STORYVIEW_FORCE_SHOW_V1_END -->
 <!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_START (20260130) === -->
@@ -461,6 +552,27 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
     align-items:center;
   }
 }
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
 </style>
 <!-- === NG_DRAFT_BYTE_FORCE_VISIBLE_V1_END === -->
 
@@ -485,6 +597,27 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
     align-items:center;
   }
 }
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
 </style>
 <!-- NG_DRAFT_LIBRARY_VISIBILITY_LOCK_CSS_V1_END -->
 
@@ -510,6 +643,27 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
     align-items:center;
   }
 }
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
 </style>
 <!-- NG_HIDE_VIEW_DIGIPACK_V4_END -->
 <style>
@@ -553,6 +707,30 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
   background: rgba(0,0,0,0.06);
 }
 /* === NG_MINI_MODE_BTN_CSS_V1_END === */
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  padding: 6px 8px !important;
+  min-height: 34px !important;
+  height: auto !important;
+  flex-wrap: wrap !important;
+}
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-headrow{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding: 6px 8px !important;
+  min-height: 40px !important;
+  height: auto !important;
+}
+/* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_END === */
+/* Hide duplicate top mini Quick/Story buttons (keep bottom output tabs) */
+#btnQuickMini, #btnStoryMini { display: none !important; }
+
 </style>
 </head>
 <body>
@@ -1039,10 +1217,12 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
 
 <div id="ng-storyview" class="panel" style="display:none;">
   <b>Story View</b>
+<button type="button" class="btn" id="ngCopyStoryView">Copy Story</button>
+
 
 
   <div style="font-size:12px;opacity:.75;margin-top:6px;">
-    Auto-preview of latest generated JSON (for quick editorial view).
+    DIGI_PACK Story View (readable output for editorial use).
   </div>
 <!-- NG_STORYVIEW_FORMATTED_V1_START -->
 
@@ -1053,6 +1233,16 @@ html[data-ng-outtab="raw"] #ng-tab-raw{
   <pre id="ng-storyview-out" style="margin-top:10px;white-space:pre-wrap;max-height:320px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
 </div>
 <!-- NG_STORYVIEW_PANEL_V1_END (20260130) -->
+<!-- === NG_JSON_PANEL_V1_START (20260206) === -->
+<div id="ng-json-panel-wrap" class="panel" style="display:none;">
+  <b>Raw JSON</b>
+  <div style="margin:6px 0 10px; opacity:.75; font-size:12px;">
+    Advanced view (debug/export). Story tab में readable text रहेगा।
+  </div>
+  <pre id="ng-json-out" style="white-space:pre-wrap; font-family:ui-monospace,monospace; font-size:13px; line-height:1.4; overflow:auto; min-height:260px; padding:10px; border:1px solid rgba(0,0,0,0.12); border-radius:12px;"></pre>
+</div>
+<!-- === NG_JSON_PANEL_V1_END === -->
+
 
   </div>
 
@@ -1848,6 +2038,42 @@ window.setTab = setTab;
 <!-- === NG_OUTPUT_TABS_JS_V1_END === -->
 
 
+<!-- === NG_JSON_PANEL_TOGGLE_V1_START (2026-02-06) === -->
+<script>
+(function(){
+  function getOutTab(){
+    try{
+      return String(
+        (document.documentElement && document.documentElement.getAttribute("data-ng-outtab")) || ""
+      ).toLowerCase();
+    }catch(e){ return ""; }
+  }
+
+  function apply(){
+    try{
+      var t = getOutTab();
+      var show = (t === "raw" || t === "json");
+      var panel = document.getElementById("ng-json-panel-wrap");
+      if (!panel) return;
+
+      panel.style.display = show ? "block" : "none";
+
+      if (show && typeof window.NG_renderJsonTab === "function"){
+        setTimeout(window.NG_renderJsonTab, 10);
+      }
+    }catch(e){}
+  }
+
+  document.addEventListener("click", function(){
+    setTimeout(apply, 20);
+  }, true);
+
+  setTimeout(apply, 120);
+
+  window.NG_applyJsonPanelVisibility = apply;
+})();
+</script>
+<!-- === NG_JSON_PANEL_TOGGLE_V1_END === -->
 
 
 
@@ -1872,7 +2098,389 @@ window.NG_refreshFinalBytes_DISABLED = function(){
 // You can trigger refresh after POST success manually if needed (see next note).
 NG_FINAL_BYTES_UI_POLL_NOTES_V1_END */
 </script>
+<script>
+/* === NG_STORYVIEW_WIRE_V1_START (20260206) === */
+(() => {
+  function getOuttab() {
+    const de = document.documentElement;
+    const b = document.body;
+    return (de && de.getAttribute("data-ng-outtab")) || (b && b.getAttribute("data-ng-outtab")) || "";
+  }
+
+  function readNgResponseJSON() {
+    const pre = document.getElementById("ngResponse");
+    if (!pre) return null;
+    const raw = (pre.textContent || "").trim();
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch(e) { return { __raw: raw, __parse_error: true }; }
+  }
+
+  function renderStoryView() {
+  try {
+    const tab = getOuttab();
+    if (tab !== "story") return;
+
+    // FORCE show wrapper + story panel (fix hidden parent)
+    const wrap = document.getElementById("ng-response-panel-wrap");
+    if (wrap) wrap.style.setProperty("display", "block", "important");
+    const sv = document.getElementById("ng-storyview");
+    if (sv) sv.style.setProperty("display", "block", "important");
+
+
+      const out = document.getElementById("ng-storyview-out");
+      const fmt = document.getElementById("ng-storyview-formatted");
+      if (!out && !fmt) return;
+
+      const j = readNgResponseJSON();
+      let text = "";
+
+      // Prefer "copy_text" (human readable), else output_json pretty, else raw
+      if (j && typeof j === "object") {
+  // unwrap if needed
+  if (j.output_json && typeof j.output_json === "object") j = j.output_json;
+
+  // 1) If backend gives ready detailed text, use it
+  if (typeof j.copy_text === "string" && j.copy_text.trim()) {
+    text = j.copy_text.trim();
+  } else {
+    // 2) Build readable detailed text from common keys (no JSON dump)
+    const lines = [];
+    const add = (label, val) => {
+  if (val == null) return;
+
+  // If array → join
+  if (Array.isArray(val)) {
+    const arr = val.map(x => (x == null ? "" : String(x).trim())).filter(Boolean);
+    if (!arr.length) return;
+    lines.push(`## ${label}\n${arr.join("\n")}\n`);
+    return;
+  }
+
+  // If object → render key:value lines
+  if (typeof val === "object") {
+    const keys = Object.keys(val || {});
+    if (!keys.length) return;
+
+    const parts = [];
+    keys.forEach(k => {
+      const v = val[k];
+      if (v == null) return;
+      if (typeof v === "string" && v.trim()) parts.push(`${k}: ${v.trim()}`);
+      else if (Array.isArray(v) && v.length) parts.push(`${k}: ${v.join(" | ")}`);
+    });
+
+    if (!parts.length) parts.push(JSON.stringify(val, null, 2));
+
+    lines.push(`${label}\n${"-".repeat(label.length)}\n${parts.join("\n")}\n`);
+
+    return;
+  }
+
+  // string/number/bool
+  const s = String(val).trim();
+  if (!s) return;
+  lines.push(`${label}\n${"-".repeat(label.length)}\n${s}\n`);
+
+};
+
+    const addList = (label, arr) => {
+      if (!Array.isArray(arr) || !arr.length) return;
+      lines.push(`${label}\n${"-".repeat(label.length)}`);
+
+      arr.forEach(it => {
+        if (it == null) return;
+        const s = (typeof it === "string") ? it.trim() : "";
+        if (s) lines.push(`- ${s}`);
+      });
+      lines.push("");
+    };
+
+    add("Headline", j.headline);
+    add("Summary", j.summary);
+addList("Key Points", j.key_points);
+  // --- Web Article (longform) ---
+  try{
+   var wa = (j && (j.web_article || j.web || j.article)) || null;
+
+    if (wa){
+
+
+      add("Web Article Title", wa.title || wa.headline || "");
+      add("Web Article Dek", wa.dek || wa.subhead || wa.summary || "");
+      add("Web Article Body", wa.body || wa.text || wa.content || "");
+    }
+  }catch(e){}
+
+add("YouTube Title", j.youtube_title || (j.youtube && j.youtube.title));
+add("YouTube Description", j.youtube_description || (j.youtube && j.youtube.description));
+add("YouTube Video Script", j.youtube_script || j.video_script || j.yt_script || (j.youtube && j.youtube.script));
+add("YouTube VO (optional)", j.youtube_vo || (j.youtube && j.youtube.vo));
+// --- Reel / Shorts (short-form) ---
+try{
+  var r = j.reel || j.short || j.shorts || null;
+  if (r){
+    add("Reel Hook", r.hook || r.opening || r.hook_line || r.one_liner || "");
+
+    add("Reel Script", r.script || r.vo || "");
+    add("Reel CTA", r.cta || "");
+  }
+}catch(e){}
+
+// --- Social (distribution) ---
+try{
+  var s = j.social || null;
+  if (s){
+    add("Instagram Caption", s.instagram_caption || s.instagram || "");
+add("Hashtags", s.hashtags || s.tags || s.hash || s.keywords || "");
+
+    add("X Post", s.x_post || s.twitter || "");
+addList("X Thread", Array.isArray(s.x) ? s.x : []);
+if (!Array.isArray(s.x)) add("X Post", s.x || "");
+
+    add("WhatsApp", s.whatsapp || "");
+   
+
+  }
+}catch(e){}
+// --- SEO Pack ---
+try{
+  // support both root keys and nested seo object
+  var seo = j.seo || j.seo_pack || null;
+
+  add("SEO Meta Title", (seo && (seo.meta_title || seo.title)) || j.meta_title || "");
+  add("SEO Meta Description", (seo && (seo.meta_description || seo.description)) || j.meta_description || "");
+  add("SEO Slug", (seo && (seo.slug)) || j.slug || "");
+  add("SEO Keywords", (seo && (seo.keywords || seo.tags)) || j.seo_keywords || j.keywords || "");
+}catch(e){}
+
+// --- References / Links ---
+try{
+  var refs = j.refs || j.references || j.links || null;
+  if (refs) add("References", refs);
+}catch(e){}
+
+
+    // common arrays
+    
+    addList("Bullets", j.bullets);
+    addList("GFX Bullets", j.gfx_bullets);
+    addList("Teleprompter", j.tp);
+
+    // if there is a socials object, show selected fields as text
+    if (j.socials && typeof j.socials === "object") {
+      add("Social (X)", j.socials.x || j.socials.twitter);
+      add("Social (Instagram)", j.socials.instagram);
+      add("Social (YouTube)", j.socials.youtube);
+      add("Social (WhatsApp)", j.socials.whatsapp);
+    }
+
+    text = lines.join("\n").trim();
+    if (!text) text = "(StoryView: detailed text fields नहीं मिले।)";
+  }
+}
+
+      if (!text) text = "(StoryView: no output yet. Generate DIGI_PACK first.)";
+
+      if (out) out.textContent = text;
+      if (fmt) fmt.textContent = ""; // keep formatted empty for now (later we can build cards)
+    } catch(e) {}
+  }
+
+  // Run on tab change (attribute mutation) + after ngResponse updates
+  const mo = new MutationObserver(() => renderStoryView());
+  try {
+    mo.observe(document.documentElement, { attributes:true, attributeFilter:["data-ng-outtab"] });
+    mo.observe(document.body, { attributes:true, attributeFilter:["data-ng-outtab"] });
+  } catch(e) {}
+
+  const pre = document.getElementById("ngResponse");
+  if (pre) {
+    const mo2 = new MutationObserver(() => renderStoryView());
+    try { mo2.observe(pre, { childList:true, subtree:true, characterData:true }); } catch(e) {}
+  }
+
+  // First paint
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renderStoryView, { once:true });
+  } else {
+    renderStoryView();
+  }
+function renderJsonTab() {
+  try {
+    const tab = getOuttab();
+    if (tab !== "raw" && tab !== "json") return;
+
+
+    const raw = (document.getElementById("ngResponse")?.textContent || "").trim();
+    const out = document.getElementById("ng-json-out");
+    if (out) out.textContent = raw || "(no JSON yet)";
+  } catch(e) {}
+}
+
+
+  // Expose manual hook for debugging
+  window.NG_renderStoryView = renderStoryView;
+})();
+</script>
+
+
+<!-- === NG_JSON_TAB_RENDERER_V1_START (2026-02-06) === -->
+<script>
+(function(){
+  window.NG_renderJsonTab = function(){
+    try{
+      var pre = document.getElementById("ngResponse");
+      var out = document.getElementById("ng-json-out");
+      if (!pre || !out) return;
+
+      var txt = (pre.textContent || pre.innerText || "").trim();
+      if (!txt){
+        out.textContent = "(empty) Generate first, then open JSON tab.";
+        return;
+      }
+
+      var pretty = "";
+      try{
+        var j = JSON.parse(txt);
+        pretty = JSON.stringify(j, null, 2);
+      }catch(e){
+        var m = txt.match(/(\{[\s\S]*\}|\[[\s\S]*\])\s*$/);
+        if (m){
+          try{
+            var j2 = JSON.parse(m[1]);
+            pretty = JSON.stringify(j2, null, 2);
+          }catch(e2){ pretty = txt; }
+        } else {
+          pretty = txt;
+        }
+      }
+      out.textContent = pretty;
+    }catch(e){}
+  };
+
+  function getOutTab(){
+    try{
+      var v =
+        (window.__NG_OUTTAB != null ? window.__NG_OUTTAB : null) ||
+        (document.documentElement && document.documentElement.getAttribute("data-ng-outtab")) ||
+        (localStorage.getItem("NG_OUTTAB")) ||
+        (localStorage.getItem("ng_outtab")) ||
+        "";
+      return String(v || "").toLowerCase();
+    }catch(e){ return ""; }
+  }
+
+  function isJsonActive(){
+    var t = getOutTab();
+    return (t === "raw" || t === "json");
+  }
+
+  function safeRender(){
+    try{
+      if (!isJsonActive()) return;
+      if (typeof window.NG_renderJsonTab === "function") window.NG_renderJsonTab();
+    }catch(e){}
+  }
+
+  document.addEventListener("click", function(){
+    setTimeout(safeRender, 30);
+  }, true);
+
+  try{
+    var panel = document.getElementById("ng-json-panel-wrap");
+    if (panel && window.MutationObserver){
+      var mo = new MutationObserver(function(){
+        try{
+          var ds = (panel.style && panel.style.display) ? panel.style.display : "";
+          if (ds !== "none") setTimeout(safeRender, 10);
+        }catch(e){}
+      });
+      mo.observe(panel, { attributes:true, attributeFilter:["style","class"] });
+    }
+  }catch(e){}
+
+  function wrapSetter(fnName){
+    try{
+      var fn = window[fnName];
+      if (typeof fn !== "function" || fn.__ngWrapped) return;
+      function wrapped(){
+        var r = fn.apply(this, arguments);
+        setTimeout(safeRender, 20);
+        return r;
+      }
+      wrapped.__ngWrapped = true;
+      window[fnName] = wrapped;
+    }catch(e){}
+  }
+  wrapSetter("setOutTab");
+  wrapSetter("NG_setOutTab");
+  wrapSetter("ngSetOutTab");
+
+  setTimeout(safeRender, 150);
+})();
+</script>
+<!-- === NG_JSON_TAB_RENDERER_V1_END === -->
+<!-- === NG_COPY_STORYVIEW_V1_START (2026-02-07) === -->
+<script>
+(function(){
+  async function copyTextToClipboard(text){
+    text = (text == null) ? "" : String(text);
+    // Prefer modern clipboard API
+    try{
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    }catch(e){}
+    // Fallback
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      ta.style.top = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return !!ok;
+    }catch(e){}
+    return false;
+  }
+
+  document.addEventListener("click", async function(e){
+    var id = e && e.target && e.target.id;
+    if (id !== "ngCopyStoryView") return;
+
+    var el = document.getElementById("ng-storyview-out");
+    var txt = el ? (el.innerText || el.textContent || "") : "";
+    var ok = await copyTextToClipboard(txt);
+
+    // optional tiny feedback (safe)
+    try{
+      var b = document.getElementById("ngCopyStoryView");
+      if (b){
+        var old = b.textContent;
+        b.textContent = ok ? "Copied ✓" : "Copy failed";
+        setTimeout(function(){ b.textContent = old; }, 900);
+      }
+    }catch(_){}
+  }, true);
+})();
+</script>
+<!-- === NG_COPY_STORYVIEW_V1_END === -->
+
+
+<!-- /* === NG_STORYVIEW_WIRE_V1_END === */ -->
+
+
+
 </html>
+
+
+
 
 
 

@@ -805,3 +805,795 @@ document.body.classList.toggle("ng-show-storyview");
 
 
 
+
+/* === NG_QUICK_STORY_MINI_V1_START (20260205) === */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function show(el){ try{ el.style.display = "block"; }catch(e){} }
+  function hide(el){ try{ el.style.display = "none"; }catch(e){} }
+  function isHidden(el){
+    try{
+      if (!el) return true;
+      var cs = getComputedStyle(el);
+      return (cs.display === "none") || el.hasAttribute("hidden");
+    }catch(e){ return true; }
+  }
+
+  function ensureBtn(id, label){
+    var root = $("ng-toolbar-root") || $("ng-superlight") || document.body;
+    if (!root) return;
+
+    // prefer a buttons host if exists
+    var host = root.querySelector(".ng-mini-buttons") || root;
+
+    if ($(id)) return;
+
+    var b = document.createElement("button");
+    b.type = "button";
+    b.id = id;
+    b.textContent = label;
+    b.style.marginLeft = "6px";
+    b.style.cursor = "pointer";
+    host.appendChild(b);
+  }
+
+  // Quick View = short preview (NOT Story View)
+  function renderQuick(){
+    var q = $("ngQuick");
+    if (!q) return;
+
+    // If quick already has meaningful content, keep it
+    var hasAny = (q.innerText || "").trim().length > 20;
+    if (hasAny) return;
+
+    var svOut = $("ng-storyview-out");
+    var txt = svOut ? (svOut.innerText || svOut.textContent || "") : "";
+    txt = (txt || "").replace(/\r/g,"").trim();
+
+    // If StoryView empty, try filling it first
+    if (!txt && typeof window.NG_fillStoryView === "function") {
+      try{ window.NG_fillStoryView(); }catch(e){}
+      txt = svOut ? (svOut.innerText || svOut.textContent || "") : "";
+      txt = (txt || "").replace(/\r/g,"").trim();
+    }
+
+    if (!txt) {
+      q.textContent = "Quick View: (No content yet) — पहले Generate करें.";
+      return;
+    }
+
+    var lines = txt.split("\n").map(s=>s.trim()).filter(Boolean);
+    var head = lines[0] || "(No headline)";
+    var next = lines.slice(1, 6).join("\n");
+
+    q.innerHTML = "";
+    var h = document.createElement("div");
+    h.style.fontWeight = "700";
+    h.style.marginBottom = "6px";
+    h.textContent = head;
+
+    var p = document.createElement("pre");
+    p.style.whiteSpace = "pre-wrap";
+    p.style.margin = "0";
+    p.textContent = next;
+
+    q.appendChild(h);
+    q.appendChild(p);
+  }
+
+  function toggleQuick(){
+    var q = $("ngQuick");
+    if (!q) return;
+    if (isHidden(q)) {
+      show(q);
+      renderQuick();
+      try{ q.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+    } else hide(q);
+  }
+
+  function toggleStory(){
+    var box = $("ng-storyview");
+    if (!box) return;
+
+    if (isHidden(box)) {
+      show(box);
+      try{
+        if (typeof window.NG_fillStoryView === "function") window.NG_fillStoryView();
+      }catch(e){}
+      try{ box.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+    } else hide(box);
+  }
+
+  function wire(){
+    // add two buttons in mini toolbar
+    ensureBtn("btnQuickMini", "Quick");
+    ensureBtn("btnStoryMini", "Story");
+
+    document.addEventListener("click", function(e){
+      var id = e && e.target && e.target.id;
+      if (id === "btnQuickMini") { e.preventDefault(); toggleQuick(); return; }
+      if (id === "btnStoryMini") { e.preventDefault(); toggleStory(); return; }
+    }, true);
+  }
+
+  // Optional hook for other code
+  if (typeof window.NG_renderQuick !== "function") window.NG_renderQuick = renderQuick;
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire, { once:true });
+  else wire();
+})();
+ /* === NG_QUICK_STORY_MINI_V1_END === */
+
+
+/* === NG_FIX_JSON_TAB_RAW_V1_START (20260205) === */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function show(el){ try{ el.style.display = "block"; }catch(e){} }
+  function hide(el){ try{ el.style.display = "none"; }catch(e){} }
+  function isHidden(el){
+    try{
+      if (!el) return true;
+      var cs = getComputedStyle(el);
+      return (cs.display === "none") || el.hasAttribute("hidden");
+    }catch(e){ return true; }
+  }
+
+  function getRawText(){
+    // Prefer ngResponse pre content if present
+    var pre = $("ngResponse");
+    var t = pre ? (pre.innerText || pre.textContent || "") : "";
+    t = (t || "").trim();
+    if (t) return t;
+
+    // Fallback: try to use any last response object if stored globally
+    try{
+      if (window.__NG_LAST_DIGIPACK_JSON__) return JSON.stringify(window.__NG_LAST_DIGIPACK_JSON__, null, 2);
+    }catch(e){}
+    return "";
+  }
+
+  function toggleRaw(){
+    var pre = $("ngResponse");
+    if (!pre) return;
+
+    // Ensure Story View does NOT get affected
+    // (Do NOT call NG_fillStoryView here)
+
+    // Toggle raw area
+    if (isHidden(pre)) {
+      show(pre);
+      // If empty, show a helpful hint
+      var t = getRawText();
+      if (!t) pre.textContent = "RAW/JSON: अभी raw response उपलब्ध नहीं है. पहले REAL mode में Generate करें.";
+      try{ pre.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+    } else {
+      hide(pre);
+    }
+  }
+
+  function wire(){
+    // Capture JSON tab clicks early so old wiring can't hijack it
+    document.addEventListener("click", function(e){
+      if (window.__NG_DISABLE_JSONTAB_HIJACK__) return;
+      var el = e && e.target ? e.target.closest("#ng-tab-raw") : null;
+      if (!el) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      toggleRaw();
+    }, true);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire, { once:true });
+  else wire();
+})();
+ /* === NG_FIX_JSON_TAB_RAW_V1_END === */
+
+
+/* === NG_JSONTAB_PRETTY_FROM_NGRESPONSE_V1_START (20260205) === */
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  function tryParse(s){
+    try{ return JSON.parse(s); }catch(e){ return null; }
+  }
+
+  function normalizeToObject(j){
+    // If worker wrapper exists, prefer output_json; else use as-is
+    try{
+      if (j && typeof j === "object") {
+        if (j.output_json && typeof j.output_json === "object") return j.output_json;
+        if (j.received && !j.headline && !j.web_article) return j; // keep wrapper if it's only received/debug
+        return j;
+      }
+    }catch(e){}
+    return j;
+  }
+
+  function prettyPrintIntoNgResponse(){
+    var pre = $("ngResponse");
+    if (!pre) return;
+
+    var raw = (pre.innerText || pre.textContent || "").trim();
+    var j = raw ? tryParse(raw) : null;
+
+    // If ngResponse already contains valid JSON, reformat it nicely
+    if (j) {
+      var obj = normalizeToObject(j);
+      try{
+        pre.textContent = JSON.stringify(obj, null, 2);
+      }catch(e){
+        pre.textContent = raw;
+      }
+      return;
+    }
+
+    // If ngResponse isn't JSON, do nothing (avoid overwriting)
+    // (We deliberately do NOT touch Story View)
+  }
+
+  // On JSON tab click: ensure raw panel shows and content is pretty-printed
+  document.addEventListener("click", function(){
+    setTimeout(function(){
+      prettyPrintIntoNgResponse();
+    }, 0);
+  }, true);
+})();
+ /* === NG_JSONTAB_PRETTY_FROM_NGRESPONSE_V1_END === */
+
+
+/* === NG_JSONTAB_FILL_FROM_CAPTURE_V1_START (20260205) === */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function show(el){ try{ el.style.display = "block"; }catch(e){} }
+
+  function getLast(){
+    try{ if (window.__NG_LAST_DIGIPACK_JSON__) return JSON.stringify(window.__NG_LAST_DIGIPACK_JSON__, null, 2); }catch(e){}
+    try{
+      var s = localStorage.getItem("NG_LAST_DIGIPACK_JSON_V1");
+      if (s) return JSON.stringify(JSON.parse(s), null, 2);
+    }catch(e){}
+    try{
+      var t = window.__NG_LAST_DIGIPACK_RAW_TEXT__ || localStorage.getItem("NG_LAST_DIGIPACK_RAW_TEXT_V1");
+      if (t) return t;
+    }catch(e){}
+    return "";
+  }
+
+  document.addEventListener("click", function(e){
+      if (window.__NG_DISABLE_JSONTAB_HIJACK__) return;
+      var el = e && e.target ? e.target.closest("#ng-tab-raw") : null;
+    if (!el) return;
+
+    setTimeout(function(){
+      var pre = $("ngResponse");
+      if (!pre) return;
+
+      var txt = getLast();
+      if (!txt) txt = "RAW/JSON: अभी last response saved नहीं है. पहले Generate करें, फिर JSON खोलें.";
+
+      pre.textContent = txt;
+      show(pre);
+      try{ pre.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+    }, 0);
+  }, true);
+})();
+ /* === NG_JSONTAB_FILL_FROM_CAPTURE_V1_END === */
+
+
+/* === NG_GUARD_JSON_DOES_NOT_TOUCH_STORY_V1_START (20260205) === */
+(function(){
+  // If any old code tries to call NG_fillStoryView during JSON tab action, block it.
+  var inJsonClick = false;
+
+  document.addEventListener("click", function(e){
+      if (window.__NG_DISABLE_JSONTAB_HIJACK__) return;
+      var el = e && e.target ? e.target.closest("#ng-tab-raw") : null;
+    if (!el) return;
+    inJsonClick = true;
+    setTimeout(function(){ inJsonClick = false; }, 0);
+  }, true);
+
+  // Wrap NG_fillStoryView (if exists) with a guard
+  try{
+    if (typeof window.NG_fillStoryView === "function" && !window.__NG_WRAP_FILL_STORY_GUARD_V1__) {
+      window.__NG_WRAP_FILL_STORY_GUARD_V1__ = true;
+      var _old = window.NG_fillStoryView;
+      window.NG_fillStoryView = function(){
+        if (inJsonClick) return; // do nothing during JSON click
+        return _old.apply(this, arguments);
+      };
+    }
+  }catch(e){}
+})();
+ /* === NG_GUARD_JSON_DOES_NOT_TOUCH_STORY_V1_END === */
+
+
+
+/* === NG_DISABLE_JSON_HIJACK_FLAG_V1 (20260205) === */
+try{ window.__NG_DISABLE_JSONTAB_HIJACK__ = true; }catch(e){}
+/* === NG_DISABLE_JSON_HIJACK_FLAG_V1_END === */
+
+
+/* === NG_FORCE_STORYVIEW_FORMATTED_V1_START (20260206) === */
+(function(){
+  try{
+    if (window.__NG_FORCE_STORYVIEW_FORMATTED_V1__) return;
+    window.__NG_FORCE_STORYVIEW_FORMATTED_V1__ = true;
+
+    // Wrap NG_fillStoryView to ensure it uses formatted renderer
+    if (typeof window.NG_fillStoryView === "function" && typeof window.NG_renderDigiPackFormatted === "function") {
+      var _old = window.NG_fillStoryView;
+      window.NG_fillStoryView = function(){
+        try{
+          // Prefer formatted renderer for Story View
+          return window.NG_renderDigiPackFormatted();
+        }catch(e){
+          // fallback to old behavior if something fails
+          return _old.apply(this, arguments);
+        }
+      };
+    }
+  }catch(e){}
+})();
+ /* === NG_FORCE_STORYVIEW_FORMATTED_V1_END === */
+
+
+/* === NG_FORCE_STORY_BTN_FORMATTED_V1_START (20260206) === */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function show(el){ try{ el.style.display = "block"; }catch(e){} }
+  function isHidden(el){
+    try{
+      if (!el) return true;
+      var cs = getComputedStyle(el);
+      return (cs.display === "none") || el.hasAttribute("hidden");
+    }catch(e){ return true; }
+  }
+
+  function renderFormatted(){
+    try{
+      if (typeof window.NG_renderDigiPackFormatted === "function") {
+        window.NG_renderDigiPackFormatted();
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+
+  document.addEventListener("click", function(e){
+    var el = e && e.target ? e.target.closest("#btnStoryMini") : null;
+    if (!el) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    var box = $("ng-storyview");
+    if (box && isHidden(box)) show(box);
+
+    var ok = renderFormatted();
+    if (!ok) {
+      var out = $("ng-storyview-out");
+      if (out) out.textContent = "Story View: formatted renderer missing. (NG_renderDigiPackFormatted not found)";
+    }
+
+    try{ box && box.scrollIntoView({behavior:"smooth", block:"start"}); }catch(err){}
+  }, true);
+})();
+ /* === NG_FORCE_STORY_BTN_FORMATTED_V1_END === */
+
+
+/* === NG_STORYVIEW_RENDER_STRUCT_FROM_CAPTURE_V1_START (20260206) === */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function show(el){ try{ el.style.display = "block"; }catch(e){} }
+  function isHidden(el){
+    try{
+      if (!el) return true;
+      var cs = getComputedStyle(el);
+      return (cs.display === "none") || el.hasAttribute("hidden");
+    }catch(e){ return true; }
+  }
+
+  function getLastJson(){
+    try{
+      if (window.__NG_LAST_DIGIPACK_JSON__) return window.__NG_LAST_DIGIPACK_JSON__;
+    }catch(e){}
+    try{
+      var s = localStorage.getItem("NG_LAST_DIGIPACK_JSON_V1");
+      if (s) return JSON.parse(s);
+    }catch(e){}
+    return null;
+  }
+
+  function unwrap(j){
+    // If worker wrapper exists, prefer output_json
+    try{
+      if (j && typeof j === "object" && j.output_json && typeof j.output_json === "object") return j.output_json;
+    }catch(e){}
+    return j;
+  }
+
+  function asLines(x){
+    if (!x) return [];
+    if (Array.isArray(x)) return x.map(v => String(v)).filter(Boolean);
+    if (typeof x === "string") return x.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    return [String(x)];
+  }
+
+  function renderStruct(){
+    var out = $("ng-storyview-out");
+    if (!out) return;
+
+    var j = unwrap(getLastJson());
+    if (!j || typeof j !== "object") {
+      out.textContent = "Story View: अभी DigiPack JSON उपलब्ध नहीं है. पहले REAL mode में Generate करें.";
+      return;
+    }
+
+    // Pick known keys (your current schema)
+    var headline = j.headline || "";
+    var summary  = j.summary || "";
+    var keyPts   = j.key_points || j.keyPoints || [];
+    var web      = j.web_article || j.web || "";
+    var video    = j.video_script || j.video || "";
+    var yt       = j.youtube || "";
+    var reel     = j.reel || j.reels || "";
+    var social   = j.social || "";
+
+    var lines = [];
+    if (headline) { lines.push("## Headline", String(headline).trim(), ""); }
+    if (summary)  { lines.push("## Summary",  String(summary).trim(), ""); }
+
+    var kp = asLines(keyPts);
+    if (kp.length){
+      lines.push("## Key Points");
+      kp.slice(0, 12).forEach(p => lines.push("- " + p));
+      lines.push("");
+    }
+
+    if (web)   { lines.push("## Web Article", String(web).trim(), ""); }
+    if (video) { lines.push("## Video Script", String(video).trim(), ""); }
+    if (yt)    { lines.push("## YouTube", String(yt).trim(), ""); }
+    if (reel)  { lines.push("## Reel", String(reel).trim(), ""); }
+    if (social){ lines.push("## Social", String(social).trim(), ""); }
+
+    // Fallback: if nothing matched, show keys list (not raw JSON)
+    if (lines.length < 3){
+      lines = ["Story View: formats keys not found. Available keys:", Object.keys(j).join(", ")];
+    }
+
+    out.textContent = lines.join("\n");
+  }
+
+  // Capture Story button click and always render structured text
+  document.addEventListener("click", function(e){
+    var el = e && e.target ? e.target.closest("#btnStoryMini") : null;
+    if (!el) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    var box = $("ng-storyview");
+    if (box && isHidden(box)) show(box);
+
+    renderStruct();
+
+    try{ box && box.scrollIntoView({behavior:"smooth", block:"start"}); }catch(err){}
+  }, true);
+
+  // Expose helper (optional)
+  if (!window.NG_renderStoryStructFromLast) window.NG_renderStoryStructFromLast = renderStruct;
+})();
+ /* === NG_STORYVIEW_RENDER_STRUCT_FROM_CAPTURE_V1_END === */
+
+
+/* === NG_STORY_STRUCT_INTERCEPT_V2_START (20260206) === */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function show(el){ try{ el.style.display = "block"; }catch(e){} }
+  function isHidden(el){
+    try{
+      if (!el) return true;
+      var cs = getComputedStyle(el);
+      return (cs.display === "none") || el.hasAttribute("hidden");
+    }catch(e){ return true; }
+  }
+
+  function getLastJson(){
+    try{ if (window.__NG_LAST_DIGIPACK_JSON__) return window.__NG_LAST_DIGIPACK_JSON__; }catch(e){}
+    try{
+      var s = localStorage.getItem("NG_LAST_DIGIPACK_JSON_V1");
+      if (s) return JSON.parse(s);
+    }catch(e){}
+    return null;
+  }
+  function unwrap(j){
+    try{ if (j && j.output_json && typeof j.output_json === "object") return j.output_json; }catch(e){}
+    return j;
+  }
+  function asLines(x){
+    if (!x) return [];
+    if (Array.isArray(x)) return x.map(v=>String(v)).filter(Boolean);
+    if (typeof x === "string") return x.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    return [String(x)];
+  }
+
+  function renderStruct(){
+    var out = $("ng-storyview-out");
+    if (!out) return;
+
+    var j = unwrap(getLastJson());
+    if (!j || typeof j !== "object") {
+      out.textContent = "Story View: अभी DigiPack JSON उपलब्ध नहीं है. पहले REAL mode में Generate करें.";
+      return;
+    }
+
+    var headline = j.headline || "";
+    var summary  = j.summary || "";
+    var keyPts   = j.key_points || j.keyPoints || [];
+    var web      = j.web_article || j.web || "";
+    var video    = j.video_script || j.video || "";
+    var yt       = j.youtube || "";
+    var reel     = j.reel || j.reels || "";
+    var social   = j.social || "";
+
+    var lines = [];
+    if (headline) { lines.push("## Headline", String(headline).trim(), ""); }
+    if (summary)  { lines.push("## Summary",  String(summary).trim(), ""); }
+
+    var kp = asLines(keyPts);
+    if (kp.length){
+      lines.push("## Key Points");
+      kp.slice(0,12).forEach(p => lines.push("- " + p));
+      lines.push("");
+    }
+
+    if (web)   { lines.push("## Web Article", String(web).trim(), ""); }
+    if (video) { lines.push("## Video Script", String(video).trim(), ""); }
+    if (yt)    { lines.push("## YouTube", String(yt).trim(), ""); }
+    if (reel)  { lines.push("## Reel", String(reel).trim(), ""); }
+    if (social){ lines.push("## Social", String(social).trim(), ""); }
+
+    if (lines.length < 3){
+      lines = ["Story View: formats keys not found. Available keys:", Object.keys(j).join(", ")];
+    }
+
+    out.textContent = lines.join("\n");
+  }
+
+  function openStoryAndRender(){
+    var box = $("ng-storyview");
+    if (box && isHidden(box)) show(box);
+    // write now + re-write a bit later to defeat any late JSON writer
+    renderStruct();
+    setTimeout(renderStruct, 30);
+    setTimeout(renderStruct, 120);
+    try{ box && box.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+  }
+
+  // Intercept BEFORE click (most reliable)
+  document.addEventListener("pointerdown", function(e){
+    var el = e && e.target ? e.target.closest("#btnStoryMini") : null;
+    if (!el) return;
+
+    // block other handlers as much as possible
+    try{ e.preventDefault(); }catch(_){}
+    try{ e.stopPropagation(); }catch(_){}
+    try{ e.stopImmediatePropagation(); }catch(_){}
+
+    window.__NG_STORY_LOCK_TS__ = Date.now();
+    openStoryAndRender();
+  }, true);
+
+  // Also intercept click if it happens after pointerdown
+  document.addEventListener("click", function(e){
+    var el = e && e.target ? e.target.closest("#btnStoryMini") : null;
+    if (!el) return;
+
+    var ts = window.__NG_STORY_LOCK_TS__ || 0;
+    if (Date.now() - ts < 800) {
+      try{ e.preventDefault(); }catch(_){}
+      try{ e.stopPropagation(); }catch(_){}
+      try{ e.stopImmediatePropagation(); }catch(_){}
+      openStoryAndRender();
+    }
+  }, true);
+
+  window.NG_renderStoryStructFromLast = renderStruct;
+})();
+ /* === NG_STORY_STRUCT_INTERCEPT_V2_END === */
+
+
+/* === NG_STORYVIEW_BLOCK_JSON_WRITES_V1_START (20260206) === */
+(function(){
+  function looksJsonText(s){
+    try{
+      s = (s == null ? "" : String(s)).trim();
+      return (s.startsWith("{") || s.startsWith("[")) && s.includes('"') && s.includes(":");
+    }catch(e){ return false; }
+  }
+
+  function getLastJson(){
+    try{ if (window.__NG_LAST_DIGIPACK_JSON__) return window.__NG_LAST_DIGIPACK_JSON__; }catch(e){}
+    try{
+      var s = localStorage.getItem("NG_LAST_DIGIPACK_JSON_V1");
+      if (s) return JSON.parse(s);
+    }catch(e){}
+    return null;
+  }
+  function unwrap(j){
+    try{ if (j && j.output_json && typeof j.output_json === "object") return j.output_json; }catch(e){}
+    return j;
+  }
+  function asLines(x){
+    if (!x) return [];
+    if (Array.isArray(x)) return x.map(v=>String(v)).filter(Boolean);
+    if (typeof x === "string") return x.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    return [String(x)];
+  }
+  function renderStructTo(out){
+    var j = unwrap(getLastJson());
+    if (!j || typeof j !== "object") {
+      out.textContent = "Story View: पहले REAL mode में Generate करें.";
+      return;
+    }
+    var headline = j.headline || "";
+    var summary  = j.summary || "";
+    var keyPts   = j.key_points || j.keyPoints || [];
+    var web      = j.web_article || j.web || "";
+    var video    = j.video_script || j.video || "";
+    var yt       = j.youtube || "";
+    var reel     = j.reel || j.reels || "";
+    var social   = j.social || "";
+
+    var lines = [];
+    if (headline) { lines.push("## Headline", String(headline).trim(), ""); }
+    if (summary)  { lines.push("## Summary",  String(summary).trim(), ""); }
+
+    var kp = asLines(keyPts);
+    if (kp.length){
+      lines.push("## Key Points");
+      kp.slice(0,12).forEach(p => lines.push("- " + p));
+      lines.push("");
+    }
+
+    if (web)   { lines.push("## Web Article", (typeof web==="string"?web:JSON.stringify(web,null,2)).trim(), ""); }
+    if (video) { lines.push("## Video Script", (typeof video==="string"?video:JSON.stringify(video,null,2)).trim(), ""); }
+    if (yt)    { lines.push("## YouTube", (typeof yt==="string"?yt:JSON.stringify(yt,null,2)).trim(), ""); }
+    if (reel)  { lines.push("## Reel", (typeof reel==="string"?reel:JSON.stringify(reel,null,2)).trim(), ""); }
+    if (social){ lines.push("## Social", (typeof social==="string"?social:JSON.stringify(social,null,2)).trim(), ""); }
+
+    out.textContent = lines.join("\n");
+  }
+
+  function install(){
+    var out = document.getElementById("ng-storyview-out");
+    if (!out || out.__ngBlockJsonWritesInstalled) return;
+    out.__ngBlockJsonWritesInstalled = true;
+
+    var orig = Object.getOwnPropertyDescriptor(Node.prototype, "textContent") || null;
+
+    // Guard via MutationObserver (most reliable)
+    var mo = new MutationObserver(function(){
+      try{
+        var t = (out.textContent || "").trim();
+        if (t && looksJsonText(t)) {
+          // replace JSON with structured view
+          renderStructTo(out);
+        }
+      }catch(e){}
+    });
+    mo.observe(out, { childList:true, characterData:true, subtree:true });
+
+    // Also guard common direct writes (best effort)
+    var _set = out.__lookupSetter__ && out.__lookupSetter__("textContent");
+    // We can't safely override native setter directly across browsers; MO is primary.
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once:true });
+  else install();
+})();
+ /* === NG_STORYVIEW_BLOCK_JSON_WRITES_V1_END === */
+
+
+/* === NG_REINJECT_MINI_QUICK_STORY_V1_START (20260206) === */
+(function(){
+  function addBtn(id, label){
+    var root = document.getElementById("ng-toolbar-root") || document.getElementById("ng-superlight");
+    if (!root) return;
+
+    if (document.getElementById(id)) return;
+
+    var b = document.createElement("button");
+    b.type = "button";
+    b.id = id;
+    b.className = "btn";
+    b.textContent = label;
+
+    // insert near Generate if possible
+    var gen = document.getElementById("btnGenerate");
+    if (gen && gen.parentElement) gen.parentElement.insertBefore(b, gen.nextSibling);
+    else root.appendChild(b);
+  }
+
+  function setOuttab(v){
+    try{ document.documentElement.setAttribute("data-ng-outtab", v); }catch(e){}
+  }
+
+  function showQuick(){
+    setOuttab("quick");
+    var q = document.getElementById("ngQuick");
+    if (q) q.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function showStory(){
+    setOuttab("story");
+    var s = document.getElementById("ng-storyview");
+    if (s) s.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function wire(){
+    addBtn("btnQuickMini","Quick");
+    addBtn("btnStoryMini","Story");
+
+    document.addEventListener("click", function(e){
+      var t = e && e.target ? e.target.closest("#btnQuickMini") : null;
+      if (!t) return;
+      e.preventDefault(); e.stopPropagation();
+      showQuick();
+    }, true);
+
+    document.addEventListener("click", function(e){
+      var t = e && e.target ? e.target.closest("#btnStoryMini") : null;
+      if (!t) return;
+      e.preventDefault(); e.stopPropagation();
+      showStory();
+    }, true);
+
+    // safety: if stuck on story but story panel hidden, default to raw
+    try{
+      var outtab = document.documentElement.getAttribute("data-ng-outtab");
+      var story = document.getElementById("ng-storyview");
+      if (outtab === "story" && story && getComputedStyle(story).display === "none") setOuttab("raw");
+    }catch(e){}
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire, { once:true });
+  else wire();
+})();
+ /* === NG_REINJECT_MINI_QUICK_STORY_V1_END === */
+
+
+
+/* === NG_MOVE_OUTPUT_HEADROW_OUT_OF_LOG_V1_START (20260206) === */
+(function(){
+  function move(){
+    try{
+      var head = document.getElementById("ng-output-headrow");
+      if (!head) return;
+
+      var logWrap = document.getElementById("ng-log-panel-wrap");
+      var adv = document.getElementById("ng-advanced-panels");
+      if (!adv) return;
+
+      // If headrow is inside logWrap, move it to the top of advanced panels
+      if (logWrap && logWrap.contains(head)) {
+        adv.insertBefore(head, adv.firstChild);
+        console.log("[NG_MOVE_HEADROW] moved ng-output-headrow out of ng-log-panel-wrap");
+      }
+    }catch(e){}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", move, { once:true });
+  } else {
+    move();
+  }
+})();
+ /* === NG_MOVE_OUTPUT_HEADROW_OUT_OF_LOG_V1_END === */
+

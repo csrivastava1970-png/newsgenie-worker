@@ -297,14 +297,17 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
           "",
           "OUTPUT_JSON_SCHEMA:",
           "{",
-          '  "headline": "string",',
-          '  "summary": "string",',
-          '  "key_points": ["string"],',
-          '  "web_article": {"title":"string","body":"string","seo_keywords":["string"]},',
-          '  "video_script": {"anchor_intro":"string","vo":"string","outro":"string"},',
-          '  "youtube": {"title":"string","description":"string","tags":["string"]},',
-          '  "reel": {"hook":"string","script":"string","cta":"string"},',
-          '  "social": {"x":["string"],"instagram_caption":"string","whatsapp":"string"}',
+         '  "headline": "string",',
+'  "summary": "string",',
+'  "key_points": ["string"],',
+'  "web_article": {"title":"string","dek":"string","body":"string"},',
+'  "video_script": {"anchor_intro":"string","vo":"string","outro":"string"},',
+'  "youtube": {"title":"string","description":"string","tags":["string"]},',
+'  "reel": {"hook":"string","script":"string","cta":"string"},',
+'  "social": {"x":"string","instagram_caption":"string","whatsapp":"string","hashtags":["string"]},',
+'  "seo": {"meta_title":"string","meta_description":"string","slug":"string","keywords":["string"]},',
+'  "refs": ["string"]',
+
           "}"
         ].join("\n");
 
@@ -374,9 +377,16 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
           const vs = output_json.video_script || {};
           const yt = output_json.youtube || {};
           const rl = output_json.reel || {};
-          const so = output_json.social || {};
+         const so = output_json.social || {};
+const seo = output_json.seo || {};
+const refs = output_json.refs || [];
 
-          const xPosts = safeArr(so.x);
+// x can be string OR array
+const xPosts = Array.isArray(so.x) ? so.x : (typeof so.x === "string" && so.x.trim() ? [so.x.trim()] : []);
+
+// hashtags can be string OR array
+const hashtags = Array.isArray(so.hashtags) ? so.hashtags
+  : (typeof so.hashtags === "string" && so.hashtags.trim() ? [so.hashtags.trim()] : []);
 
           copy_text = [
             "=== HEADLINE ===",
@@ -427,6 +437,21 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
             safeStr(so.instagram_caption) || "(missing)",
             "",
             "WhatsApp:",
+"",
+"Hashtags:",
+hashtags.length ? hashtags.map(h => `- ${safeStr(h)}`).join("\n") : "(missing)",
+"",
+"=== SEO ===",
+"Meta Title: " + (safeStr(seo.meta_title) || "(missing)"),
+"Meta Description: " + (safeStr(seo.meta_description) || "(missing)"),
+"Slug: " + (safeStr(seo.slug) || "(missing)"),
+"Keywords:",
+safeArr(seo.keywords).length ? safeArr(seo.keywords).map(k => `- ${safeStr(k)}`).join("\n") : "(missing)",
+"",
+"=== REFS ===",
+safeArr(refs).length ? safeArr(refs).map(r => `- ${safeStr(r)}`).join("\n") : "(missing)",
+"",
+
             safeStr(so.whatsapp) || "(missing)"
           ].join("\n");
         }

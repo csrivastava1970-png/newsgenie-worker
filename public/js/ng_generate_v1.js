@@ -889,3 +889,37 @@ window.__NG_RENDER_EXPORT_OK__ = true;
 
 
 
+
+/* === NG_ENABLE_OUTPUT_TABS_ON_RESPONSE_V1_START (20260206) === */
+(function(){
+  function enableTabs(){
+    try{
+      ["ng-tab-quick","ng-tab-log","ng-tab-raw"].forEach(function(id){
+        var b = document.getElementById(id);
+        if (b) b.disabled = false;
+      });
+    }catch(e){}
+  }
+
+  function watch(){
+    try{
+      var pre = document.getElementById("ngResponse");
+      if (!pre) return;
+
+      // Enable if already has content
+      if ((pre.textContent || "").trim().length > 0) enableTabs();
+
+      // Watch for changes (Generate writes here)
+      var mo = new MutationObserver(function(){
+        var t = (pre.textContent || "").trim();
+        if (t.length > 0) enableTabs();
+      });
+      mo.observe(pre, { childList:true, characterData:true, subtree:true });
+    }catch(e){}
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", watch, { once:true });
+  else watch();
+})();
+ /* === NG_ENABLE_OUTPUT_TABS_ON_RESPONSE_V1_END === */
+
