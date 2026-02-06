@@ -47,3 +47,6 @@ public/ng_toolbar_actions_v1.js
 public/ng_toolbar_mini_v1.js
 tools/scan_unclosed.js
 tools/scan_unclosed_context.js
+
+# Local untracked backup folder
+backup/
