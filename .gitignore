@@ -60,3 +60,12 @@ backup/
 public/*.bak_*
 public/_script*_FAIL.js*
 public/_script*.bak_*
+# --- local backups / dumps ---
+_local_backups/
+**/*backup_before*
+**/index_backup_before_*.html
+public/script*_dump.js
+public/script*_dump_backup_*.js
+public/js/*_backup_*.js
+*.bak
+
