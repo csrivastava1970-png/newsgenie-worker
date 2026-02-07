@@ -127,6 +127,26 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // NG_ASSETS_ROUTE_V1_START (2026-02-07)
+    // Always RETURN a Response for static assets (prevents "Promise did not resolve to Response")
+    if (env && env.ASSETS) {
+      // Devtools sometimes probes this path; never crash
+      if (path.startsWith("/.well-known/")) {
+        return new Response("{}", { status: 200, headers: { "content-type": "application/json; charset=utf-8" } });
+      }
+
+      // Serve static files from /public via Assets binding
+      if (
+        path === "/" ||
+        path.startsWith("/js/") ||
+        path.startsWith("/css/") ||
+        path.startsWith("/assets/") ||
+        path.endsWith(".html")
+      ) {
+        return env.ASSETS.fetch(request);
+      }
+    }
+    // NG_ASSETS_ROUTE_V1_END
     // --- /api/bytes/latest via Durable Object (persistent) ---
     if (url.pathname === "/api/bytes/latest") {
       const id = env.BYTES_DO.idFromName("latest");
@@ -222,3 +242,4 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
   // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
