@@ -1227,15 +1227,22 @@ try {
           const bodyObj = JSON.parse(bodyStr);
 
           // If request has "prompt", ensure it uses latest bytes
-          if (typeof bodyObj.prompt === "string") {
-            // Prefer hidden prompt if present (already has all fields)
-            const hidden = getPromptFromHiddenInput();
-            bodyObj.prompt = hidden ? normalizePromptString(hidden) : normalizePromptString(bodyObj.prompt);
-          } else {
-            // If prompt missing, try set from hidden
-            const hidden = getPromptFromHiddenInput();
-            if (hidden) bodyObj.prompt = normalizePromptString(hidden);
-          }
+// If client already sent story, do NOT override prompt (server requires story)
+const hasStory = !!(bodyObj && bodyObj.story && String(bodyObj.story).trim());
+if (!hasStory) {
+  if (typeof bodyObj.prompt === "string") {
+    // Prefer hidden prompt if present (already has all fields)
+    const hidden = getPromptFromHiddenInput();
+    bodyObj.prompt = hidden
+      ? normalizePromptString(hidden)
+      : normalizePromptString(bodyObj.prompt);
+  } else {
+    // If prompt missing, try set from hidden
+    const hidden = getPromptFromHiddenInput();
+    if (hidden) bodyObj.prompt = normalizePromptString(hidden);
+  }
+} // end guard
+
 
           init = Object.assign({}, init, { body: JSON.stringify(bodyObj) });
           console.log("[NG_FETCH_OVERRIDE] /api/digi-pack prompt overridden. bytesLen=",
@@ -1252,4 +1259,46 @@ try {
   console.log("[NG_FETCH_OVERRIDE] installed");
 })();
 /* === NG_DIGIPACK_FETCH_PROMPT_OVERRIDE_V1_END (20260131) === */
+
+
+/* === NG_CAPTURE_DIGIPACK_LAST_V1_START (20260205) === */
+(function(){
+  try{
+    if (window.__NG_CAPTURE_DIGIPACK_LAST_V1__) return;
+    window.__NG_CAPTURE_DIGIPACK_LAST_V1__ = true;
+
+    var _fetch = window.fetch;
+    if (typeof _fetch !== "function") return;
+
+    window.fetch = async function(input, init){
+      var url = "";
+      try{
+        url = (typeof input === "string") ? input : (input && input.url ? input.url : "");
+      }catch(e){}
+
+      var res = await _fetch.apply(this, arguments);
+
+      try{
+        if (url && /\/api\/digi-pack\b/.test(url)) {
+          var clone = res.clone();
+          clone.text().then(function(txt){
+            try{
+              // Try parse JSON; if parse fails, store text
+              var j = null;
+              try{ j = JSON.parse(txt); }catch(e){}
+              window.__NG_LAST_DIGIPACK_RAW_TEXT__ = txt;
+              window.__NG_LAST_DIGIPACK_JSON__ = j;
+              try{ localStorage.setItem("NG_LAST_DIGIPACK_RAW_TEXT_V1", txt); }catch(e){}
+              if (j) { try{ localStorage.setItem("NG_LAST_DIGIPACK_JSON_V1", JSON.stringify(j)); }catch(e){} }
+              console.log("[NG_CAPTURE_DIGIPACK_LAST_V1] saved", {parsed: !!j, chars: (txt||"").length});
+            }catch(e){}
+          }).catch(function(){});
+        }
+      }catch(e){}
+
+      return res;
+    };
+  }catch(e){}
+})();
+ /* === NG_CAPTURE_DIGIPACK_LAST_V1_END === */
 
