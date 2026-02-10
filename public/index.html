@@ -2075,13 +2075,16 @@ window.setTab = setTab;
 </script>
 <!-- === NG_JSON_PANEL_TOGGLE_V1_END === -->
 
-<!-- NG_DRAFT_TO_ADD_FINAL_BRIDGE_V1_START -->
+<!-- NG_DRAFT_TO_ADD_FINAL_BRIDGE_V2_START (20260210) -->
 <script>
-  (function() {
-    try {
-      var btn = document.getElementById("ng-add-final");
-      if (!btn) return;
-      btn.addEventListener("click", function() {
+(function(){
+  try{
+    var btn = document.getElementById("ng-add-final");
+    if (!btn) return;
+
+    // Run BEFORE existing click logic
+    btn.addEventListener("click", function(){
+      try{
         var draft = document.getElementById("ng-byte-draft-text");
         var text = draft ? String(draft.value || "").trim() : "";
         if (!text) return;
@@ -2089,13 +2092,29 @@ window.setTab = setTab;
         var host = document.getElementById("ng-manual-bytes") || document.getElementById("bytes-wrap");
         if (!host) return;
 
+        // If no byte-row exists yet, try to create one (so Add-to-Bytes has something to work with)
+        var hasRow = host.querySelector(".ng-byte-row, textarea, input");
+        if (!hasRow) {
+          // Best-effort: click any "+ Add" style button inside host
+          var addBtn = Array.prototype.slice.call(host.querySelectorAll("button"))
+            .find(function(b){
+              var t = (b.textContent || "").trim().toLowerCase();
+              return t.includes("add") && t.includes("byte");
+            });
+          if (addBtn) addBtn.click();
+        }
+
+        // Ensure the host textarea receives draft text
         var ta = host.querySelector("textarea");
         if (ta) ta.value = text;
-      }, true);
-    } catch (e) {}
-  })();
+
+      }catch(e){}
+    }, true);
+
+  }catch(e){}
+})();
 </script>
-<!-- NG_DRAFT_TO_ADD_FINAL_BRIDGE_V1_END -->
+<!-- NG_DRAFT_TO_ADD_FINAL_BRIDGE_V2_END -->
 
 
 
