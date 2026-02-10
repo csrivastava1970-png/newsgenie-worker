@@ -373,6 +373,7 @@ try {
 
             var gs = document.getElementById("genStatus"); if (gs) gs.textContent = "";
             ngSetCopyViewEnabled(false);
+            try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputReady(false); }catch(e){}
             setBanner("[NG] status=" + r.status + " (non-JSON)\n" + (text||"").slice(0, 700));
             return;
           }
@@ -399,8 +400,14 @@ try {
             NG_setQuickSummary("Server error: " + errMsg);
 
             ngSetCopyViewEnabled(false);
-            setBanner("[NG] status=" + r.status + " ok=false");
-try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputReady(true); }catch(e){}
+            try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputReady(false); }catch(e){}
+            if (r.status === 404) {
+              var missPath = (parsed && parsed.path) ? String(parsed.path) : "/api/digi-pack";
+              var missMarker = (parsed && parsed.entry_marker) ? String(parsed.entry_marker) : "unknown-build";
+              setBanner("[NG] status=404 route missing on backend: " + missPath + " (build=" + missMarker + "). Deploy/run backend build with /api/digi-pack enabled.");
+            } else {
+              setBanner("[NG] status=" + r.status + " ok=false");
+            }
 
             return;
           }
@@ -563,7 +570,18 @@ function NG_pickDigiPackFormats(dp){
 
 function NG_renderDigiPackFormatted(dp){
   const host = document.getElementById("ng-storyview-formatted");
-  if (!host) return false;
+  if (!host) {
+    console.log("[NG_RENDER_DIGIPACK] host missing: #ng-storyview-formatted");
+    return false;
+  }
+  try {
+    console.log("[NG_RENDER_DIGIPACK] start", {
+      hostId: host.id,
+      hasDp: !!dp,
+      dpType: typeof dp,
+      dpKeys: dp && typeof dp === "object" ? Object.keys(dp).slice(0, 12) : null
+    });
+  } catch (e) {}
 
   host.innerHTML = "";
   // ---- unwrap common API wrappers (echo/real) ----
@@ -656,6 +674,14 @@ function NG_renderDigiPackFormatted(dp){
     host.appendChild(card);
   });
 
+  try {
+    console.log("[NG_RENDER_DIGIPACK] done", {
+      formatsLen: formats.length,
+      hostChildren: host.children ? host.children.length : null,
+      hostHtmlLen: (host.innerHTML || "").length
+    });
+  } catch (e) {}
+
   return true;
 }
 window.NG_renderDigiPackFormatted = NG_renderDigiPackFormatted;
@@ -688,6 +714,7 @@ window.__NG_RENDER_EXPORT_OK__ = true;
 
 
       }).catch(function(err){
+        try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputReady(false); }catch(e){}
         setBanner("[NG] ERROR: " + (err && err.message ? err.message : String(err)));
       }).finally(function(){
         inFlight = false;
@@ -703,178 +730,6 @@ window.__NG_RENDER_EXPORT_OK__ = true;
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire, { once:true });
   else wire();
 })();
-/* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_START (20260205) === */
-(function(){
-  if (window.NG_renderDigiPackFormatted) return; // already installed
-
-  function NG_safeTitleFromKey(k){
-    try{
-      return String(k || "")
-        .replace(/[_\-]+/g," ")
-        .replace(/\s+/g," ")
-        .trim()
-        .replace(/\b\w/g, c => c.toUpperCase());
-    }catch(e){ return String(k||"Format"); }
-  }
-
-  function NG_copyTextToClipboard(text){
-    const t = (text == null) ? "" : String(text);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(t).catch(() => {
-        const ta = document.createElement("textarea");
-        ta.value = t;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.focus(); ta.select();
-        try { document.execCommand("copy"); } catch(e){}
-        document.body.removeChild(ta);
-      });
-    }
-    const ta = document.createElement("textarea");
-    ta.value = t;
-    ta.style.position = "fixed";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.focus(); ta.select();
-    try { document.execCommand("copy"); } catch(e){}
-    document.body.removeChild(ta);
-    return Promise.resolve();
-  }
-
-  function NG_pickDigiPackFormats(dp){
-    const out = [];
-    if (!dp) return out;
-
-    if (Array.isArray(dp.formats)) {
-      dp.formats.forEach((it, idx) => {
-        const key = it && (it.key || it.name || it.title || ("format_"+idx));
-        const title = it && (it.title || it.name || NG_safeTitleFromKey(key));
-        const text = it && (it.text || it.content || it.body || "");
-        if (String(text||"").trim()) out.push({ key, title, text: String(text) });
-      });
-      if (out.length) return out;
-    }
-
-    if (typeof dp === "object") {
-      const skip = new Set(["ok","ts","meta","refs","sources","source","model","mode","status","error","raw","json","debug","telemetry","_meta","_debug"]);
-      const preferred = ["web_article","article","news_article","video_script","video","tv_script","youtube","youtube_script","yt_script","shorts","reel","reels","insta_reel","social","social_posts","x_thread","twitter_thread","headline","summary","bullet_points","anchors","prompts"];
-      const keys = Object.keys(dp);
-      const ordered = [];
-      preferred.forEach(k => { if (keys.includes(k)) ordered.push(k); });
-      keys.forEach(k => { if (!ordered.includes(k)) ordered.push(k); });
-
-      ordered.forEach((k) => {
-        if (skip.has(k)) return;
-        const v = dp[k];
-        if (v == null) return;
-
-        if (typeof v === "object" && !Array.isArray(v)) {
-          const maybe = v.text || v.content || v.body || v.script || v.output || "";
-          if (String(maybe||"").trim()) out.push({ key: k, title: NG_safeTitleFromKey(k), text: String(maybe) });
-          return;
-        }
-
-        const text = Array.isArray(v) ? v.join("\n") : String(v);
-        if (text.trim()) out.push({ key: k, title: NG_safeTitleFromKey(k), text });
-      });
-    }
-
-    return out;
-  }
-
-  function NG_renderDigiPackFormatted(dp){
-    const host = document.getElementById("ng-storyview-formatted");
-    if (!host) return false;
-    host.innerHTML = "";
-
-    // unwrap wrappers
-    try {
-      const unwrapped =
-        (dp && (dp.digi_pack || dp.digipack || dp.digiPack || dp.DIGI_PACK)) ||
-        (dp && (dp.outputs || dp.output || dp.result || dp.data || dp.payload)) ||
-        null;
-      if (unwrapped) dp = unwrapped;
-
-      if (dp && typeof dp === "object" && String(dp.mode || "").toLowerCase() === "echo") {
-        const msg = document.createElement("div");
-        msg.className = "ng-card";
-        msg.style.padding = "10px";
-        msg.innerHTML = "<b>mode: echo</b> मिला है — इस response में formatted outputs नहीं होंगे। REAL mode में Generate करें।";
-        host.appendChild(msg);
-        return true;
-      }
-      if (dp && typeof dp === "object" && dp.received && !dp.outputs && !dp.output && !dp.result && !dp.digi_pack && !dp.digipack) {
-        const msg = document.createElement("div");
-        msg.className = "ng-card";
-        msg.style.padding = "10px";
-        msg.innerHTML = "<b>ECHO response</b>: अभी server ने सिर्फ आपका input (received) लौटाया है, DigiPack formats नहीं।<br>REAL mode में Generate करें ताकि web/video/youtube आदि outputs आएं।";
-        host.appendChild(msg);
-        return true;
-      }
-    } catch(e) {}
-
-    const formats = NG_pickDigiPackFormats(dp);
-
-    if (!formats.length) {
-      const empty = document.createElement("div");
-      empty.className = "ng-card";
-      empty.style.padding = "10px";
-      empty.textContent = "No formatted DigiPack formats found (empty).";
-      host.appendChild(empty);
-      return true;
-    }
-
-    formats.forEach((f, i) => {
-      const card = document.createElement("section");
-      card.className = "ng-card";
-      card.style.padding = "10px";
-      card.style.marginBottom = "10px";
-
-      const head = document.createElement("div");
-      head.style.display = "flex";
-      head.style.alignItems = "center";
-      head.style.justifyContent = "space-between";
-      head.style.gap = "8px";
-
-      const h = document.createElement("div");
-      h.style.fontWeight = "700";
-      h.style.fontSize = "14px";
-      h.textContent = f.title || ("Format " + (i+1));
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = "Copy";
-      btn.className = "ng-btn ng-btn-mini";
-      btn.addEventListener("click", () => {
-        NG_copyTextToClipboard(f.text || "").then(() => {
-          btn.textContent = "Copied";
-          setTimeout(() => (btn.textContent = "Copy"), 900);
-        });
-      });
-
-      head.appendChild(h);
-      head.appendChild(btn);
-
-      const body = document.createElement("pre");
-      body.style.whiteSpace = "pre-wrap";
-      body.style.margin = "10px 0 0 0";
-      body.style.fontSize = "13px";
-      body.style.lineHeight = "1.35";
-      body.textContent = f.text || "";
-
-      card.appendChild(head);
-      card.appendChild(body);
-      host.appendChild(card);
-    });
-
-    return true;
-  }
-
-  window.NG_renderDigiPackFormatted = NG_renderDigiPackFormatted;
-  window.__NG_RENDER_EXPORT_OK__ = true;
-})();
- /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
 
 
 
@@ -922,4 +777,3 @@ window.__NG_RENDER_EXPORT_OK__ = true;
   else watch();
 })();
  /* === NG_ENABLE_OUTPUT_TABS_ON_RESPONSE_V1_END === */
-

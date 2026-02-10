@@ -283,7 +283,7 @@ body[data-ng-outtab="json"] #ng-json-panel-wrap,
 
 
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_START (20260206) === */
-#ng-storyview-formatted { display:none !important; }
+#ng-storyview-formatted:empty { display:none !important; }
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_END === */
 
 </style>
@@ -1806,6 +1806,7 @@ return out;
 <!-- NG_SMOKE_TEST_BUTTON_V1_END -->
 
 <script src="ng_add_byte_multirow_v3.js"></script>
+<script src="ng_default_byte_row_boot_v1.js"></script>
 
 
 <!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_START (20260130) -->
@@ -2131,13 +2132,36 @@ NG_FINAL_BYTES_UI_POLL_NOTES_V1_END */
       const fmt = document.getElementById("ng-storyview-formatted");
       if (!out && !fmt) return;
 
-      const j = readNgResponseJSON();
+      let j = readNgResponseJSON();
+      const originalJson = j;
       let text = "";
 
       // Prefer "copy_text" (human readable), else output_json pretty, else raw
       if (j && typeof j === "object") {
   // unwrap if needed
   if (j.output_json && typeof j.output_json === "object") j = j.output_json;
+
+  // render cards in formatted host (if renderer is available)
+  if (fmt) {
+    const renderFn = window.NG_renderDigiPackFormatted;
+    if (typeof renderFn === "function") {
+      const beforeLen = (fmt.innerHTML || "").length;
+      const rendered = renderFn(j);
+      const afterLen = (fmt.innerHTML || "").length;
+      try {
+        console.log("[NG_STORYVIEW_RENDER] formatted", {
+          called: true,
+          rendered,
+          beforeLen,
+          afterLen,
+          hostChildren: fmt.children ? fmt.children.length : 0,
+          hasOutputJson: !!(originalJson && originalJson.output_json)
+        });
+      } catch(e) {}
+    } else {
+      try { console.log("[NG_STORYVIEW_RENDER] formatted renderer missing"); } catch(e) {}
+    }
+  }
 
   // 1) If backend gives ready detailed text, use it
   if (typeof j.copy_text === "string" && j.copy_text.trim()) {
@@ -2282,7 +2306,9 @@ try{
       if (!text) text = "(StoryView: no output yet. Generate DIGI_PACK first.)";
 
       if (out) out.textContent = text;
-      if (fmt) fmt.textContent = ""; // keep formatted empty for now (later we can build cards)
+      if (fmt && (!fmt.children || fmt.children.length === 0)) {
+        fmt.textContent = ""; // leave formatted content intact if already rendered
+      }
     } catch(e) {}
   }
 
@@ -2478,9 +2504,6 @@ function renderJsonTab() {
 
 
 </html>
-
-
-
 
 
 
