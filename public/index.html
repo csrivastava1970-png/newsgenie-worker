@@ -2093,15 +2093,11 @@ window.setTab = setTab;
         if (!host) return;
 
         // If no byte-row exists yet, try to create one (so Add-to-Bytes has something to work with)
-        var hasRow = host.querySelector(".ng-byte-row, textarea, input");
+               // If no byte-row exists yet, create one by clicking the known Add Byte button
+        var hasRow = host.querySelector(".ng-byte-row");
         if (!hasRow) {
-          // Best-effort: click any "+ Add" style button inside host
-          var addBtn = Array.prototype.slice.call(host.querySelectorAll("button"))
-            .find(function(b){
-              var t = (b.textContent || "").trim().toLowerCase();
-              return t.includes("add") && t.includes("byte");
-            });
-          if (addBtn) addBtn.click();
+          var addByteBtn = document.getElementById("addByteBtn");
+          if (addByteBtn) addByteBtn.click();
         }
 
         // Ensure the host textarea receives draft text
