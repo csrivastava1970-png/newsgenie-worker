@@ -210,7 +210,7 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
       const max_output_tokens = Number(env?.MAX_OUTPUT_TOKENS || 2200);
 
       // Echo mode (old behavior)
-      if (mode !== "openai") {
+      if (mode !== "openai" && mode !== "real") {
         return json(
           {
             ok: true,
@@ -230,8 +230,111 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
             if (!has_openai_key) {
         return json({ ok: false, path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OPENAI_API_KEY missing" });
       }
+/* NG_OPENAI_CALL_V1_START (20260210) */
+      // REAL/OpenAI mode: call OpenAI Responses API and return output_json for StoryView
+      try {
+        const lang = (promptObj && promptObj.language) ? String(promptObj.language) : "hi";
+        const input =
+`TOPIC: ${promptObj.topic || ""}
+PLATFORM: ${promptObj.platform || ""}
+STORY_TYPE: ${promptObj.story_type || ""}
+ANGLE: ${promptObj.angle || ""}
+WHAT_HAPPENED: ${promptObj.what_happened || ""}
+SOURCES: ${promptObj.sources || ""}
+BACKGROUND: ${promptObj.background || ""}
 
+OUTPUT REQUIREMENTS:
+- Language: ${lang} (default hi)
+- Return JSON only (schema enforced).
+- Provide multiple DigiPack formats for editorial use:
+  headline, summary, web_article, video_script, youtube_script, social_posts.`;
 
+        const schema = {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            topic: { type: "string" },
+            language: { type: "string" },
+            formats: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  key: { type: "string" },
+                  title: { type: "string" },
+                  text: { type: "string" }
+                },
+                required: ["key","title","text"]
+              }
+            }
+          },
+          required: ["topic","language","formats"]
+        };
+
+        const openaiReq = {
+          model,
+          max_output_tokens,
+          instructions: "You are a newsroom digital producer assistant. Create a clean, structured DigiPack. Keep claims conservative; avoid inventing facts. If sources are missing, clearly say 'source not provided' where relevant.",
+          input,
+          text: {
+            format: {
+              type: "json_schema",
+              name: "newsgenie_digi_pack",
+              schema
+            }
+          }
+        };
+
+        const r = await fetch("https://api.openai.com/v1/responses", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "authorization": `Bearer ${env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify(openaiReq)
+        });
+
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          return json(
+            { ok:false, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, error:"OPENAI_API_ERROR", status:r.status, details:data },
+            502,
+            corsHeaders(request)
+          );
+        }
+
+        let outText = (data && typeof data.output_text === "string") ? data.output_text : "";
+        if (!outText && data && Array.isArray(data.output)) {
+          try {
+            for (const it of data.output) {
+              if (it && it.type === "message" && Array.isArray(it.content)) {
+                for (const c of it.content) {
+                  if (c && c.type === "output_text" && typeof c.text === "string") outText += c.text;
+                }
+              }
+            }
+          } catch (e) {}
+        }
+
+        let outJson = null;
+        try { outJson = JSON.parse(outText); } catch(e) {
+          outJson = { language: lang, topic: String(promptObj.topic || ""), formats: [{ key:"raw", title:"Raw Output", text: String(outText || "") }] };
+        }
+
+        return json(
+          { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson },
+          200,
+          corsHeaders(request)
+        );
+      } catch (e) {
+        return json(
+          { ok:false, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, error:"OPENAI_CALL_FAILED", detail: String((e && e.message) ? e.message : e) },
+          500,
+          corsHeaders(request)
+        );
+      }
+/* NG_OPENAI_CALL_V1_END (20260210) */
     // fallback
     return json(
       { ok: false, ts: new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error: "Not found" },
@@ -242,4 +345,6 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
   // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
+
 
