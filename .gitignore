@@ -54,3 +54,7 @@ backup/
 # deps
 node_modules/
 
+
+# Local cleanroom UI backups
+backups/ui_cleanroom/
+
