@@ -682,12 +682,51 @@ if (btnAdd){
   }
 
   function persistFinalBytes(items){
+    // NG_FINAL_BYTES_APPEND_DEDUPE_V2 (2026-02-12)
+    var incoming = Array.isArray(items) ? items : (items ? [items] : []);
+    var existing = [];
+    try {
+      var raw = localStorage.getItem("NG_FINAL_BYTES_V1") || "";
+      if (raw) {
+        var j = null; try { j = JSON.parse(raw); } catch(e){}
+        if (Array.isArray(j)) existing = j;
+        else if (j && Array.isArray(j.items)) existing = j.items;
+        else if (j && j.payload && Array.isArray(j.payload.items)) existing = j.payload.items;
+      }
+    } catch(e){}
+
+    function normText(x){
+      try {
+        if (x == null) return "";
+        if (typeof x === "string") return x.trim();
+        if (typeof x === "object") return String(x.text || x.t || x.line || "").trim();
+        return String(x).trim();
+      } catch(e){ return ""; }
+    }
+
+    // merge + dedupe by normalized text (case-insensitive)
+    var seen = Object.create(null);
+    var merged = [];
+    function addOne(x){
+      var t = normText(x);
+      if (!t) return;
+      var k = t.toLowerCase();
+      if (seen[k]) return;
+      seen[k] = 1;
+      merged.push(typeof x === "object" && x ? Object.assign({}, x, { text: t }) : { text: t });
+    }
+
+    try { (existing || []).forEach(addOne); } catch(e){}
+    try { (incoming || []).forEach(addOne); } catch(e){}
+
     var payload = {
-      v: 1,
+      v: 2,
       saved_at: new Date().toISOString(),
-      items: items || []
+      items: merged
     };
+
     try { localStorage.setItem("NG_FINAL_BYTES_V1", JSON.stringify(payload)); } catch(e){}
+    return merged;
   }
 
   // CAPTURE PHASE: we own the click and always commit/persist.
@@ -711,21 +750,30 @@ var items = readByteListFromUI();
       }catch(e){}
 
       // Commit + persist
-      persistFinalBytes(items);
-      writeFinalBytesToUI(items);
+      var merged = persistFinalBytes(items);
+      // UI refresh (avoid false 'commit failed' if UI renderer not present)
+      try{
+        if (typeof writeFinalBytesToUI === "function") {
+          writeFinalBytesToUI(merged);
+        } else if (typeof window.NG_refreshFinalBytes === "function") {
+          window.NG_refreshFinalBytes();
+        }
+      }catch(e){
+        console.warn("[NG] UI refresh failed (saved anyway)", e);
+      }
 
       // notify other modules (optional)
       try{
-        window.dispatchEvent(new CustomEvent("NG_FINAL_BYTES_COMMITTED", { detail: { items: items } }));
+        window.dispatchEvent(new CustomEvent("NG_FINAL_BYTES_COMMITTED", { detail: { items: merged } }));
       }catch(e){}
 
       // tiny UX feedback
       try{
         btnAdd.blur();
       }catch(e){}
-      alert("Final Bytes saved: " + (items ? items.length : 0));
+      alert("Final Bytes saved: " + (merged ? merged.length : 0));
     }catch(e){
-      alert("ERROR: Add to Bytes commit failed.");
+      console.error("[NG] Add to Bytes handler error (saved may have succeeded)", e); alert("Note: UI commit error (check console). Saved bytes may still be stored.");
     }
   }, true);
 }
@@ -742,6 +790,8 @@ var items = readByteListFromUI();
 
 })();
 /* NG_INBOX_EXPORTS_AND_BOOT_V1 (2026-02-11) */
+    // NG_EXPORT_MAKE_DRAFT_FROM_SELECTION_V1 (2026-02-12)
+    if (typeof makeDraftFromSelection === "function") window.makeDraftFromSelection = makeDraftFromSelection;
 ;(() => {
   try {
     // Export common entrypoints if they exist inside this file's scope
@@ -765,6 +815,10 @@ var items = readByteListFromUI();
       try {
         if (window.__NG_INBOX_BOOTED__) return;
         window.__NG_INBOX_BOOTED__ = true;
+        // NG_EXPORT_MAKE_DRAFT_IN_INIT_V1 (2026-02-12)
+        try {
+          if (typeof makeDraftFromSelection === "function") window.makeDraftFromSelection = makeDraftFromSelection;
+        } catch(e){}
 
         if (typeof window.initTranscriptInbox === "function") {
           window.initTranscriptInbox();
@@ -884,7 +938,8 @@ var items = readByteListFromUI();
         if (st) st.textContent = "No lines selected";
         return;
       }
-
+    // NG_EXPORT_MAKE_DRAFT_AFTER_DEF_V1 (2026-02-12)
+    try { window.makeDraftFromSelection = makeDraftFromSelection; } catch(e){}
       ta.value = sel.join("\n");
       if (st) st.textContent = "Selected: " + sel.length;
       ta.dispatchEvent(new Event("input", { bubbles:true }));
@@ -1032,6 +1087,14 @@ var items = readByteListFromUI();
     console.error("[NG_INBOX] WIRE_V2 failed", e);
   }
 })();
+
+
+
+
+
+
+
+
 
 
 
