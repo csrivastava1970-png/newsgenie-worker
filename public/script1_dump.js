@@ -1397,3 +1397,107 @@ if (!hasStory) {
   }catch(e){}
 })();
 /* === NG_FINAL_BYTES_LIST_AUTO_RENDER_V1_END === */
+/* === NG_FINAL_BYTES_LIST_AUTO_RENDER_V2_GUARD_START (2026-02-12) === */
+(() => {
+  try{
+    if (window.__NG_FINAL_BYTES_LIST_AUTO_RENDER_V2_GUARD__) return;
+    window.__NG_FINAL_BYTES_LIST_AUTO_RENDER_V2_GUARD__ = true;
+
+    var KEY = "NG_FINAL_BYTES_V1";
+    var OUT_ID = "ng-final-bytes-list-auto";
+
+    function hasData(){
+      try{
+        var raw = localStorage.getItem(KEY) || "";
+        if (!raw) return false;
+        var j = null;
+        try{ j = JSON.parse(raw); }catch(e){}
+        if (!j) return false;
+        if (Array.isArray(j)) return j.length > 0;
+        if (j.items && Array.isArray(j.items)) return j.items.length > 0;
+        if (j.bytes && Array.isArray(j.bytes)) return j.bytes.length > 0;
+        // if object but unknown shape, still treat as data-present
+        return true;
+      }catch(e){}
+      return false;
+    }
+
+    function rerenderSoon(label){
+      try{
+        if (typeof window.NG_renderFinalBytesListAuto === "function") {
+          setTimeout(function(){
+            try{
+              var r = window.NG_renderFinalBytesListAuto();
+              // debug (optional)
+              // console.log("[NG_FINAL_BYTES_V2_GUARD] rerender", label, r);
+            }catch(e){}
+          }, 0);
+          setTimeout(function(){
+            try{ window.NG_renderFinalBytesListAuto(); }catch(e){}
+          }, 50);
+        }
+      }catch(e){}
+    }
+
+    // 1) Hook storage writes to KEY (covers Add to Bytes + any other writer)
+    try{
+      if (!window.__NG_LS_SETITEM_HOOKED_V1__) {
+        window.__NG_LS_SETITEM_HOOKED_V1__ = true;
+        var _setItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function(k, v){
+          var ret = _setItem.apply(this, arguments);
+          try{
+            if (k === KEY) rerenderSoon("setItem(KEY)");
+          }catch(e){}
+          return ret;
+        };
+      }
+    }catch(e){}
+
+    // 2) If some code wipes the UI after we render, auto-heal it
+    function attachObserver(){
+      var el = document.getElementById(OUT_ID);
+      if (!el) return false;
+
+      if (el.__ngFinalBytesObs) return true;
+      el.__ngFinalBytesObs = true;
+
+      try{
+        var mo = new MutationObserver(function(){
+          try{
+            var nowLen = (el.textContent || "").trim().length;
+            if (nowLen === 0 && hasData()) {
+              rerenderSoon("mutation-heal");
+            }
+          }catch(e){}
+        });
+        mo.observe(el, { childList:true, subtree:true, characterData:true });
+      }catch(e){}
+      return true;
+    }
+
+    // run observer attach now + after DOM ready + periodic (in case element is re-created)
+    attachObserver();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", attachObserver, { once:true });
+    }
+    setInterval(function(){
+      try{
+        var ok = attachObserver();
+        if (ok){
+          var el = document.getElementById(OUT_ID);
+          if (el && (el.textContent||"").trim().length === 0 && hasData()){
+            rerenderSoon("interval-heal");
+          }
+        }
+      }catch(e){}
+    }, 1200);
+
+    // 3) Also listen to your commit event (already in V1, but harmless)
+    window.addEventListener("NG_FINAL_BYTES_COMMITTED", function(){
+      rerenderSoon("event");
+    });
+
+  }catch(e){}
+})();
+/* === NG_FINAL_BYTES_LIST_AUTO_RENDER_V2_GUARD_END === */
