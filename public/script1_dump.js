@@ -714,8 +714,8 @@ try {
               return lines[i] || "";
             })
             .filter(Boolean);
-          draft.value = checked.join("\n");
-          try { draft.dispatchEvent(new Event("input", { bubbles:true })); } catch(_){}
+          /* NG_DISABLE_DRAFT_AUTOFILL_ON_SELECT_V1 (2026-02-12)
+   disabled: draft auto-fill on checkbox select (use Make Draft button instead) */try { draft.dispatchEvent(new Event("input", { bubbles:true })); } catch(_){}
         }
       });
       wrap.appendChild(row);
@@ -896,8 +896,8 @@ try {
     window.__NG_LINES_TO_BYTES_WIRE_V1__ = true;
     linesWrap.addEventListener('change', (e) => {
       if (e.target && e.target.matches('input[type="checkbox"][data-ln]')) {
-        pushSelectionToFirstByte();
-      }
+        /* NG_DISABLE_LINES_AUTOFILL_V1 (2026-02-12) disabled: pushSelectionToFirstByte(); */
+}
     }, true);
   }
 
@@ -922,6 +922,11 @@ try {
     out.dispatchEvent(new Event('input', { bubbles: true }));
     return { ok: true, cards: cards.length, out_len: out.value.length };
   }
+  // --- EXPORT Final Bytes helpers (needed by Add-to-Bytes button listeners) ---
+  window.finalHost = finalHost;
+  window.isDuplicateFinal = isDuplicateFinal;
+  window.appendFinalCard = appendFinalCard;
+  window.syncFinalToJSONOut = syncFinalToJSONOut;
 
   // Observe finals host for changes
   const host = finalHost();
@@ -1302,3 +1307,93 @@ if (!hasStory) {
 })();
  /* === NG_CAPTURE_DIGIPACK_LAST_V1_END === */
 
+
+
+/* === NG_FINAL_BYTES_LIST_AUTO_RENDER_V1_START (2026-02-12) === */
+(() => {
+  try{
+    if (window.__NG_FINAL_BYTES_LIST_AUTO_RENDER_V1__) return;
+    window.__NG_FINAL_BYTES_LIST_AUTO_RENDER_V1__ = true;
+
+    var KEY = "NG_FINAL_BYTES_V1";
+    var OUT_ID = "ng-final-bytes-list-auto";
+
+    function pickText(it){
+      try{
+        if (it == null) return "";
+        if (typeof it === "string") return it;
+        if (typeof it === "number") return String(it);
+        if (typeof it === "object"){
+          return (it.text || it.byte || it.value || it.line || it.content || it.title || it.t || "");
+        }
+      }catch(e){}
+      try{ return String(it); }catch(e2){}
+      return "";
+    }
+
+    function readArr(){
+      var raw = "";
+      try{ raw = localStorage.getItem(KEY) || ""; }catch(e){}
+      if (!raw) return [];
+      var j = null;
+      try{ j = JSON.parse(raw); }catch(e){}
+      if (!j) return [];
+      if (Array.isArray(j)) return j;
+      // tolerate object-wrapped forms
+      if (j.items && Array.isArray(j.items)) return j.items;
+      if (j.bytes && Array.isArray(j.bytes)) return j.bytes;
+      return [];
+    }
+
+    function render(){
+      var el = document.getElementById(OUT_ID);
+      if (!el) return { ok:false, reason:"no_el" };
+
+      var arr = readArr();
+      var lines = [];
+      for (var i=0; i<arr.length; i++){
+        var t = pickText(arr[i]);
+        if (t && String(t).trim()) lines.push(String(t).trim());
+      }
+
+      var txt = lines.join("\n\n");
+      el.textContent = txt;
+
+      try{
+        console.log("[NG_FINAL_BYTES_LIST_AUTO_RENDER_V1] render", {
+          count: lines.length,
+          outLen: (txt||"").length
+        });
+      }catch(e){}
+
+      return { ok:true, count: lines.length, outLen: (txt||"").length };
+    }
+
+    function boot(){
+      try{ render(); }catch(e){}
+    }
+
+    // expose a tiny API for manual testing
+    window.NG_renderFinalBytesListAuto = render;
+
+    // run now + on DOM ready (safe either way)
+    boot();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", boot, { once:true });
+    }
+
+    // re-render when commit event fires
+    window.addEventListener("NG_FINAL_BYTES_COMMITTED", function(){
+      try{ render(); }catch(e){}
+    });
+
+    // optional: re-render on storage change (multi-tab)
+    window.addEventListener("storage", function(ev){
+      try{
+        if (ev && ev.key === KEY) render();
+      }catch(e){}
+    });
+
+  }catch(e){}
+})();
+/* === NG_FINAL_BYTES_LIST_AUTO_RENDER_V1_END === */
