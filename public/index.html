@@ -927,6 +927,180 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
   <div id="ng-final-bytes-list-auto" style="margin-top:8px;"></div>
 
+<!-- NG_FINAL_BYTES_CONTROLS_V1_START (20260212) -->
+<div id="ng-final-bytes-controls" style="margin:8px 0 12px; display:flex; gap:10px; flex-wrap:wrap;">
+  <button type="button" id="ng-final-bytes-clear">Clear Final Bytes</button>
+  <button type="button" id="ng-final-bytes-pop">Remove Last</button>
+</div>
+
+<script>
+/* NG_FINAL_BYTES_CONTROLS_V1 (20260212) */
+(() => {
+  const KEY = "NG_FINAL_BYTES_V1";
+
+  function readStore(){
+    try { return JSON.parse(localStorage.getItem(KEY) || "null"); }
+    catch(e){ return null; }
+  }
+
+  function writeStore(obj){
+    try { localStorage.setItem(KEY, JSON.stringify(obj)); } catch(e){}
+  }
+
+  function normalize(p){
+    // Accept array or {v, items:[]}
+    if (Array.isArray(p)) return { v: 2, items: p };
+    if (p && typeof p === "object") {
+      if (!Array.isArray(p.items)) p.items = [];
+      p.v = 2;
+      return p;
+    }
+    return { v: 2, items: [] };
+  }
+
+  function rerender(){
+    try {
+      if (rerender.__pending) return;
+      rerender.__pending = true;
+      Promise.resolve().then(() => {
+        rerender.__pending = false;
+        try { if (window.NG_refreshFinalBytes) window.NG_refreshFinalBytes(); } catch(e){}
+      });
+    } catch(e){}
+  }
+
+  function onClick(e){
+    const id = e && e.target && e.target.id;
+
+    if (id === "ng-final-bytes-clear") {
+      const p = normalize(readStore());
+      p.items = [];
+      writeStore(p);
+      try{ applyControlsVisibility(); }catch(e){}
+      rerender();
+      return;
+    }
+
+    if (id === "ng-final-bytes-pop") {
+      const p = normalize(readStore());
+      p.items.pop();
+      writeStore(p);
+      try{ applyControlsVisibility(); }catch(e){}
+      rerender();
+      return;
+    }
+  }
+
+    // smart visibility: hide controls when count=0
+  function getCount(){
+    const p = readStore();
+    const n = normalize(p);
+    return (n.items && n.items.length) ? n.items.length : 0;
+  }
+
+  function applyControlsVisibility(){
+    try{
+      const wrap = document.getElementById("ng-final-bytes-controls");
+      if (!wrap) return;
+      wrap.style.display = (getCount() > 0) ? "flex" : "none";
+    }catch(e){}
+  }
+
+  // wrap NG_refreshFinalBytes once, so every render also updates visibility
+  (function hookRefresh(){
+    try{
+      if (window.__NG_FINAL_BYTES_CONTROLS_HOOKED) return;
+      window.__NG_FINAL_BYTES_CONTROLS_HOOKED = true;
+
+      const orig = window.NG_refreshFinalBytes;
+      if (typeof orig === "function") {
+        window.NG_refreshFinalBytes = function(){
+          const r = orig.apply(this, arguments);
+          try{ applyControlsVisibility(); }catch(e){}
+          return r;
+        };
+      }
+    }catch(e){}
+  })();  /* NG_FINAL_BYTES_CONTROLS_RETRY_HOOK_V1 (20260212) */
+  (function retryHook(){
+    try{
+      let tries = 0;
+      const t = setInterval(() => {
+        tries++;
+        try{
+          // If refresh exists now, ensure it's wrapped and visibility is applied
+          if (typeof window.NG_refreshFinalBytes === "function") {
+            // If earlier hook missed it, wrap now
+            if (!window.__NG_FINAL_BYTES_CONTROLS_HOOKED) {
+              window.__NG_FINAL_BYTES_CONTROLS_HOOKED = true;
+              const orig = window.NG_refreshFinalBytes;
+              window.NG_refreshFinalBytes = function(){
+                const r = orig.apply(this, arguments);
+                try{ applyControlsVisibility(); }catch(e){}
+                return r;
+              };
+            }
+            try{ applyControlsVisibility(); }catch(e){}
+            clearInterval(t);
+          }
+        }catch(e){}
+        if (tries >= 20) { clearInterval(t); } // ~6s max
+      }, 300);
+    }catch(e){}
+  })();
+
+
+
+  
+
+  /* NG_FINAL_BYTES_CONTROLS_WATCH_REFRESH_V1 (20260212) */
+  (function watchRefresh(){
+    try{
+      let last = null;
+      let ticks = 0;
+
+      const t = setInterval(() => {
+        ticks++;
+        try{
+          const fn = window.NG_refreshFinalBytes;
+
+          // If refresh becomes available OR gets overwritten, (re)wrap it
+          if (typeof fn === "function" && fn !== last) {
+            last = fn;
+
+            if (!fn.__ngWrappedControls) {
+              const orig = fn;
+              const wrapped = function(){
+                const r = orig.apply(this, arguments);
+                try{ applyControlsVisibility(); }catch(e){}
+                return r;
+              };
+              wrapped.__ngWrappedControls = true;
+
+              window.NG_refreshFinalBytes = wrapped;
+              window.__NG_FINAL_BYTES_CONTROLS_HOOKED = true;
+              last = wrapped;
+            }
+
+            try{ applyControlsVisibility(); }catch(e){}
+          }
+
+        }catch(e){}
+
+        // stop after ~20s
+        if (ticks >= 70) { clearInterval(t); }
+      }, 300);
+
+    }catch(e){}
+  })();
+// run once on load
+  try { applyControlsVisibility(); } catch(e){}
+
+  document.addEventListener("click", onClick, false);
+})();
+</script>
+<!-- NG_FINAL_BYTES_CONTROLS_V1_END -->
+
   <script>
 
 </script>
@@ -2123,6 +2297,46 @@ window.setTab = setTab;
   <!-- NG_ADD_TRANSCRIPT_INBOX_SCRIPT_V1_START (2026-02-12) -->
   <script defer src="js/ng_transcript_inbox_v1.js?v=20260212_4"></script>
   <!-- NG_ADD_TRANSCRIPT_INBOX_SCRIPT_V1_END -->
+<!-- NG_BYTE_ROW_AUTOCOLLAPSE_V1_START (20260212) -->
+<style>
+  .ng-byte-row.ng-empty-collapsed{ display:none !important; }
+</style>
+
+<script>
+/* NG_BYTE_ROW_AUTOCOLLAPSE_V1 (20260212) */
+(() => {
+  function isRowEmpty(row){
+    const a = row.querySelector(".ng-byte-speaker");
+    const b = row.querySelector(".ng-byte-desig");
+    const c = row.querySelector(".ng-byte-text");
+    const av = a ? (a.value||"").trim() : "";
+    const bv = b ? (b.value||"").trim() : "";
+    const cv = c ? (c.value||"").trim() : "";
+    return (!av && !bv && !cv);
+  }
+
+  function apply(){
+    const rows = document.querySelectorAll(".ng-byte-row");
+    rows.forEach(row => {
+      if (isRowEmpty(row)) row.classList.add("ng-empty-collapsed");
+      else row.classList.remove("ng-empty-collapsed");
+    });
+  }
+
+  document.addEventListener("input", (e) => {
+    const t = e && e.target;
+    if (!t || !t.classList) return;
+    if (t.classList.contains("ng-byte-speaker") || t.classList.contains("ng-byte-desig") || t.classList.contains("ng-byte-text")){
+      apply();
+    }
+  }, true);
+
+  apply();
+  let n=0;
+  const t=setInterval(()=>{ n++; apply(); if (n>=15) clearInterval(t); }, 200);
+})();
+</script>
+<!-- NG_BYTE_ROW_AUTOCOLLAPSE_V1_END -->
 </body>
 <script id="ng-runtime-flags">
 /* NG_EE_AUTOINIT_DISABLED_V1_START (20260205)
@@ -2523,6 +2737,13 @@ function renderJsonTab() {
 
 
 </html>
+
+
+
+
+
+
+
 
 
 
