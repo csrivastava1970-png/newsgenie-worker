@@ -1335,7 +1335,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <div id="ng-advanced-panels">
 
 
-  <div class="panel" id="ng-log-panel-wrap"><div id="ng-output-headrow" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+  <div class="panel" id="ng-output-headwrap"><div id="ng-output-headrow" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
 
 
   <div class="status" style="margin:0;"><b>Status:</b> <span id="ngStatus">Idle</span></div>
@@ -1417,9 +1417,11 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <div id="ng-json-panel-wrap" class="panel" style="display:none;">
   <b>Raw JSON</b>
   <div style="margin:6px 0 10px; opacity:.75; font-size:12px;">
-    Advanced view (debug/export). Story tab has readable text.
+    Advanced view (debug/export). Story tab में readable text रहेगा।
   </div>
-  <pre id="ng-json-out" style="white-space:pre-wrap; font-family:ui-monospace,monospace; font-size:13px; line-height:1.4; overflow:auto; min-height:260px; padding:10px; border:1px solid rgba(0,0,0,0.12); border-radius:12px;"></pre>
+  <pre id="ng-json-out" style="white-space:pre-wrap; font-family:ui-monospace,monospace; font-size:13px;
+line-height:1.4; overflow:auto; min-height:260px; padding:10px; border:1px solid rgba(0,0,0,0.12);
+border-radius:12px;"></pre>
 </div>
 <!-- === NG_JSON_PANEL_V1_END === -->
 
@@ -2157,65 +2159,80 @@ return out;
 (function(){
   if (window.__NG_OUTPUT_TABS_JS_V1__) return;
   window.__NG_OUTPUT_TABS_JS_V1__ = true;
-function NG_setOutputReady(on){
-  try{
-    const q = document.getElementById("ng-tab-quick");
-    const l = document.getElementById("ng-tab-log");
-    const r = document.getElementById("ng-tab-raw");
-    if (q) q.disabled = !on;
-    if (l) l.disabled = !on;
-    if (r) r.disabled = !on;
-  }catch(e){}
-}
-window.NG_setOutputReady = NG_setOutputReady;
 
+  function NG_setOutputReady(on){
+    try{
+      var q = document.getElementById("ng-tab-quick");
+      var l = document.getElementById("ng-tab-log");
+      var r = document.getElementById("ng-tab-raw");
+      if (q) q.disabled = !on;
+      if (l) l.disabled = !on;
+      if (r) r.disabled = !on;
+    }catch(e){}
+  }
+  window.NG_setOutputReady = NG_setOutputReady;
 
   function setTab(t){
-window.setTab = setTab;
-
     try{ document.documentElement.setAttribute("data-ng-outtab", t); }catch(e){}
+    // Explicitly toggle panels (defensive against other CSS/JS overrides)
+    try{
+      var sv = document.getElementById("ng-storyview");
+      var qw = document.getElementById("ng-quick-panel-wrap");
+      var rw = document.getElementById("ng-response-panel-wrap");
+      var lw = document.getElementById("ng-log-panel-wrap");
+
+      if (sv) sv.style.display = (t === "story") ? "block" : "none";
+      if (qw) qw.style.display = (t === "quick") ? "block" : "none";
+      if (lw) lw.style.display = (t === "log") ? "block" : "none";
+      if (rw) rw.style.display = (t === "raw") ? "block" : "none";
+    }catch(e){}
+    // Sync Raw JSON panel with RAW tab
+    try{
+      var jp = document.getElementById("ng-json-panel-wrap");
+      if (jp) jp.style.display = (t === "raw" || t === "json") ? "block" : "none";
+    }catch(e){}
     if (t === "story") {
       try{
-        document.body.classList.add("ng-show-storyview");
         var p = document.getElementById("ng-storyview");
         if (p) p.style.display = "block";
         if (typeof window.NG_fillStoryView === "function") window.NG_fillStoryView();
       }catch(e){}
     }
   }
+  window.setTab = setTab;
 
   function boot(){
-  var bStory = document.getElementById("ng-tab-story");
-  var bQuick = document.getElementById("ng-tab-quick");
-  var bLog   = document.getElementById("ng-tab-log");
-  var bRaw   = document.getElementById("ng-tab-raw");
+    var bStory = document.getElementById("ng-tab-story");
+    var bQuick = document.getElementById("ng-tab-quick");
+    var bLog   = document.getElementById("ng-tab-log");
+    var bRaw   = document.getElementById("ng-tab-raw");
 
-  if (bStory) bStory.addEventListener("click", function(){ setTab("story"); });
-  if (bQuick) bQuick.addEventListener("click", function(){ setTab("quick"); });
-  if (bLog)   bLog.addEventListener("click", function(){ setTab("log"); });
-  if (bRaw)   bRaw.addEventListener("click", function(){ setTab("raw"); });
+    if (bStory) bStory.addEventListener("click", function(){ setTab("story"); });
+    if (bQuick) bQuick.addEventListener("click", function(){ setTab("quick"); });
+    if (bLog)   bLog.addEventListener("click", function(){ setTab("log"); });
+    if (bRaw)   bRaw.addEventListener("click", function(){ setTab("raw"); });
 
-  // default: disable optional tabs until first output exists
-  try{ if (typeof NG_setOutputReady === "function") NG_setOutputReady(false); }catch(e){}
+    // default: disable optional tabs until first output exists
+    try{ NG_setOutputReady(false); }catch(e){}
 
-  // default tab
-  setTab("quick");
+    // default tab
+    setTab("quick");
 
-  // sync: toolbar Story View button
-  document.addEventListener("click", function(e){
-    var id = e && e.target && e.target.id;
-    if (id === "ng-ui-storyview") setTab("story");
-  }, true);
-}
+    // sync: toolbar Story View button
+    document.addEventListener("click", function(e){
+      var id = e && e.target && e.target.id;
+      if (id === "ng-ui-storyview") setTab("story");
+    }, true);
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot, { once:true });
   } else {
     boot();
   }
 })();
-
+/* === NG_OUTPUT_TABS_JS_V1_END (20260204) === */
 </script>
-<!-- === NG_OUTPUT_TABS_JS_V1_END === -->
 
 
 <!-- === NG_JSON_PANEL_TOGGLE_V1_START (2026-02-06) === -->
@@ -2737,6 +2754,14 @@ function renderJsonTab() {
 
 
 </html>
+
+
+
+
+
+
+
+
 
 
 
