@@ -48,7 +48,7 @@ html body #ngQuick.ng-soft-nudge{
 /* === NG_SOFT_NUDGE_V1_END === */
 
   /* NG_STD_UI_TOOLBAR_ROW_V2
-     Goal: single-row toolbar (actions left, UI toggle right) â€” CSS-only, hang-free
+     Goal: single-row toolbar (actions left, UI toggle right) — CSS-only, hang-free
      Rules: NO DOM moving, NO MutationObserver, only CSS overrides.
   */
 
@@ -762,7 +762,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
       <div>
         <label>Topic</label>
-        <input name="topic" id="topic" placeholder="E.g., à¤¸à¤‚à¤¸à¤¦ à¤ªà¥à¤°à¤¦à¥‚à¤·à¤£ à¤µà¤¿à¤µà¤¾à¤¦" required />
+        <input name="topic" id="topic" placeholder="E.g., संसद प्रदूषण विवाद" required />
 
       </div>
 
@@ -781,7 +781,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
       <div>
         <label>Angle (optional)</label>
-        <input id="angle" name="angle" type="text" placeholder="Angle (optional) â€” 3â€“8 words" style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:10px;" />
+        <input id="angle" name="angle" type="text" placeholder="Angle (optional) — 3–8 words" style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:10px;" />
         
       </div>
     </div>
@@ -801,7 +801,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
     <div style="margin-top:10px;">
       <label>What Happened (mandatory)</label>
-      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2â€“4 lines à¤®à¥‡à¤‚ à¤•à¥à¤¯à¤¾ à¤¹à¥à¤†?" required></textarea>
+      <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
 
     </div>
 
@@ -1243,7 +1243,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <div id="ng-json-panel-wrap" class="panel" style="display:none;">
   <b>Raw JSON</b>
   <div style="margin:6px 0 10px; opacity:.75; font-size:12px;">
-    Advanced view (debug/export). Story tab à¤®à¥‡à¤‚ readable text à¤°à¤¹à¥‡à¤—à¤¾à¥¤
+    Advanced view (debug/export). Story tab has readable text.
   </div>
   <pre id="ng-json-out" style="white-space:pre-wrap; font-family:ui-monospace,monospace; font-size:13px; line-height:1.4; overflow:auto; min-height:260px; padding:10px; border:1px solid rgba(0,0,0,0.12); border-radius:12px;"></pre>
 </div>
@@ -1382,7 +1382,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
         const who = document.createElement("div");
         who.style.cssText = "font-size:12px;opacity:.85;";
-        who.textContent = (sp || de) ? `${sp}${(sp && de) ? " â€” " : ""}${de}` : `Byte ${idx+1}`;
+        who.textContent = (sp || de) ? `${sp}${(sp && de) ? " — " : ""}${de}` : `Byte ${idx+1}`;
 
         const tag = document.createElement("div");
         tag.style.cssText = "font-size:11px;opacity:.6;";
@@ -1585,10 +1585,10 @@ const defDe = "";
   function render(bytes) {
     const ui = ensureHost();
     const arr = Array.isArray(bytes) ? bytes : [];
-    ui.label.textContent = `Final Bytes â€¢ ${arr.length}`;
+    ui.label.textContent = `Final Bytes • ${arr.length}`;
 
     const draftStatus = document.querySelector("#ng-byte-draft-status");
-    if (draftStatus) draftStatus.textContent = `Final Bytes â€¢ ${arr.length}`;
+    if (draftStatus) draftStatus.textContent = `Final Bytes • ${arr.length}`;
 
     if (!arr.length) {
       ui.cards.innerHTML = `<div style="font-size:12px;opacity:.6;border:1px dashed #e2e8f0;border-radius:12px;padding:10px;">Final Bytes empty</div>`;
@@ -1599,12 +1599,12 @@ const defDe = "";
       const sp = esc(b.speaker || "");
       const des = esc(b.designation || "");
       const tx = esc(b.text || "");
-      const head = (sp || des) ? `<div style="font-size:12px;opacity:.85;margin-bottom:6px;"><b>${sp || "â€”"}</b>${des ? ` â€¢ ${des}` : ""}</div>` : "";
+      const head = (sp || des) ? `<div style="font-size:12px;opacity:.85;margin-bottom:6px;"><b>${sp || "—"}</b>${des ? ` • ${des}` : ""}</div>` : "";
       return `<div class="ng-final-card" data-idx="${i}" style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff;">
         ${head}
 
 
-        <div style="font-size:14px;line-height:1.3;">${tx || "<span style='opacity:.6'>â€”</span>"}</div>
+        <div style="font-size:14px;line-height:1.3;">${tx || "<span style='opacity:.6'>—</span>"}</div>
       </div>`;
     }).join("");
   }
@@ -1667,7 +1667,7 @@ const defDe = "";
       try { parsed = JSON.parse(raw); } catch { parsed = raw; }
 
       const text = extractTranscriptText(parsed) || (typeof parsed === "string" ? parsed : "");
-      window.NG_TRANSCRIPT = text; // âœ… sets extracted text
+      window.NG_TRANSCRIPT = text; // ✅ sets extracted text
       console.log("[TL] NG_TRANSCRIPT set. chars:", (text || "").length);
     }
 
@@ -1694,7 +1694,7 @@ const defDe = "";
     } else {
       boot();
     }
-})();  // âœ… close Transcript Loader IIFE
+})();  // ✅ close Transcript Loader IIFE
 
 
   // ---------------- export global + auto init ----------------
@@ -1770,7 +1770,7 @@ const defDe = "";
     }catch(e){ bad("NG_refreshFinalBytes_run", { error: String(e?.message||e) }); }
 
  console.log("[NG_SMOKE_TEST]", out);
-// Show results on-page (no console dependency) â€” DEV ONLY (box)
+// Show results on-page (no console dependency) — DEV ONLY (box)
 const __NG_SMOKE_ON__ = new URLSearchParams(location.search).get("smoke") === "1";
 
 /*
@@ -2193,7 +2193,7 @@ NG_FINAL_BYTES_UI_POLL_NOTES_V1_END */
     const add = (label, val) => {
   if (val == null) return;
 
-  // If array â†’ join
+  // If array → join
   if (Array.isArray(val)) {
     const arr = val.map(x => (x == null ? "" : String(x).trim())).filter(Boolean);
     if (!arr.length) return;
@@ -2201,7 +2201,7 @@ NG_FINAL_BYTES_UI_POLL_NOTES_V1_END */
     return;
   }
 
-  // If object â†’ render key:value lines
+  // If object → render key:value lines
   if (typeof val === "object") {
     const keys = Object.keys(val || {});
     if (!keys.length) return;
@@ -2320,7 +2320,7 @@ try{
     }
 
     text = lines.join("\n").trim();
-    if (!text) text = "(StoryView: detailed text fields à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¥‡à¥¤)";
+    if (!text) text = "(StoryView: detailed text fields not found.)";
   }
 }
 
@@ -2508,7 +2508,7 @@ function renderJsonTab() {
       var b = document.getElementById("ngCopyStoryView");
       if (b){
         var old = b.textContent;
-        b.textContent = ok ? "Copied âœ“" : "Copy failed";
+        b.textContent = ok ? "Copied ✓" : "Copy failed";
         setTimeout(function(){ b.textContent = old; }, 900);
       }
     }catch(_){}
@@ -2523,6 +2523,7 @@ function renderJsonTab() {
 
 
 </html>
+
 
 
 
