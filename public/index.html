@@ -2171,6 +2171,55 @@ return out;
     }catch(e){}
   }
   window.NG_setOutputReady = NG_setOutputReady;
+window.NG_fillStoryView = function(){
+  try{
+    var out = document.getElementById("ng-storyview-out");
+    if (!out) return;
+
+    var pre = document.getElementById("ngResponse");
+    var txt = (pre && pre.textContent) ? pre.textContent.trim() : "";
+    if (!txt) { out.textContent = "(StoryView: no response yet)"; return; }
+
+    var j = null;
+    try{ j = JSON.parse(txt); }catch(e){ j = null; }
+    if (!j) { out.textContent = "(StoryView: response is not valid JSON)"; return; }
+
+    // formats[] can exist at multiple nest levels depending on what ngResponse stores
+    var arr = null;
+    try{
+      if (j && Array.isArray(j.formats)) arr = j.formats;
+
+      // common: ngResponse holds output_json directly, and formats live under digi_pack
+      if (!arr && j && j.digi_pack && Array.isArray(j.digi_pack.formats)) arr = j.digi_pack.formats;
+
+      if (!arr && j && j.output_json){
+        if (Array.isArray(j.output_json.formats)) arr = j.output_json.formats;
+        if (!arr && j.output_json.digi_pack && Array.isArray(j.output_json.digi_pack.formats)) arr = j.output_json.digi_pack.formats;
+      }
+
+      if (!arr && j && j.received && Array.isArray(j.received.formats)) arr = j.received.formats;
+    }catch(e){ arr = null; }
+
+    if (!arr || !arr.length){
+      out.textContent = "(StoryView: formats[] not found in response.)";
+      return;
+    }
+
+    var blocks = [];
+    try{
+      var topic = j.topic || (j.received && j.received.topic) || "";
+      if (topic) blocks.push("# " + String(topic).trim());
+    }catch(e){}
+
+    for (var i=0;i<arr.length;i++){
+      var it = arr[i] || {};
+      var title = String(it.title || it.key || ("Item " + (i+1)));
+      var body  = String(it.text || it.body || it.copy || it.content || "").replace(/\r\n/g,"\n").trim(); if (!body) body = "(not provided)";
+      blocks.push("## " + title + (body ? ("\n" + body) : ""));
+    }
+    out.textContent = blocks.join("\n\n");
+  }catch(e){}
+};
 
   function setTab(t){
     try{ document.documentElement.setAttribute("data-ng-outtab", t); }catch(e){}
@@ -2557,6 +2606,20 @@ try{
 
       if (!text) text = "(StoryView: no output yet. Generate DIGI_PACK first.)";
 
+      // Guard: do NOT overwrite if NG_fillStoryView already rendered useful text
+      try{
+        if (out) {
+          var cur = String(out.textContent || "").trim();
+          var isPlaceholder = !cur ||
+            /^\(StoryView:/i.test(cur) ||
+            cur === "(StoryView: detailed text fields not found.)" ||
+            cur === "(StoryView: no output yet. Generate DIGI_PACK first.)" ||
+            cur === "(StoryView: no response yet)" ||
+            cur === "(StoryView: response is not valid JSON)" ||
+            cur === "(StoryView: formats[] not found in response.)";
+          if (!isPlaceholder) return;
+        }
+      }catch(e){}
       if (out) out.textContent = text;
       if (fmt) fmt.textContent = ""; // keep formatted empty for now (later we can build cards)
     } catch(e) {}
@@ -2754,6 +2817,10 @@ function renderJsonTab() {
 
 
 </html>
+
+
+
+
 
 
 

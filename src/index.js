@@ -249,29 +249,53 @@ OUTPUT REQUIREMENTS:
 - Provide multiple DigiPack formats for editorial use:
   headline, summary, web_article, video_script, youtube_script, social_posts.`;
 
+        // Old-gold DigiPack schema (validator-safe): additionalProperties=false everywhere; nested objects minimal
         const schema = {
           type: "object",
           additionalProperties: false,
           properties: {
             topic: { type: "string" },
             language: { type: "string" },
-            formats: {
-              type: "array",
-              items: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  key: { type: "string" },
-                  title: { type: "string" },
-                  text: { type: "string" }
-                },
-                required: ["key","title","text"]
-              }
+
+            web_article: {
+              type: "object",
+              additionalProperties: false,
+              properties: { text: { type: "string" } },
+              required: ["text"]
+            },
+
+            video_script: {
+              type: "object",
+              additionalProperties: false,
+              properties: { text: { type: "string" } },
+              required: ["text"]
+            },
+
+            youtube: {
+              type: "object",
+              additionalProperties: false,
+              properties: { text: { type: "string" } },
+              required: ["text"]
+            },
+
+            reel: {
+              type: "object",
+              additionalProperties: false,
+              properties: { text: { type: "string" } },
+              required: ["text"]
+            },
+
+            hook: { type: "string" },
+
+            social: {
+              type: "object",
+              additionalProperties: false,
+              properties: { text: { type: "string" } },
+              required: ["text"]
             }
           },
-          required: ["topic","language","formats"]
+          required: ["topic","language","web_article","video_script","youtube","reel","hook","social"]
         };
-
         const openaiReq = {
           model,
           max_output_tokens,
@@ -317,8 +341,61 @@ OUTPUT REQUIREMENTS:
           } catch (e) {}
         }
 
+        // Parse JSON if possible; otherwise keep raw output
         let outJson = null;
-        try { outJson = JSON.parse(outText); } catch(e) {
+        let parsedOk = false;
+        try { outJson = JSON.parse(outText); parsedOk = true; } catch(e) { parsedOk = false; }
+
+        // Normalize to "old-gold" DIGI_PACK formats[] if the model returned the classic object schema
+        // (web_article / video_script / youtube / reel / social / hook, etc.)
+        try{
+          if (parsedOk && outJson && typeof outJson === "object" && !Array.isArray(outJson)) {
+            const og = outJson; // candidate old-gold object
+            const hasOldGold =
+              (og.web_article || og.video_script || og.youtube || og.reel || og.social || og.hook || og.opening || og.one_liner);
+
+            if (hasOldGold) {
+              const s = (v) => (v == null ? "" : (typeof v === "string" ? v : JSON.stringify(v, null, 2)));
+              const block = (title, obj) => {
+                if (!obj) return "";
+                if (typeof obj === "string") return obj.trim();
+                if (typeof obj !== "object") return String(obj).trim();
+                // common fields pretty-print
+                const parts = [];
+                if (obj.headline) parts.push(String(obj.headline).trim());
+                if (obj.title && !obj.headline) parts.push(String(obj.title).trim());
+                if (obj.summary) parts.push(String(obj.summary).trim());
+                if (obj.script) parts.push(String(obj.script).trim());
+                if (obj.text) parts.push(String(obj.text).trim());
+                if (obj.body) parts.push(String(obj.body).trim());
+                if (Array.isArray(obj.bullets)) parts.push(obj.bullets.map(x=>"- "+String(x)).join("\n"));
+                if (Array.isArray(obj.points)) parts.push(obj.points.map(x=>"- "+String(x)).join("\n"));
+                if (!parts.length) parts.push(s(obj));
+                return parts.filter(Boolean).join("\n\n").trim();
+              };
+
+              const topic2 = String(og.topic || promptObj.topic || "").trim();
+
+              outJson = {
+                language: String(og.language || lang || "hi").trim(),
+                topic: topic2,
+                headline: og.headline || og.title || "",
+                summary: og.summary || "",
+                formats: [
+                  { key:"web",   title:"Web Article", text: block("Web Article", og.web_article) },
+                  { key:"video", title:"Video Script", text: block("Video Script", og.video_script) },
+                  { key:"yt",    title:"YouTube", text: block("YouTube", og.youtube) },
+                  { key:"reel",  title:"Reel / Shorts", text: block("Reel", og.reel) },
+                  { key:"hook",  title:"Reel Hook", text: String(og.hook || og.opening || og.hook_line || og.one_liner || "").trim() },
+                  { key:"social",title:"Social Pack", text: block("Social", og.social) },
+                  { key:"raw",   title:"Raw Output", text: String(outText || "").trim() }
+                ]
+              };
+            }
+          }
+        }catch(e){}
+
+        if (!outJson) {
           outJson = { language: lang, topic: String(promptObj.topic || ""), formats: [{ key:"raw", title:"Raw Output", text: String(outText || "") }] };
         }
 
@@ -345,6 +422,10 @@ OUTPUT REQUIREMENTS:
   // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
+
+
+
 
 
 

@@ -406,7 +406,12 @@ try {
   var s2 = document.getElementById("ngStatus");
   if (s2) {
     s2.setAttribute("data-base", "OK");
-    s2.textContent = "OK | " + (__real ? "REAL" : "ECHO");
+    var __mode = "";
+try{
+  __mode = String((parsed && parsed.mode) || (parsed && parsed.output_json && parsed.output_json.mode) || "").toUpperCase();
+}catch(e){ __mode = ""; }
+if (!__mode) __mode = (__real ? "REAL" : "ECHO");
+s2.textContent = "OK | " + __mode;
   }
 } catch(e) {}
 // === NG_STATUS_BASE_OK_V2_END ===
@@ -719,6 +724,7 @@ window.NG_renderDigiPackFormatted(__dp);
   window.__NG_RENDER_EXPORT_OK__ = true;
 })();
  /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
+
 
 
 
