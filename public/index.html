@@ -2469,6 +2469,14 @@ NG_FINAL_BYTES_UI_POLL_NOTES_V1_END */
       const out = document.getElementById("ng-storyview-out");
       const fmt = document.getElementById("ng-storyview-formatted");
       if (!out && !fmt) return;
+// If formatted cards exist, do not overwrite StoryView text (prevents Raw Output bleed)
+try {
+  if (fmt && (fmt.textContent || "").trim()) {
+    if (out) { out.textContent = ""; out.innerHTML = ""; }
+    return;
+  }
+} catch(e) {}
+
 
       const j = readNgResponseJSON();
       let text = "";

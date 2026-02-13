@@ -574,11 +574,24 @@ window.NG_fillStoryView = fillStoryView;
         }
       }
 
+window.NG_renderDigiPackFormatted(dp);
 
-      window.NG_renderDigiPackFormatted(dp);
+// Prefer formatted cards. Clear legacy text immediately (prevents stale Raw).
+try { if (out) { out.textContent = ""; out.innerHTML = ""; } } catch(e){}
 
-      // if cards rendered, don't overwrite with fallback text
-      if (host.textContent && host.textContent.trim()) return;
+// After a tick, if formatted actually rendered, keep legacy cleared
+setTimeout(function(){
+  try{
+    if (host && host.textContent && host.textContent.trim()) {
+      if (out) { out.textContent = ""; out.innerHTML = ""; }
+    }
+  }catch(e){}
+}, 0);
+
+return;
+
+
+
     }
   } catch (e) {}
 
@@ -713,8 +726,14 @@ if (!obj || typeof obj !== "object"){
 
   // Render HTML cards inside the existing <pre> container by switching it to a div-like renderer
   // (safe: we only set innerHTML; styles remain)
-  const html = sections
-    .filter(s => (s.text || "").trim())
+ const html = sections
+  .filter(s => {
+    const k = String(s && s.key || "").toLowerCase();
+    const t = String(s && s.title || "").toLowerCase();
+    if (k.includes("raw") || t.includes("raw")) return false; // hard-hide raw in StoryView
+    return (s.text || "").trim();
+  })
+
     .map(s => {
       const id = "ng-sv-" + s.key;
       return `
