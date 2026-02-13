@@ -163,7 +163,7 @@ function NG_setQuickSummary(text) {
     if (!q) return;
     var t = (text == null ? "" : String(text)).trim();
     // summary-only: keep it short
-    if (t.length > 500) t = t.slice(0, 500) + " …";
+    if (t.length > 320) t = t.slice(0, 320) + " …";
     q.textContent = t || "(no quick view)";
   } catch (e) {}
 }
@@ -183,66 +183,40 @@ function NG_setQuickSummary(text) {
     }
 
     function ngRenderQuick(outj){
-  try{
-    if (!outj) return "Status: (no quick view)";
-    function s(x){ return (x==null) ? "" : String(x); }
-    function clip(x,n){ x=s(x).trim(); return x.length>n ? (x.slice(0,n-1) + "…") : x; }
-    var headline =
-      outj.headline || outj.Headline || outj.title || outj.Title ||
-      (outj.top_band && outj.top_band.headline) || "";
-    var summary =
-      outj.summary || outj.Summary || outj.brief || outj.overview || "";
-    var keys = Object.keys(outj || {});
-    function hasAny(substr){
-      substr = substr.toLowerCase();
-      return keys.some(k => k.toLowerCase().includes(substr));
+      try{
+        if (!outj) return "(no quick view)";
+        // unwrap common envelopes
+        if (outj && outj.output_json && typeof outj.output_json === "object") outj = outj.output_json;
+        if (outj && outj.digi_pack && typeof outj.digi_pack === "object") outj = outj.digi_pack;
+
+        function s(x){ return (x==null) ? "" : String(x); }
+        function clip(x,n){ x=s(x).trim(); return x.length>n ? (x.slice(0,n-1) + "…") : x; }
+
+        var headline =
+          outj.headline || outj.Headline || outj.title || outj.Title ||
+          (outj.top_band && outj.top_band.headline) || "";
+
+        // prefer: formats[] keys if present
+        var formats = [];
+        try{
+          var farr = null;
+          if (outj && Array.isArray(outj.formats)) farr = outj.formats;
+          if (!farr && outj && outj.digi_pack && Array.isArray(outj.digi_pack.formats)) farr = outj.digi_pack.formats;
+          if (Array.isArray(farr) && farr.length){
+            formats = farr.map(x => String((x && x.key) ? x.key : "")).filter(Boolean);
+          }
+        }catch(e){}
+
+        var lines = [];
+        lines.push(headline ? ("Headline: " + clip(headline, 110)) : "Headline: (not set)");
+        lines.push("Formats:  " + (formats.length ? formats.join(", ") : "(open Story tab)"));
+        lines.push("Status:   OK");
+        return lines.join("\n");
+      }catch(e){
+        return "Status: (quick view failed)";
+      }
     }
-    var formats = [];
-    if (hasAny("web")) formats.push("Web");
-    if (hasAny("video")) formats.push("Video");
-    if (hasAny("youtube") || hasAny("yt")) formats.push("YouTube");
-    if (hasAny("short") || hasAny("reel")) formats.push("Shorts");
-    if (hasAny("social")) formats.push("Social");
-    if (hasAny("gfx") || hasAny("graphic")) formats.push("Graphics");
-    if (hasAny("ref") || hasAny("source")) formats.push("Refs");
-    var lines = [];
-    if (headline) lines.push("Headline: " + clip(headline, 110));
-    if (summary)  lines.push("Summary:  " + clip(summary, 180));
-    lines.push("Formats:  " + (formats.length ? formats.join(", ") : "(see Story View)"));
-    lines.push("Status:   OK");
 
-
-
-
-// --- Echo quick summary (payload-based) ---
-try {
-  if (outj) {
- 
-    var t = (outj.topic || "").trim();
-    var w = (outj.what_happened || "").trim();
-if (!w) w = (outj.story || "").trim();
-if (w && w.startsWith("TOPIC:")) w = w.replace(/^TOPIC:[^\n]*\n*/i, "").trim();
-w = w.replace(/^STORY_TYPE:[^\n]*\n*/gmi, "").replace(/^PLATFORM:[^\n]*\n*/gmi, "").trim();
-
-
-    var st = (outj.story_type || "").trim();
-    var pf = (outj.platform || "").trim();
-    var sc = (outj.sources || "").trim();
-
-    lines.push(""); // spacer
-    lines.push("Topic:   " + (t || "(blank)"));
-    lines.push("What:    " + (w ? (w.slice(0,140) + (w.length>140 ? "…" : "")) : "(blank)"));
-    lines.push("Meta:    " + "Type=" + (st || "-") + " | Platform=" + (pf || "-") + " | SourcesChars=" + (sc ? sc.length : 0));
-  }
-} catch(e) {}
-
-    return lines.join("\n");
-  }catch(e){
-    return "Status: (quick view summary failed)";
-  }
-}
-
-    
 
     function ngSetCopyViewEnabled(on){
       if (btnCopy) btnCopy.disabled = !on;
@@ -411,6 +385,16 @@ try{
   __mode = String((parsed && parsed.mode) || (parsed && parsed.output_json && parsed.output_json.mode) || "").toUpperCase();
 }catch(e){ __mode = ""; }
 if (!__mode) __mode = (__real ? "REAL" : "ECHO");
+// === NG_REALMODE_SYNC_FROM_RESPONSE_V1_START (20260214) ===
+try{
+  // If server actually ran OpenAI (or any non-echo mode), sync the UI toggle to REAL for consistency
+  var m = String(__mode || "").toLowerCase();
+  if (m && m !== "echo") {
+    localStorage.setItem("NG_REAL_MODE", "1");
+    if (typeof window.NG_paintRealModeBtn === "function") window.NG_paintRealModeBtn();
+  }
+}catch(e){}
+// === NG_REALMODE_SYNC_FROM_RESPONSE_V1_END (20260214) ===
 s2.textContent = "OK | " + __mode;
   }
 } catch(e) {}
@@ -437,22 +421,18 @@ try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputRead
 
           var copy_text = (parsed && parsed.copy_text) ? ngSafeStr(parsed.copy_text) : "";
           var outj = (parsed && parsed.output_json) ? parsed.output_json : (parsed && parsed.received ? parsed.received : null);
-// === NG_QUICK_ECHO_SUMMARY_V1_START (20260204) ===
+ // === NG_QUICK_STATUS_SUMMARY_V2_START (20260214) ===
 try {
-  var isEcho = (parsed && parsed.mode === "echo") || (outj && outj.mode === "echo");
-  if (isEcho && outj) {
-    var t = (outj.topic || "").trim();
-    var w = (outj.what_happened || "").trim();
-    var st = (outj.story_type || "").trim();
-    var pf = (outj.platform || "").trim();
-    var sc = (outj.sources || "").trim();
-    var line1 = (t ? ("Topic: " + t) : "Topic: (blank)");
-    var line2 = (w ? ("What: " + w.slice(0, 140) + (w.length > 140 ? "…" : "")) : "What: (blank)");
-    var meta = "Type: " + (st || "-") + " | Platform: " + (pf || "-") + " | Sources chars: " + (sc ? sc.length : 0);
-    NG_setQuickSummary(line1 + "\n" + line2 + "\n" + meta);
+  // Always update quick view (REAL or ECHO). Keep it minimal.
+  if (outj) {
+    NG_setQuickSummary(ngRenderQuick(outj));
+  } else if (parsed && parsed.output_json) {
+    NG_setQuickSummary(ngRenderQuick(parsed.output_json));
+  } else {
+    NG_setQuickSummary("(no quick view)");
   }
 } catch(e) {}
-// === NG_QUICK_ECHO_SUMMARY_V1_END ===
+// === NG_QUICK_STATUS_SUMMARY_V2_END ===
 
 
           if (pre) pre.textContent = (parsed && parsed.output_json) ? JSON.stringify(parsed.output_json, null, 2) : JSON.stringify(parsed, null, 2);
@@ -741,6 +721,10 @@ if (String(f && f.key || "").toLowerCase() === "raw") return;
   window.__NG_RENDER_EXPORT_OK__ = true;
 })();
  /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
+
+
+
+
 
 
 
