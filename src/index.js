@@ -231,6 +231,30 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
         return json({ ok: false, path, entry_marker: ENTRY_MARKER, has_openai_key, error: "OPENAI_API_KEY missing" });
       }
 /* NG_OPENAI_CALL_V1_START (20260210) */
+
+        // === NG_OPENAI_FETCH_RETRY_V1_START (20260214) ===
+        async function ngFetchWithRetry(url, opts, tries){
+          tries = (tries == null ? 3 : tries);
+          let lastErr = null;
+          for (let i=1;i<=tries;i++){
+            try{
+              const resp = await fetch(url, opts);
+              // retry on rate-limit and server errors
+              if (resp && (resp.status === 429 || (resp.status >= 500 && resp.status <= 599))){
+                lastErr = new Error("HTTP "+resp.status);
+              } else {
+                return resp;
+              }
+            } catch(e){
+              lastErr = e;
+            }
+            // backoff: 250ms, 650ms, 1250ms
+            const ms = (i===1?250:(i===2?650:1250));
+            try{ await new Promise(r=>setTimeout(r, ms)); }catch(e){}
+          }
+          throw lastErr || new Error("ngFetchWithRetry failed");
+        }
+        // === NG_OPENAI_FETCH_RETRY_V1_END ===
       // REAL/OpenAI mode: call OpenAI Responses API and return output_json for StoryView
       try {
         const lang = (promptObj && promptObj.language) ? String(promptObj.language) : "hi";
@@ -326,7 +350,7 @@ OUTPUT REQUIREMENTS:
           }
         };
 
-        const r = await fetch("https://api.openai.com/v1/responses", {
+        const r = await ngFetchWithRetry("https://api.openai.com/v1/responses", {
           method: "POST",
           headers: {
             "content-type": "application/json",
@@ -459,6 +483,7 @@ OUTPUT REQUIREMENTS:
   // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
 
 
 
