@@ -729,9 +729,19 @@ if (String(f && f.key || "").toLowerCase() === "raw") return;
   }
 
   window.NG_renderDigiPackFormatted = NG_renderDigiPackFormatted;
+  // LOCK: prevent future scripts from overwriting the renderer (single source of truth)
+  try {
+    window.NG_renderDigiPackFormatted.__LOCKED = true;
+    Object.defineProperty(window, "NG_renderDigiPackFormatted", {
+      configurable: false,
+      writable: false,
+      value: window.NG_renderDigiPackFormatted
+    });
+  } catch(e) {}
   window.__NG_RENDER_EXPORT_OK__ = true;
 })();
  /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
+
 
 
 
