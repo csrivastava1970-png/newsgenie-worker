@@ -256,12 +256,21 @@ OUTPUT REQUIREMENTS:
           properties: {
             topic: { type: "string" },
             language: { type: "string" },
+            headline: { type: "string" },
+            summary: { type: "string" },
 
             web_article: {
               type: "object",
               additionalProperties: false,
-              properties: { text: { type: "string" } },
-              required: ["text"]
+              properties: {
+                headline: { type: "string" },
+                dek: { type: "string" },
+                subhead: { type: "string" },
+                summary: { type: "string" },
+                key_points: { type: "array", items: { type: "string" } },
+                text: { type: "string" }
+              },
+              required: ["headline","dek","subhead","summary","key_points","text"]
             },
 
             video_script: {
@@ -290,11 +299,18 @@ OUTPUT REQUIREMENTS:
             social: {
               type: "object",
               additionalProperties: false,
-              properties: { text: { type: "string" } },
-              required: ["text"]
+              properties: {
+                x_post: { type: "string" },
+                fb_post: { type: "string" },
+                instagram_caption: { type: "string" },
+                hashtags: { type: "array", items: { type: "string" } },
+                tags: { type: "array", items: { type: "string" } },
+                text: { type: "string" }
+              },
+              required: ["x_post","fb_post","instagram_caption","hashtags","tags","text"]
             }
           },
-          required: ["topic","language","web_article","video_script","youtube","reel","hook","social"]
+          required: ["topic","language","headline","summary","web_article","video_script","youtube","reel","hook","social"]
         };
         const openaiReq = {
           model,
@@ -360,16 +376,36 @@ OUTPUT REQUIREMENTS:
                 if (!obj) return "";
                 if (typeof obj === "string") return obj.trim();
                 if (typeof obj !== "object") return String(obj).trim();
-                // common fields pretty-print
+                // common fields pretty-print (extended for web_article + social)
                 const parts = [];
+
+                // headlines/titles
                 if (obj.headline) parts.push(String(obj.headline).trim());
                 if (obj.title && !obj.headline) parts.push(String(obj.title).trim());
+
+                // web_article style fields
+                if (obj.dek) parts.push("DEK: " + String(obj.dek).trim());
+                if (obj.subhead) parts.push("SUBHEAD: " + String(obj.subhead).trim());
                 if (obj.summary) parts.push(String(obj.summary).trim());
+
+                // scripts / bodies
                 if (obj.script) parts.push(String(obj.script).trim());
                 if (obj.text) parts.push(String(obj.text).trim());
                 if (obj.body) parts.push(String(obj.body).trim());
+
+                // social pack fields
+                if (obj.instagram_caption) parts.push("INSTAGRAM: " + String(obj.instagram_caption).trim());
+                if (obj.x_post) parts.push("X: " + String(obj.x_post).trim());
+                if (obj.fb_post) parts.push("FB: " + String(obj.fb_post).trim());
+                if (obj.whatsapp) parts.push("WHATSAPP: " + String(obj.whatsapp).trim());
+
+                // lists
+                if (Array.isArray(obj.key_points) && obj.key_points.length) parts.push("KEY POINTS:\n" + obj.key_points.map(x=>"- "+String(x)).join("\n"));
+                if (Array.isArray(obj.hashtags) && obj.hashtags.length) parts.push("HASHTAGS: " + obj.hashtags.map(x=>String(x)).join(" "));
+                if (Array.isArray(obj.tags) && obj.tags.length) parts.push("TAGS: " + obj.tags.map(x=>String(x)).join(" | "));
                 if (Array.isArray(obj.bullets)) parts.push(obj.bullets.map(x=>"- "+String(x)).join("\n"));
                 if (Array.isArray(obj.points)) parts.push(obj.points.map(x=>"- "+String(x)).join("\n"));
+
                 if (!parts.length) parts.push(s(obj));
                 return parts.filter(Boolean).join("\n\n").trim();
               };
@@ -381,22 +417,23 @@ OUTPUT REQUIREMENTS:
                 topic: topic2,
                 headline: og.headline || og.title || "",
                 summary: og.summary || "",
-                formats: [
+                web_article: og.web_article || null,
+                 social: og.social || null,
+                 formats: [
                   { key:"web",   title:"Web Article", text: block("Web Article", og.web_article) },
                   { key:"video", title:"Video Script", text: block("Video Script", og.video_script) },
                   { key:"yt",    title:"YouTube", text: block("YouTube", og.youtube) },
                   { key:"reel",  title:"Reel / Shorts", text: block("Reel", og.reel) },
                   { key:"hook",  title:"Reel Hook", text: String(og.hook || og.opening || og.hook_line || og.one_liner || "").trim() },
-                  { key:"social",title:"Social Pack", text: block("Social", og.social) },
-                  { key:"raw",   title:"Raw Output", text: String(outText || "").trim() }
-                ]
-              };
+                  { key:"social",title:"Social Pack", text: block("Social", og.social) }
+                 ]
+               };
             }
           }
         }catch(e){}
 
         if (!outJson) {
-          outJson = { language: lang, topic: String(promptObj.topic || ""), formats: [{ key:"raw", title:"Raw Output", text: String(outText || "") }] };
+          outJson = { language: lang, topic: String(promptObj.topic || ""), formats: [] };
         }
 
         return json(
@@ -422,6 +459,10 @@ OUTPUT REQUIREMENTS:
   // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
+
+
+
 
 
 

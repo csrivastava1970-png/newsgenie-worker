@@ -702,19 +702,117 @@ if (!obj || typeof obj !== "object"){
       if (typeof v === "string") return v.trim();
       try { return JSON.stringify(v, null, 2); } catch(e){ return String(v); }
     };
+// --- NEW: nested-path picker (web_article.dek, social.hashtags, etc.) ---
+const pickPath = (path) => {
+  try {
+    if (!obj || typeof obj !== "object") return "";
+    const parts = String(path || "").split(".");
+    let cur = obj;
+    for (const p of parts) {
+      if (!cur || typeof cur !== "object") return "";
+      cur = cur[p];
+    }
+    if (cur == null) return "";
+    if (typeof cur === "string") return cur.trim();
+    if (Array.isArray(cur)) {
+      return cur.map(x => String(x || "").trim()).filter(Boolean).join("\n");
+    }
+    try { return JSON.stringify(cur, null, 2); } catch(e) { return String(cur); }
+  } catch(e) { return ""; }
+};
 
     // Prefer explicit structured buckets if present
     sections.push({ key:"headline", title:"Headline", text: pick("headline") || pick("title") });
-    sections.push({ key:"summary", title:"Summary", text: pick("summary") || pick("dek") });
 
-    sections.push({ key:"web", title:"Web", text: pick("web") || pick("article") || pick("web_article") });
-    sections.push({ key:"video", title:"Video", text: pick("video") || pick("video_script") });
-    sections.push({ key:"youtube", title:"YouTube", text: pick("youtube") || pick("yt") || pick("yt_script") });
-    sections.push({ key:"shorts", title:"Shorts", text: pick("shorts") || pick("reels") || pick("short") });
-    sections.push({ key:"social", title:"Social", text: pick("social") || pick("twitter") || pick("x") || pick("instagram") });
+// Summary + Dek + Key Points (separate cards)
+sections.push({
+  key:"summary",
+  title:"Summary",
+  text: pick("summary") || pick("dek") || pickPath("web_article.summary") || pickPath("article.summary")
+});
 
-    sections.push({ key:"graphics", title:"Graphics", text: pick("graphics") || pick("gfx") || pick("plates") });
-    sections.push({ key:"refs", title:"Refs", text: pick("refs") || pick("references") || pick("sources") });
+sections.push({
+  key:"dek",
+  title:"Dek",
+  text: pickPath("web_article.dek") || pickPath("web_article.subhead") || pickPath("article.dek") || pick("dek")
+});
+
+sections.push({
+  key:"key_points",
+  title:"Key Points",
+  text:
+    pick("key_points") ||
+    pick("bullet_points") ||
+    pickPath("web_article.key_points") ||
+    pickPath("web_article.bullets") ||
+    pickPath("article.key_points")
+});
+
+// Web / Video / YouTube / Shorts
+sections.push({
+  key:"web",
+  title:"Web Article",
+  text:
+    pickPath("web_article.text") ||
+    pickPath("article.text") ||
+    pick("web") ||
+    pick("article") ||
+    pick("web_article")
+});
+
+sections.push({ key:"video", title:"Video Script", text: pick("video") || pick("video_script") || pickPath("video_script.text") });
+sections.push({ key:"youtube", title:"YouTube", text: pick("youtube") || pick("yt") || pick("yt_script") || pickPath("youtube.text") });
+sections.push({ key:"shorts", title:"Reel / Shorts", text: pick("shorts") || pick("reels") || pick("reel") || pick("short") });
+
+// Social (platform-wise + a fallback Social Pack)
+sections.push({
+  key:"x_post",
+  title:"X Post",
+  text:
+    pickPath("social.x_post") ||
+    pickPath("socials.x_post") ||
+    pickPath("social.twitter") ||
+    pickPath("social.x") ||
+    pick("x_post")
+});
+
+sections.push({
+  key:"fb_post",
+  title:"Facebook Post",
+  text: pickPath("social.facebook_post") || pickPath("social.fb_post") || pickPath("socials.fb_post") || pick("fb_post")
+});
+
+sections.push({
+  key:"insta_caption",
+  title:"Instagram Caption",
+  text:
+    pickPath("social.instagram_caption") ||
+    pickPath("social.instagram") ||
+    pickPath("socials.instagram_caption") ||
+    pick("instagram_caption")
+});
+
+sections.push({
+  key:"hashtags",
+  title:"Hashtags",
+  text:
+    pickPath("social.hashtags") ||
+    pickPath("social.tags") ||
+    pickPath("socials.hashtags") ||
+    pick("hashtags") ||
+    pick("tags")
+});
+
+sections.push({
+  key:"social",
+  title:"Social Pack",
+  text: pick("social") || pick("socials") || pick("social_posts")
+});
+
+// Graphics + Refs
+sections.push({ key:"graphics", title:"Graphics", text: pick("graphics") || pick("gfx") || pick("plates") });
+sections.push({ key:"refs", title:"Refs", text: pick("refs") || pick("references") || pick("sources") });
+
 
     // If none matched, fallback to raw pretty JSON
     const any = sections.some(s => (s.text || "").trim());

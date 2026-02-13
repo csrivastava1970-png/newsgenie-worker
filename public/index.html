@@ -2484,6 +2484,27 @@ try {
 
 
       const j = readNgResponseJSON();
+      // === NG_FORMATS_BRIDGE_V1_START (20260214) ===
+      // If backend provides output_json.formats[], render them into the formatted view too
+      try{
+        let jj = j;
+        if (jj && jj.output_json && typeof jj.output_json === "object") jj = jj.output_json;
+
+        let farr = null;
+        if (jj && Array.isArray(jj.formats)) farr = jj.formats;
+        if (!farr && jj && jj.digi_pack && Array.isArray(jj.digi_pack.formats)) farr = jj.digi_pack.formats;
+
+        // Store on window for reuse/debug (optional)
+        window.__NG_LAST_FORMATS = farr || null;
+
+        // If we later build "lines" from keys, we can also append formats blocks
+        // We'll do it after "const lines = []" exists by using a flag
+        window.__NG_HAS_FORMATS = (Array.isArray(farr) && farr.length) ? true : false;
+      }catch(e){
+        window.__NG_HAS_FORMATS = false;
+        window.__NG_LAST_FORMATS = null;
+      }
+      // === NG_FORMATS_BRIDGE_V1_END ===
       let text = "";
 
       // Prefer "copy_text" (human readable), else output_json pretty, else raw
@@ -2497,6 +2518,30 @@ try {
   } else {
     // 2) Build readable detailed text from common keys (no JSON dump)
     const lines = [];
+
+    // === NG_FORMATS_RENDER_V1_START (20260214) ===
+    try{
+      let jj = j;
+      if (jj && jj.output_json && typeof jj.output_json === "object") jj = jj.output_json;
+
+      let farr = null;
+      if (jj && Array.isArray(jj.formats)) farr = jj.formats;
+      if (!farr && jj && jj.digi_pack && Array.isArray(jj.digi_pack.formats)) farr = jj.digi_pack.formats;
+
+      if (Array.isArray(farr) && farr.length){
+        lines.push("## Formats\n");
+        farr.forEach(it => {
+          it = it || {};
+          const k = String(it.key || "").trim();
+          const t = String(it.title || it.key || "").trim();
+          const body = String(it.text || it.body || it.copy || it.content || "").trim();
+          if (!body) return;
+          lines.push(`### ${t || k || "Format"}\n${body}\n`);
+        });
+        lines.push("");
+      }
+    }catch(e){}
+    // === NG_FORMATS_RENDER_V1_END ===
     const add = (label, val) => {
   if (val == null) return;
 
@@ -2549,7 +2594,7 @@ try {
 
     add("Headline", j.headline);
     add("Summary", j.summary);
-addList("Key Points", j.key_points);
+addList("Key Points", (j && j.key_points) ? j.key_points : ((j && j.web_article && j.web_article.key_points) ? j.web_article.key_points : []));
   // --- Web Article (longform) ---
   try{
    var wa = (j && (j.web_article || j.web || j.article)) || null;
@@ -2844,6 +2889,7 @@ function renderJsonTab() {
 
 
 </html>
+
 
 
 
