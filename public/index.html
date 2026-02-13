@@ -2865,8 +2865,23 @@ function renderJsonTab() {
     var id = e && e.target && e.target.id;
     if (id !== "ngCopyStoryView") return;
 
-    var el = document.getElementById("ng-storyview-out");
-    var txt = el ? (el.innerText || el.textContent || "") : "";
+    // Prefer formatted StoryView (cards). Fallback to legacy text area.
+    var fmt = document.getElementById("ng-storyview-formatted");
+    var el  = document.getElementById("ng-storyview-out");
+
+    var txt = "";
+    try{
+      txt = fmt ? (fmt.innerText || fmt.textContent || "") : "";
+    }catch(e){ txt = ""; }
+
+    if (!txt || !String(txt).trim()){
+      try{
+        txt = el ? (el.innerText || el.textContent || "") : "";
+      }catch(e){ txt = ""; }
+    }
+
+    txt = (txt == null) ? "" : String(txt).trim();
+    if (!txt) txt = "(StoryView empty)";
     var ok = await copyTextToClipboard(txt);
 
     // optional tiny feedback (safe)
@@ -2889,6 +2904,7 @@ function renderJsonTab() {
 
 
 </html>
+
 
 
 
