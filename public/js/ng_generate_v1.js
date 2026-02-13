@@ -663,7 +663,13 @@ window.NG_renderDigiPackFormatted(__dp);
       }
     } catch(e) {}
 
-    const formats = NG_pickDigiPackFormats(dp);
+    let formats = NG_pickDigiPackFormats(dp);
+
+// HARD FILTER: never show Raw in StoryView (JSON tab already covers it)
+try {
+  formats = (formats || []).filter(f => String(f && f.key || "").toLowerCase() !== "raw");
+} catch(e) {}
+
 
     if (!formats.length) {
       const empty = document.createElement("div");
@@ -675,6 +681,8 @@ window.NG_renderDigiPackFormatted(__dp);
     }
 
     formats.forEach((f, i) => {
+if (String(f && f.key || "").toLowerCase() === "raw") return;
+
       const card = document.createElement("section");
       card.className = "ng-card";
       card.style.padding = "10px";
