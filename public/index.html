@@ -2003,7 +2003,21 @@ return out;
 
 <!-- NG_PROMPT_BUILDER_V1_INCLUDE_START (20260130) -->
 <!-- NG_PROMPT_BUILDER_V1_INCLUDE_END -->
-<script src="/script1_dump.js?v=20260131" defer></script>
+<script>
+  // DEV-only: avoid loading heavy dump in normal runs
+  (function(){
+    try {
+      var qs = new URLSearchParams(location.search || "");
+      if (qs.get("dev") === "1") {
+        var s = document.createElement("script");
+        s.src = "/script1_dump.js?v=20260131";
+        s.defer = true;
+        document.head.appendChild(s);
+      }
+    } catch(e) {}
+  })();
+</script>
+
 
 <script>
 /* Patch Override ... */
