@@ -285,6 +285,8 @@ body[data-ng-outtab="json"] #ng-json-panel-wrap,
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_START (20260206) === */
 #ng-storyview-formatted { display:none !important; }
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_END === */
+#ng-storyview-out{display:none!important;}
+
 
 </style>
 <style>
@@ -1240,32 +1242,17 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 </div>
 <!-- NG_BYTES_UNIFIED_DRAFT_V1_END -->
 <!-- NG_DRAFT_LIBRARY_PANEL_V1_START (20260130) -->
-
-
 <div id="ng-draft-library" class="panel" style="display:none;">
   <details id="ng-draft-lib-details">
     <summary style="cursor:pointer; font-weight:700;">Draft Library</summary>
 
-
-
-    <div style="margin-top:10px;">
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
       <button type="button" id="ng-lib-refresh">Refresh</button>
       <button type="button" id="ng-lib-clear">Clear Library</button>
-
-      <pre id="ng-lib-out" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
     </div>
+
+    <pre id="ng-lib-out" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
   </details>
-</div>
-
-
-
-
-  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-    <button type="button" id="ng-lib-refresh">Refresh</button>
-    <button type="button" id="ng-lib-clear">Clear Library</button>
-  </div>
-
-  <pre id="ng-lib-out" style="margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto;border:1px solid #eee;border-radius:12px;padding:10px;"></pre>
 </div>
 <!-- NG_DRAFT_LIBRARY_PANEL_V1_END -->
 
@@ -2904,6 +2891,7 @@ function renderJsonTab() {
 
 
 </html>
+
 
 
 

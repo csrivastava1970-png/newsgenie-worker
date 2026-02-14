@@ -479,6 +479,8 @@
       window.__NG_LINES_WATCHER_V1 = setInterval(tryRenderFromTextarea, 900);
     }catch(e){}
   }
+      // NG_EXPORT_MAKE_DRAFT_GLOBAL_V1 (2026-02-14)
+      try{ if (typeof makeDraftFromSelection === "function") window.makeDraftFromSelection = makeDraftFromSelection; }catch(e){}
 
   // boot
   if (document.readyState === "loading") {
@@ -1075,6 +1077,8 @@ var items = readByteListFromUI();
         NG_loadTranscriptJSON: typeof window.NG_loadTranscriptJSON
       });
     };
+      // NG_EXPORT_MAKE_DRAFT_GLOBAL_V1 (2026-02-14)
+      try{ if (typeof makeDraftFromSelection === "function") window.makeDraftFromSelection = makeDraftFromSelection; }catch(e){}
 
     // boot
     if (document.readyState === "loading") {
@@ -1087,6 +1091,7 @@ var items = readByteListFromUI();
     console.error("[NG_INBOX] WIRE_V2 failed", e);
   }
 })();
+
 
 
 

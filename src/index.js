@@ -1,4 +1,4 @@
-﻿console.log("[NG_BOOT_SIG] src/index.js 20260119_162645");
+console.log("[NG_BOOT_SIG] src/index.js 20260119_162645");
 // src/index.js  (BOOT v3: echo + openai mode)
 // Root if (path === "/" && request.method === "GET") {   return new globalThis.Response("OK", { status: 200, headers: corsHeaders(request) }); } 
 // Uses OpenAI Responses API + Structured Outputs (json_schema)
@@ -119,13 +119,34 @@ export default {
       if (__u.pathname === "/health" || __u.pathname === "/api/health" || __u.pathname === "/api/health/") {
         return new Response(JSON.stringify({ ok: true, ts: new Date().toISOString(), entry: 'src/index.js' }), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8' } });
       }
-      if (__u.pathname === '/') {
-        return new Response('OK', { status: 200, headers: { 'content-type': 'text/plain; charset=utf-8' } });
-      }
+//       if (__u.pathname === '/') {
+//         return new Response('OK', { status: 200, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+//       }
     } catch (e) { /* ignore */ }
 
     const url = new URL(request.url);
     const path = url.pathname;
+    // NG_DIAG_ROOT_V1_START (2026-02-14)
+    if (path === "/__diag_root") {
+      let assets_ok = !!(env && env.ASSETS);
+      let assets_status = null;
+      let assets_len = null;
+      try{
+        if (assets_ok) {
+          const u2 = new URL(request.url);
+          u2.pathname = "/index.html";
+          const rr = await env.ASSETS.fetch(new Request(u2.toString(), { method: request.method, headers: request.headers, redirect: "follow" }));
+          assets_status = rr.status;
+          const txt = await rr.text();
+          assets_len = txt.length;
+        }
+      }catch(e){
+        assets_status = "ERR";
+        assets_len = String(e && e.message ? e.message : e);
+      }
+      return json({ ok:true, path, assets_ok, assets_status, assets_len }, 200, corsHeaders(request));
+    }
+    // NG_DIAG_ROOT_V1_END
 
     // NG_ASSETS_ROUTE_V1_START (2026-02-07)
     // Always RETURN a Response for static assets (prevents "Promise did not resolve to Response")
@@ -143,6 +164,12 @@ export default {
         path.startsWith("/assets/") ||
         path.endsWith(".html")
       ) {
+        // If root, serve index.html explicitly (prevents blank root)
+        if (path === "/") {
+          const u2 = new URL(request.url);
+          u2.pathname = "/index.html";
+          request = new Request(u2.toString(), request);
+        }
         return env.ASSETS.fetch(request);
       }
     }
@@ -232,29 +259,49 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
       }
 /* NG_OPENAI_CALL_V1_START (20260210) */
 
-        // === NG_OPENAI_FETCH_RETRY_V1_START (20260214) ===
+        // === NG_OPENAI_FETCH_RETRY_V2_START (20260214) ===
         async function ngFetchWithRetry(url, opts, tries){
           tries = (tries == null ? 3 : tries);
+
+          // expose retry stats for debugging (safe)
+          const meta = { tries, attempts: 0, last_status: null, last_error: "" };
+
           let lastErr = null;
           for (let i=1;i<=tries;i++){
+            meta.attempts = i;
             try{
               const resp = await fetch(url, opts);
-              // retry on rate-limit and server errors
+              meta.last_status = resp ? resp.status : null;
+
+              // Do NOT retry on 4xx (except 429). Those are schema/auth/validation issues.
+              if (resp && resp.status >= 400 && resp.status <= 499 && resp.status !== 429){
+                resp.__ngRetryMeta = meta;
+                return resp;
+              }
+
+              // Retry on rate-limit and server errors
               if (resp && (resp.status === 429 || (resp.status >= 500 && resp.status <= 599))){
-                lastErr = new Error("HTTP "+resp.status);
+                lastErr = new Error("HTTP " + resp.status);
+                meta.last_error = String(lastErr.message || lastErr);
               } else {
+                resp.__ngRetryMeta = meta;
                 return resp;
               }
             } catch(e){
               lastErr = e;
+              meta.last_error = String((e && e.message) ? e.message : e);
             }
-            // backoff: 250ms, 650ms, 1250ms
-            const ms = (i===1?250:(i===2?650:1250));
+
+            // backoff: 300ms, 900ms, 1800ms (slightly more conservative)
+            const ms = (i===1?300:(i===2?900:1800));
             try{ await new Promise(r=>setTimeout(r, ms)); }catch(e){}
           }
-          throw lastErr || new Error("ngFetchWithRetry failed");
+
+          const err = lastErr || new Error("ngFetchWithRetry failed");
+          err.__ngRetryMeta = meta;
+          throw err;
         }
-        // === NG_OPENAI_FETCH_RETRY_V1_END ===
+        // === NG_OPENAI_FETCH_RETRY_V2_END ===
       // REAL/OpenAI mode: call OpenAI Responses API and return output_json for StoryView
       try {
         const lang = (promptObj && promptObj.language) ? String(promptObj.language) : "hi";
@@ -362,7 +409,7 @@ OUTPUT REQUIREMENTS:
         const data = await r.json().catch(() => ({}));
         if (!r.ok) {
           return json(
-            { ok:false, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, error:"OPENAI_API_ERROR", status:r.status, details:data },
+            { ok:false, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, error:"OPENAI_API_ERROR", status:r.status, retry_meta: (r && r.__ngRetryMeta) ? r.__ngRetryMeta : null, details:data },
             502,
             corsHeaders(request)
           );
@@ -483,6 +530,8 @@ OUTPUT REQUIREMENTS:
   // final fallback (guarantee Response)   return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
+
 
 
 

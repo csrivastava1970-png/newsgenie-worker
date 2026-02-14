@@ -62,3 +62,9 @@ backups/ui_cleanroom/
 _local_backups/
 public/js/*_backup_before_*
 public/*_backup_before_*
+
+_HARDLOCK_*
+_ng_find_*.txt
+.dev.vars_backup_*
+public/index_zero_before_restore_*.html
+

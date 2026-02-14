@@ -1,4 +1,4 @@
-﻿/* NG_TOOLBAR_MINI_JS_V1_START (2026-01-30) */
+/* NG_TOOLBAR_MINI_JS_V1_START (2026-01-30) */
 (() => {
   if (window.__NG_TOOLBAR_MINI_JS_V1__) return;
   window.__NG_TOOLBAR_MINI_JS_V1__ = true;
@@ -471,65 +471,308 @@ try {
 })();
 /* NG_LIBRARY_TOGGLE_DOC_V1_END (2026-01-30) */
 
-/* NG_DRAFT_LIBRARY_WIRE_V1_START (2026-01-30) */
+/* NG_DRAFT_LIBRARY_WIRE_V2_START (2026-02-14) */
 (function(){
-  if (window.__NG_DRAFT_LIBRARY_WIRE_V1__) return;
-  window.__NG_DRAFT_LIBRARY_WIRE_V1__ = true;
+  if (window.__NG_DRAFT_LIBRARY_WIRE_V2__) return;
+  window.__NG_DRAFT_LIBRARY_WIRE_V2__ = true;
 
   const KEY = "ng_draft_library_v1";
+  const MAX_ITEMS = 200;
+  const MAX_BYTES = 3.5 * 1024 * 1024;
+
+  function safeJsonParse(raw, fallback){
+    try { return JSON.parse(raw); } catch(e) { return fallback; }
+  }
 
   function readLib(){
     try{
       const raw = localStorage.getItem(KEY);
-      const arr = raw ? JSON.parse(raw) : [];
+      const arr = raw ? safeJsonParse(raw, []) : [];
       return Array.isArray(arr) ? arr : [];
-    }catch(e){
-      return [];
+    }catch(e){ return []; }
+  }
+
+  function approxBytes(obj){
+    try { return new Blob([JSON.stringify(obj)]).size; } catch(e) { return 0; }
+  }
+
+  function tryWrite(arr){
+    try { localStorage.setItem(KEY, JSON.stringify(arr || [])); return true; }
+    catch(e){ return false; }
+  }
+
+  function guardLib(arr){
+    let out = Array.isArray(arr) ? arr.slice() : [];
+    if (out.length > MAX_ITEMS) out = out.slice(out.length - MAX_ITEMS);
+
+    let bytes = approxBytes(out);
+    let safety = 0;
+    while (bytes > MAX_BYTES && out.length > 1 && safety < 5000){
+      out.shift();
+      bytes = approxBytes(out);
+      safety++;
     }
+    return out;
   }
 
   function writeLib(arr){
-    try{ localStorage.setItem(KEY, JSON.stringify(arr || [])); }catch(e){}
+    const guarded = guardLib(arr || []);
+    if (tryWrite(guarded)) return true;
+
+    let tmp = guarded.slice();
+    for (let i=0;i<5;i++){
+      if (tmp.length <= 1) break;
+      tmp.shift();
+      if (tryWrite(tmp)) return true;
+    }
+    return false;
+  }
+
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  function itemText(it){
+    try{
+      const t = [
+        it && (it.topic || it.title || ""),
+        it && it.received && (it.received.topic || it.received.story || ""),
+        it && it.output_json ? JSON.stringify(it.output_json) : ""
+      ].join(" ");
+      return (t || "").toLowerCase();
+    }catch(e){ return ""; }
+  }
+
+  function ensureArchiveUI(){
+    const out = document.getElementById("ng-lib-out");
+    if (!out) return;
+
+    const wrapId = "ng-lib-archive-wrap";
+    if (!document.getElementById(wrapId)){
+      const wrap = document.createElement("div");
+      wrap.id = wrapId;
+      wrap.innerHTML = `
+        <div style="display:flex;gap:10px;align-items:center;margin:8px 0 10px 0;">
+          <input id="ng-lib-search" type="text" placeholder="Search by keyword / topic…"
+                 style="flex:1;padding:8px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.15);outline:none;">
+          <span id="ng-lib-meta" style="font-size:12px;opacity:.75;white-space:nowrap;"></span>
+        </div>
+        <div id="ng-lib-list"></div>
+        <div id="ng-lib-viewer" style="display:none;margin-top:10px;border:1px solid rgba(0,0,0,.12);border-radius:14px;padding:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+            <div id="ng-lib-viewer-title" style="font-weight:800;"></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button type="button" id="ng-lib-copy" style="padding:4px 10px;border-radius:10px;">Copy</button>
+              <button type="button" id="ng-lib-close" style="padding:4px 10px;border-radius:10px;">Close</button>
+            </div>
+          </div>
+          <pre id="ng-lib-viewer-pre" style="white-space:pre-wrap;max-height:340px;overflow:auto;margin:0;"></pre>
+        </div>
+      `;
+      out.innerHTML = "";
+      out.appendChild(wrap);
+    }
+  }
+
+  function setViewer(on, title, text){
+    const v = document.getElementById("ng-lib-viewer");
+    const t = document.getElementById("ng-lib-viewer-title");
+    const p = document.getElementById("ng-lib-viewer-pre");
+    if (!v || !t || !p) return;
+    if (!on){
+      v.style.display = "none"; t.textContent=""; p.textContent="";
+      return;
+    }
+    v.style.display = "block";
+    t.textContent = title || "Saved story";
+    p.textContent = text || "";
+    try { v.scrollIntoView({ behavior:"smooth", block:"nearest" }); } catch(e) {}
+  }
+
+  function formatItemForViewer(it){
+    try{
+      if (it && it.output_json) return JSON.stringify(it.output_json, null, 2);
+    }catch(e){}
+    try { return JSON.stringify(it, null, 2); } catch(e) {}
+    return String(it || "");
   }
 
   function renderLib(){
     const out = document.getElementById("ng-lib-out");
     if (!out) return;
 
+    ensureArchiveUI();
+
+    const meta = document.getElementById("ng-lib-meta");
+    const listHost = document.getElementById("ng-lib-list");
+    const qEl = document.getElementById("ng-lib-search");
+    if (!listHost) return;
+
     const arr = readLib();
+    const q = (qEl && qEl.value ? qEl.value : "").trim().toLowerCase();
+
     if (!arr.length){
-      out.textContent = "Library empty. (No saved drafts yet)";
+      listHost.innerHTML = `<div style="opacity:.7;padding:8px 2px;">Library empty. (No saved drafts yet)</div>`;
+      if (meta) meta.textContent = "0";
+      setViewer(false);
       return;
     }
 
-    // Show latest first
-    const lines = arr.slice().reverse().map((it, idx) => {
+    // Build [item, originalIndex] so actions target original array positions
+let revPairs = arr.map((it, i) => [it, i]).reverse();
+if (q) revPairs = revPairs.filter(([it]) => itemText(it).includes(q));
+
+
+
+const rows = revPairs.map(([it, realIndex]) => {
+
       const ts = it.ts || it.saved_at || "";
       const topic = it.topic || (it.received && it.received.topic) || it.title || "(no topic)";
-      return `${idx+1}) ${topic}\n   ${ts}\n`;
+      return `<div data-ng-lib-row="1" data-ng-lib-idx="${realIndex}" style="display:flex;align-items:flex-start;gap:10px;padding:8px 6px;border-bottom:1px solid rgba(0,0,0,.06);">
+
+        <div style="display:flex;flex-direction:column;gap:6px;">
+         <button type="button" data-ng-lib="view" style="padding:4px 10px;border-radius:10px;">View</button>
+
+<button type="button" data-ng-lib="del" style="padding:4px 10px;border-radius:10px;opacity:.85;">Delete</button>
+
+        </div>
+        <div style="flex:1;">
+          <div style="font-weight:800;">${esc(topic)}</div>
+          <div style="font-size:12px;opacity:.75;">${esc(ts)}</div>
+        </div>
+      </div>`;
     });
-    out.textContent = lines.join("\n");
+
+    listHost.innerHTML = rows.join("");
+  }
+
+  function getItemByVisibleIndex(idx){
+    const list = readLib().slice().reverse();
+    return list[idx] || null;
   }
 
   document.addEventListener("click", function(e){
-    const id = e.target && e.target.id;
+    const t = e.target;
+    const id = t && t.id;
 
-    if (id === "ng-lib-refresh") {
-      renderLib();
+    if (id === "ng-lib-refresh") { renderLib(); return; }
+    if (id === "ng-lib-clear")   { writeLib([]); renderLib(); setViewer(false); return; }
+    if (id === "ng-lib-close")   { setViewer(false); return; }
+
+    if (id === "ng-lib-copy"){
+      const p = document.getElementById("ng-lib-viewer-pre");
+      if (!p) return;
+      try { navigator.clipboard.writeText(p.textContent || ""); } catch(e){}
       return;
     }
 
-    if (id === "ng-lib-clear") {
-      writeLib([]);
-      renderLib();
-      return;
+    const btn = (t && t.closest) ? t.closest("button[data-ng-lib]") : t;
+    const act = btn && btn.getAttribute && btn.getAttribute("data-ng-lib");
+    const row = btn && btn.closest ? btn.closest('[data-ng-lib-row="1"]') : null;
+const sidx = row && row.getAttribute ? row.getAttribute("data-ng-lib-idx") : null;
+
+if (act && sidx != null){
+  const idx = parseInt(sidx, 10);
+  const arr = readLib();
+  const it = (Number.isFinite(idx) && arr && arr[idx]) ? arr[idx] : null;
+  if (!it) return;
+
+      if (!it) return;
+
+      if (act === "view"){
+        const topic = it.topic || (it.received && it.received.topic) || it.title || "Saved story";
+        setViewer(false);
+
+        // ALSO open in main StoryView (View acts like Restore)
+        try { document.documentElement.setAttribute("data-ng-outtab", "story"); } catch(e) {}
+
+        try {
+          const sw = document.getElementById("ng-storyview");
+          if (sw) sw.style.display = "block";
+          const fmt = document.getElementById("ng-storyview-formatted");
+          if (fmt) fmt.style.display = "block";
+          try { document.documentElement.setAttribute("data-ng-std-ui", "advanced"); } catch(e) {}
+        } catch(e) {}
+
+        try {
+          const dp =
+            (it && it.output_json && it.output_json.formats) ? it.output_json.formats :
+            (it && it.output_json) ? it.output_json :
+            it;
+          if (typeof window.NG_renderDigiPackFormatted === "function") window.NG_renderDigiPackFormatted(dp);
+          try { localStorage.setItem("NG_DIGIPACK_DRAFT_V1", JSON.stringify(it)); } catch(e) {}
+        } catch(e) {}
+
+        try {
+          const fmt2 = document.getElementById("ng-storyview-formatted");
+          if (fmt2 && fmt2.scrollIntoView) fmt2.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch(e) {}
+
+        return;
+      }
+
+      if (act === "restore"){
+        // Switch output tab to Story so restored content becomes visible
+        try{ document.documentElement.setAttribute("data-ng-outtab","story"); }catch(e){}
+        // Ensure StoryView is visible when restoring
+        try{
+          const sw = document.getElementById("ng-storyview");
+          if (sw) sw.style.display = "block";
+          const fmt = document.getElementById("ng-storyview-formatted");
+          if (fmt) fmt.style.display = "block";
+          const out = document.getElementById("ng-storyview-out");
+          if (out) out.style.height = "60vh";
+          try { document.documentElement.setAttribute("data-ng-std-ui", "advanced"); } catch(e){}
+        }catch(e){}
+          // Force renderer input (so restore always shows something)
+          try{
+            const dp = (it && it.output_json) ? it.output_json : it;
+window.NG_LAST_DIGIPACK = dp;
+window.NG_DIGIPACK_OBJ = dp;
+window.NG_RESPONSE_OBJ = dp;
+
+          }catch(e){}
+        try{
+          try { localStorage.setItem("NG_DIGIPACK_DRAFT_V1", JSON.stringify(it)); } catch(e) {}
+          try { localStorage.setItem("NG_DIGIPACK_DRAFTS_V1", JSON.stringify([it])); } catch(e) {}
+          try { document.documentElement.setAttribute("data-ng-std-ui", "advanced"); } catch(e) {}
+
+          if (typeof window.NG_fillStoryView === "function") window.NG_fillStoryView();
+          else if (typeof window.NG_renderDigiPackFormatted === "function") window.NG_renderDigiPackFormatted(it && it.output_json ? it.output_json : it);
+
+        }catch(e){}
+        try {
+          const fmt = document.getElementById("ng-storyview-formatted");
+          if (fmt && fmt.scrollIntoView) fmt.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch(e) {}
+
+        return;
+      }
+
+      if (act === "del"){
+        try{
+          const arr = readLib();
+          const origIdx = arr.length - 1 - idx;
+          if (origIdx >= 0 && origIdx < arr.length){
+            arr.splice(origIdx, 1);
+            writeLib(arr);
+          }
+          setViewer(false);
+          renderLib();
+        }catch(e){}
+        return;
+      }
     }
   }, true);
 
-  // First paint when page loads
+  document.addEventListener("input", function(e){
+    const t = e.target;
+    if (t && t.id === "ng-lib-search") renderLib();
+  }, true);
+
   window.addEventListener("load", function(){ renderLib(); });
 })();
-/* NG_DRAFT_LIBRARY_WIRE_V1_END (2026-01-30) */
+/* NG_DRAFT_LIBRARY_WIRE_V2_END (2026-02-14) */
 /* NG_STORYVIEW_TOGGLE_DOC_V2_START (2026-01-30) */
 (function(){
   if (window.__NG_STORYVIEW_TOGGLE_DOC_V2__) return;

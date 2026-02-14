@@ -488,8 +488,54 @@ try{
     }
   }
 }catch(e){}
-window.NG_renderDigiPackFormatted(__dp);
-  }
+
+  /* NG_DRAFT_LIBRARY_SAVE_DIGIPACK_V1_START (2026-02-14)
+     Save ONLY structured DIGI_PACK outputs (output_json) into library. */
+  try {
+    const KEY_LIB = "ng_draft_library_v1";
+    // Prefer structured output_json only
+    const dp = (parsed && parsed.output_json && typeof parsed.output_json === "object") ? parsed.output_json : null;
+    if (dp) {
+      let arr = [];
+      try { arr = JSON.parse(localStorage.getItem(KEY_LIB) || "[]"); } catch(e) { arr = []; }
+      if (!Array.isArray(arr)) arr = [];
+
+      // topic: from dp.received.topic or dp.topic or fallback
+      const topic0 = (dp && dp.received && dp.received.topic) ? dp.received.topic : (dp.topic || (parsed && parsed.received && parsed.received.topic) || "");
+      const topic = String(topic0 || "(digi-pack)").trim();
+
+      const item = {
+        v: 1,
+        saved_at: new Date().toISOString(),
+        topic: (topic.length > 120 ? (topic.slice(0,120) + "…") : topic),
+        mode: (dp.mode || parsed.mode || ""),
+        received: (dp.received || parsed.received || null),
+        output_json: dp
+      };
+
+      // newest first; de-dupe by topic+mode (keep latest)
+      const sig = (item.topic + "|" + item.mode).toLowerCase();
+      arr = arr.filter(x => {
+        const t = String(x && x.topic || "").toLowerCase();
+        const m = String(x && x.mode || "").toLowerCase();
+        return (t + "|" + m) !== sig;
+      });
+
+      arr.unshift(item);
+      if (arr.length > 50) arr = arr.slice(0, 50);
+
+      try { localStorage.setItem(KEY_LIB, JSON.stringify(arr)); } catch(e) {}
+
+      // refresh library UI if present
+      try {
+        const btn = document.getElementById("ng-lib-refresh");
+        if (btn) btn.click();
+      } catch(e) {}
+    }
+  } catch(e) {}
+  /* NG_DRAFT_LIBRARY_SAVE_DIGIPACK_V1_END */
+
+window.NG_renderDigiPackFormatted(__dp);}
 }catch(e){}
 /* === NG_STORYVIEW_RENDER_AFTER_FILL_V1_END (20260205) === */
 
@@ -721,6 +767,7 @@ if (String(f && f.key || "").toLowerCase() === "raw") return;
   window.__NG_RENDER_EXPORT_OK__ = true;
 })();
  /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
+
 
 
 
