@@ -1065,6 +1065,12 @@ var items = readByteListFromUI();
       const btnSelC  = $("ng-lines-clear");
       const btnDel  = $("ng-lines-delete");
 
+      const spkName = $("ng-spk-name");
+      const spkDes  = $("ng-spk-desig");
+      const btnSpkApply = $("ng-spk-apply");
+      const btnSpkClear = $("ng-spk-clear");
+
+
       const btnMake  = $("ng-make-byte");
 
       if (btnLoad && !btnLoad.__ng){
@@ -1131,6 +1137,148 @@ var items = readByteListFromUI();
         btnDel.__ng = 1;
         btnDel.addEventListener("click", (e)=>{ e.preventDefault(); deleteSelectedLines(); });
       }
+
+      // === NG_SPK_LABEL_WIRE_V1_START (20260215) ===
+      function getSelectedCheckboxes(){
+        const wrap = $("ng-lines-wrap");
+        if (!wrap) return [];
+        return qsa('input[type="checkbox"]:checked', wrap);
+      }
+
+      function setSpkBtnsEnabled(){
+        try{
+          const n = getSelectedCheckboxes().length;
+          if (btnSpkApply) btnSpkApply.disabled = !(n > 0);
+          if (btnSpkClear) btnSpkClear.disabled = !(n > 0);
+        }catch(e){}
+      }
+
+            function normalizeLabelParts(){
+        const name = (spkName && spkName.value ? String(spkName.value) : "").trim();
+        const des  = (spkDes  && spkDes.value  ? String(spkDes.value)  : "").trim();
+        return { left: name, right: des };
+      }
+
+
+      function stripExistingPrefix(s){
+        s = String(s || "");
+        // removes leading [x] or [x|y] prefix once
+        return s.replace(/^\s*\[\s*[^\]]+\]\s*/,"");
+      }
+
+            function getRowTextNode(rowEl){
+        try{
+          if (!rowEl) return null;
+
+          // Old card renderer
+          var t = rowEl.querySelector(".ng-line-text");
+          if (t) return t;
+
+          // Current LABEL renderer: <label><input ...><div>TEXT</div></label>
+          if (rowEl.tagName === "LABEL") {
+            // prefer first DIV after checkbox
+            var divs = rowEl.querySelectorAll("div");
+            if (divs && divs.length) return divs[0];
+          }
+
+          // Generic fallback: a div/span that is not the checkbox
+          var kids = Array.from(rowEl.children || []);
+          for (var i=0;i<kids.length;i++){
+            var el = kids[i];
+            if (!el) continue;
+            if (el.tagName === "INPUT") continue;
+            if (el.tagName === "DIV" || el.tagName === "SPAN") return el;
+          }
+
+          return null;
+        } catch(e){
+          return null;
+        }
+      }
+
+      function applyPrefixToRowText(rowEl, prefix){
+        var t = getRowTextNode(rowEl);
+        if (!t) return;
+        var raw = stripExistingPrefix(t.textContent || "");
+        t.textContent = prefix + " " + raw;
+      }
+
+      function clearPrefixFromRowText(rowEl){
+        var t = getRowTextNode(rowEl);
+        if (!t) return;
+        t.textContent = stripExistingPrefix(t.textContent || "");
+      }
+
+
+      function findRowFromCheckbox(cb){
+        try{
+          // old renderer uses .ng-line-item; v2 may use parent container
+          return cb.closest(".ng-line-item") || cb.closest("label") || cb.parentElement;
+        }catch(e){
+          return cb && cb.parentElement ? cb.parentElement : null;
+        }
+      }
+
+      function applySpeakerLabelSelected(){
+        const wrap = $("ng-lines-wrap");
+        if (!wrap) return alert("Transcript lines panel missing.");
+        const cbs = getSelectedCheckboxes();
+        if (!cbs.length) return alert("No lines selected.");
+
+        const parts = normalizeLabelParts();
+        if (!parts.left) return alert("Speaker नाम भरिए (Name).");
+
+        const prefix = "[" + parts.left + (parts.right ? ("|" + parts.right) : "") + "]";
+
+        cbs.forEach(cb => {
+          const row = findRowFromCheckbox(cb);
+          applyPrefixToRowText(row, prefix);
+        });
+
+        // update status text if present
+        try{
+          const st = $("ng-lines-status");
+          if (st) st.textContent = (st.textContent || "") + " | Labeled: " + prefix + " (" + cbs.length + ")";
+        }catch(e){}
+
+        setSpkBtnsEnabled();
+      }
+
+      function clearSpeakerLabelSelected(){
+        const wrap = $("ng-lines-wrap");
+        if (!wrap) return alert("Transcript lines panel missing.");
+        const cbs = getSelectedCheckboxes();
+        if (!cbs.length) return alert("No lines selected.");
+
+        cbs.forEach(cb => {
+          const row = findRowFromCheckbox(cb);
+          clearPrefixFromRowText(row);
+        });
+
+        try{
+          const st = $("ng-lines-status");
+          if (st) st.textContent = (st.textContent || "") + " | Label cleared (" + cbs.length + ")";
+        }catch(e){}
+
+        setSpkBtnsEnabled();
+      }
+
+      if (btnSpkApply && !btnSpkApply.__ng){
+        btnSpkApply.__ng = 1;
+        btnSpkApply.addEventListener("click", (e)=>{ e.preventDefault(); applySpeakerLabelSelected(); });
+      }
+      if (btnSpkClear && !btnSpkClear.__ng){
+        btnSpkClear.__ng = 1;
+        btnSpkClear.addEventListener("click", (e)=>{ e.preventDefault(); clearSpeakerLabelSelected(); });
+      }
+
+      // enable/disable when selection changes (cheap poll)
+      if (!window.__NG_SPK_BTN_POLL_V1){
+        window.__NG_SPK_BTN_POLL_V1 = setInterval(setSpkBtnsEnabled, 500);
+      }
+      setSpkBtnsEnabled();
+      // === NG_SPK_LABEL_WIRE_V1_END ===
+
 
 
       // auto-restore saved

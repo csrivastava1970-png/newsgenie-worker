@@ -894,6 +894,21 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <button type="button" id="ng-lines-delete" title="Delete selected transcript lines">Delete Selected</button>
 
       <button type="button" id="ng-lines-clear">Clear Selection</button>
+      <!-- NG_SPK_LABEL_UI_V1_START (20260215) -->
+      <span style="margin-left:10px; font-size:12px; opacity:.8;">Label:</span>
+
+      
+
+      <input id="ng-spk-name" type="text" placeholder="Name (optional)"
+        style="padding:6px 8px; border:1px solid #ddd; border-radius:8px; min-width:140px;" />
+
+      <input id="ng-spk-desig" type="text" placeholder="Designation (optional)"
+        style="padding:6px 8px; border:1px solid #ddd; border-radius:8px; min-width:160px;" />
+
+      <button type="button" id="ng-spk-apply" title="Apply label to selected lines" disabled>Apply</button>
+      <button type="button" id="ng-spk-clear" title="Clear label from selected lines" disabled>Clear Label</button>
+      <!-- NG_SPK_LABEL_UI_V1_END -->
+
       <span id="ng-lines-status" style="font-size:12px; opacity:.75;"></span>
     </div>
 
