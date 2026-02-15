@@ -890,8 +890,13 @@ var items = readByteListFromUI();
     };
 
     function getSelectedLines(){
-      const wrap = $("ng-lines-wrap");
-      const base = (window.__NG_TLINES && Array.isArray(window.__NG_TLINES)) ? window.__NG_TLINES : [];
+      const wrap = $("ng-lines-wrap");        let base = (window.__NG_TLINES && Array.isArray(window.__NG_TLINES)) ? window.__NG_TLINES : [];
+
+        // Fallback: if V2 base is empty, build from DOM (old renderer)
+        if (!base.length){
+          base = qsa(".ng-line-text", wrap).map(n => (n.textContent || "").trim());
+        }
+
       if (!wrap) return [];
 
       // support both data-i (new) and data-ln (script1_dump)
@@ -927,6 +932,53 @@ var items = readByteListFromUI();
       qsa("input[type=checkbox][data-i], input[type=checkbox][data-ln]", wrap)
         .forEach(cb => cb.checked = !!on);
     }
+    function deleteSelectedLines(){
+      try{
+        const wrap = $("ng-lines-wrap");
+        const base = (window.__NG_TLINES && Array.isArray(window.__NG_TLINES)) ? window.__NG_TLINES : [];
+        if (!wrap || !base.length) return alert("No transcript lines to delete.");
+
+        const cbs = qsa('input[type=checkbox]:checked', wrap)
+          .filter(cb => cb.hasAttribute('data-i') || cb.hasAttribute('data-ln'));
+
+        if (!cbs.length) return alert("No transcript lines selected.");
+
+        // collect indices
+        const idxs = [];
+        for (const cb of cbs){
+                    const v = cb.getAttribute("data-i") || cb.getAttribute("data-ln") || cb.getAttribute("data-idx");
+
+          const n = parseInt(v, 10);
+          if (!isNaN(n)) idxs.push(n);
+        }
+        if (!idxs.length) return alert("No valid selected indices.");
+
+        // unique + sort desc (safe splice)
+        const uniq = Array.from(new Set(idxs)).sort((a,b)=>b-a);
+
+        const msg = `Delete ${uniq.length} selected line(s)?`;
+        if (!confirm(msg)) return;
+
+        const next = base.slice();
+        for (const i of uniq){
+          if (i >= 0 && i < next.length) next.splice(i, 1);
+        }
+
+        window.__NG_TLINES = next;
+        if (typeof window.NG_setTranscriptLines === "function") {
+          window.NG_setTranscriptLines(next);
+        }
+
+        // status line (best-effort)
+        const st = $("ng-lines-status");
+        if (st) st.textContent = next.length ? ("Lines: " + next.length) : "No lines yet";
+
+      }catch(e){
+        console.error("[NG_TLINES] deleteSelectedLines error", e);
+        alert("Delete failed. See console.");
+      }
+    }
+
 
     function makeDraftFromSelection(){
       const sel = getSelectedLines();
@@ -1001,6 +1053,8 @@ var items = readByteListFromUI();
       const btnClr   = $("btn-clear-transcript-json");
       const btnSelA  = $("ng-lines-selectall");
       const btnSelC  = $("ng-lines-clear");
+      const btnDel  = $("ng-lines-delete");
+
       const btnMake  = $("ng-make-byte");
 
       if (btnLoad && !btnLoad.__ng){
@@ -1063,6 +1117,11 @@ var items = readByteListFromUI();
       if (btnSelA && !btnSelA.__ng){ btnSelA.__ng=1; btnSelA.addEventListener("click", ()=>selectAll(true)); }
       if (btnSelC && !btnSelC.__ng){ btnSelC.__ng=1; btnSelC.addEventListener("click", ()=>selectAll(false)); }
       if (btnMake && !btnMake.__ng){ btnMake.__ng=1; btnMake.addEventListener("click", ()=>makeDraftFromSelection()); }
+      if (btnDel && !btnDel.__ng){
+        btnDel.__ng = 1;
+        btnDel.addEventListener("click", (e)=>{ e.preventDefault(); deleteSelectedLines(); });
+      }
+
 
       // auto-restore saved
       try{
