@@ -668,7 +668,8 @@ const rows = revPairs.map(([it, realIndex]) => {
 
     const btn = (t && t.closest) ? t.closest("button[data-ng-lib]") : t;
     const act = btn && btn.getAttribute && btn.getAttribute("data-ng-lib");
-    const row = btn && btn.closest ? btn.closest('[data-ng-lib-row="1"]') : null;
+    const row = e.target && e.target.closest ? e.target.closest('[data-ng-lib-row="1"]') : null;
+
 const sidx = row && row.getAttribute ? row.getAttribute("data-ng-lib-idx") : null;
 
 if (act && sidx != null){
@@ -695,10 +696,9 @@ if (act && sidx != null){
         } catch(e) {}
 
         try {
-          const dp =
-            (it && it.output_json && it.output_json.formats) ? it.output_json.formats :
-            (it && it.output_json) ? it.output_json :
-            it;
+         // Prefer full output_json for structured renderer (not formats-only)
+const dp = (it && it.output_json) ? it.output_json : it;
+
           if (typeof window.NG_renderDigiPackFormatted === "function") window.NG_renderDigiPackFormatted(dp);
           try { localStorage.setItem("NG_DIGIPACK_DRAFT_V1", JSON.stringify(it)); } catch(e) {}
         } catch(e) {}
@@ -750,13 +750,14 @@ window.NG_RESPONSE_OBJ = dp;
       }
 
       if (act === "del"){
-        try{
-          const arr = readLib();
-          const origIdx = arr.length - 1 - idx;
-          if (origIdx >= 0 && origIdx < arr.length){
-            arr.splice(origIdx, 1);
-            writeLib(arr);
-          }
+  try{
+    const arr = readLib();
+    const origIdx = idx; // data-ng-lib-idx is the real index
+    if (origIdx >= 0 && origIdx < arr.length){
+      arr.splice(origIdx, 1);
+      writeLib(arr);
+    }
+
           setViewer(false);
           renderLib();
         }catch(e){}
