@@ -901,7 +901,8 @@ var items = readByteListFromUI();
 
       // support both data-i (new) and data-ln (script1_dump)
       const cbs = qsa('input[type=checkbox]:checked', wrap)
-        .filter(cb => cb.hasAttribute('data-i') || cb.hasAttribute('data-ln'));
+        .filter(cb => cb.hasAttribute('data-i') || cb.hasAttribute('data-ln') || cb.hasAttribute('data-idx'));
+
 
       const out = [];
       for (const cb of cbs){
@@ -933,13 +934,22 @@ var items = readByteListFromUI();
         .forEach(cb => cb.checked = !!on);
     }
     function deleteSelectedLines(){
-      try{
-        const wrap = $("ng-lines-wrap");
-        const base = (window.__NG_TLINES && Array.isArray(window.__NG_TLINES)) ? window.__NG_TLINES : [];
-        if (!wrap || !base.length) return alert("No transcript lines to delete.");
+      try{        const wrap = $("ng-lines-wrap");
+        if (!wrap) return alert("No transcript lines to delete.");
+
+        let base = (window.__NG_TLINES && Array.isArray(window.__NG_TLINES)) ? window.__NG_TLINES : [];
+
+        // Fallback: if V2 base is empty, build from DOM (old renderer)
+        if (!base.length){
+          base = qsa(".ng-line-text", wrap).map(n => (n.textContent || "").trim());
+        }
+
+        if (!base.length) return alert("No transcript lines to delete.");
+
 
         const cbs = qsa('input[type=checkbox]:checked', wrap)
-          .filter(cb => cb.hasAttribute('data-i') || cb.hasAttribute('data-ln'));
+ .filter(cb => cb.hasAttribute('data-i') || cb.hasAttribute('data-ln') || cb.hasAttribute('data-idx'));
+
 
         if (!cbs.length) return alert("No transcript lines selected.");
 
