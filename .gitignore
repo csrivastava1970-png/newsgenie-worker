@@ -67,4 +67,5 @@ _HARDLOCK_*
 _ng_find_*.txt
 .dev.vars_backup_*
 public/index_zero_before_restore_*.html
+*BROKEN_BACKUP*.js
 
