@@ -74,6 +74,19 @@
   }
 
   function doLoad(){
+  // NG_SMART_LOAD_V1 (20260215):
+  // If user has typed/pasted into textarea, treat "Load" as "Parse/Render from textarea".
+  try{
+    const ta = $("ta-transcript-json");
+    const cur = (ta && ta.value ? String(ta.value) : "").trim();
+    if (cur) {
+      if (typeof window.NG_loadTranscriptJSON === "function") {
+        window.NG_loadTranscriptJSON();
+        return;
+      }
+    }
+  }catch(_){}
+
     const v = readLS();
     updateUIFromValue(v, "Loaded");
     setHint(v ? "Loaded from localStorage." : "Nothing saved yet.");
@@ -1019,8 +1032,11 @@ var items = readByteListFromUI();
 
       try { localStorage.setItem(LS_KEY, raw); } catch(e){}
 
-      let parsed = raw;
-      try { parsed = JSON.parse(raw); } catch(e){}
+            let parsed = raw;
+      let isJson = true;
+      try { parsed = JSON.parse(raw); }
+      catch(e){ parsed = raw; isJson = false; }
+
 
       // Extract text candidates
       function extractText(obj){
@@ -1037,11 +1053,35 @@ var items = readByteListFromUI();
       }
 
       const text = extractText(parsed) || (typeof parsed === "string" ? parsed : "");
+      // --- NG_STATUS_HINT_DIRECT_V1 (20260215) ---
+      function ngWriteStatusHint(statusMsg, hintMsg){
+        try{
+          var se = document.getElementById("ng-latest-transcript-status");
+          var he = document.getElementById("transcript-load-hint");
+          if (se) se.textContent = statusMsg || "";
+          if (he) he.textContent = hintMsg || "";
+        }catch(e){}
+      }
+
+    // UX: tell user whether we loaded JSON or plain text
+try {
+  const msg = isJson
+    ? "Loaded JSON → lines rendered → saved."
+    : "Loaded text → lines rendered → saved.";
+
+  console.log("[NG_INBOX] load mode:", (isJson ? "json" : "text"));
+  ngWriteStatusHint(msg + " • len " + (raw.length || 0), "");
+
+} catch(_) {}
+
+
+
       window.NG_TRANSCRIPT = text;
       console.log("[NG_INBOX] NG_TRANSCRIPT set chars:", (text||"").length);
 
       // If ingest exists (index.html hook), use it:
-      if (typeof window.NG_ingestTranscript === "function") {
+            if (isJson && typeof window.NG_ingestTranscript === "function") {
+
         try { window.NG_ingestTranscript(parsed); } catch(e){ console.error("[NG_INBOX] ingest error", e); }
       } else {
         // fallback: split lines and render
