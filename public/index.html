@@ -1,7 +1,6 @@
 ﻿
 
 
-
 <!doctype html>
 <html lang="en">
 <!-- NG_BUILD_STAMP_START -->
@@ -747,9 +746,8 @@ input[type="text"], input[type="search"], textarea, select{
 
 /* NG_APP_LOOK_V2_TUNE5_END */
 /* NG_APP_LOOK_V2_TUNE6_START (2026-02-16) */
-/* Guaranteed segmented control: #ng-output-tabs — CSS only */
 
-#ng-output-tabs{
+
   border: 1px solid rgba(15,23,42,0.12) !important;
   background: rgba(255,255,255,0.75) !important;
   border-radius: 999px !important;
@@ -760,7 +758,7 @@ input[type="text"], input[type="search"], textarea, select{
   align-items: center !important;
 }
 
-#ng-output-tabs > button{
+
   border-radius: 999px !important;
   border: 1px solid transparent !important;
   background: transparent !important;
@@ -772,25 +770,25 @@ input[type="text"], input[type="search"], textarea, select{
   transform: none !important;
 }
 
-#ng-output-tabs > button:hover{
+
   background: rgba(79,70,229,0.10) !important;
   color: rgba(15,23,42,0.88) !important;
 }
 
-#ng-output-tabs > button:active{
+
   background: rgba(79,70,229,0.14) !important;
 }
 
 /* Active tab (best-effort: many UIs add .active or aria-selected) */
-#ng-output-tabs > button.active,
-#ng-output-tabs > button[aria-selected="true"]{
+
+
   background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
   border-color: rgba(79,70,229,0.30) !important;
   color: rgba(15,23,42,0.92) !important;
 }
 
 /* If no active class is used, at least make keyboard focus look selected */
-#ng-output-tabs > button:focus-visible{
+
   background: linear-gradient(180deg, rgba(79,70,229,0.18), rgba(79,70,229,0.08)) !important;
   border-color: rgba(79,70,229,0.30) !important;
 }
@@ -800,36 +798,36 @@ input[type="text"], input[type="search"], textarea, select{
 /* Compact + align output tabs — CSS only */
 
 /* Make the segmented bar less "bubble" and more "app tabs" */
-#ng-output-tabs{
+
   padding: 4px !important;
   gap: 4px !important;
   box-shadow: 0 6px 14px rgba(15,23,42,0.08) !important;
   background: rgba(255,255,255,0.85) !important;
 }
 
-#ng-output-tabs > button{
+
   padding: 6px 10px !important;
   font-size: 12.5px !important;
 }
 
 /* Try to align Status + tabs in one row (best-effort) */
-#ng-output-tabs{
+
   vertical-align: middle;
 }
 
-#ng-output-tabs{
+
   margin-left: auto !important;
 }
 
 /* If there is a wrapper around status+tabs, make it a flex row */
-#ng-output-tabs:where(*) {
+
   /* no-op marker */
 }
-#ng-output-tabs{
+
   /* keep as inline-flex; wrapper flex does alignment */
 }
 
-#ng-output-tabs{
+
   /* allow it to sit nicely without taking full width */
   max-width: 100% !important;
 }
@@ -869,7 +867,7 @@ input[type="text"], input[type="search"], textarea, select{
 }
 
 /* Put tabs on the right without weird stretching */
-#ng-output-tabs{
+
   margin-left: 0 !important;
   display: inline-flex !important;
 }
@@ -895,9 +893,8 @@ input[type="text"], input[type="search"], textarea, select{
 /* Fix: ng-tab-log looking like separate pill — CSS only */
 
 /* Make sure all tab buttons inside ng-output-tabs share identical baseline */
-#ng-output-tabs > button,
-#ng-output-tabs > button.btn,
-#ng-output-tabs > button#ng-tab-log{
+
+
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -918,20 +915,19 @@ input[type="text"], input[type="search"], textarea, select{
 }
 
 /* Kill any special "btn" effects that might be applied to only one tab */
-#ng-output-tabs > button.btn{
+
   box-shadow: none !important;
 }
 
 /* Hover */
-#ng-output-tabs > button:hover{
+
   background: rgba(79,70,229,0.10) !important;
   color: rgba(15,23,42,0.88) !important;
 }
 
 /* Active handling: support BOTH .active and .is-active and aria-selected */
-#ng-output-tabs > button.active,
-#ng-output-tabs > button.is-active,
-#ng-output-tabs > button[aria-selected="true"]{
+
+
   background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
   border-color: rgba(79,70,229,0.30) !important;
   color: rgba(15,23,42,0.92) !important;
@@ -942,14 +938,14 @@ input[type="text"], input[type="search"], textarea, select{
 /* Fix: #ng-tab-log gets pushed out — reset positioning/auto-margins/floats */
 
 /* Ensure tabs container is a single inline-flex group */
-#ng-output-tabs{
+
   display: inline-flex !important;
   align-items: center !important;
   flex-wrap: nowrap !important;
 }
 
 /* HARD reset for the Log tab */
-#ng-output-tabs > #ng-tab-log{
+
   margin-left: 0 !important;      /* kills push-to-right */
   float: none !important;         /* kills float-right */
   position: static !important;     /* kills absolute/fixed */
@@ -970,7 +966,7 @@ input[type="text"], input[type="search"], textarea, select{
 }
 
 /* Also prevent any child icon wrapper from forcing layout */
-#ng-output-tabs > #ng-tab-log *{
+
   float: none !important;
   position: static !important;
 }
@@ -981,21 +977,21 @@ input[type="text"], input[type="search"], textarea, select{
 /* Fix: ng-tab-log has different flex rules (btn) — normalize to tabs */
 
 /* Normalize ALL tab buttons to same flex behavior */
-#ng-output-tabs > button{
+
   flex: 0 1 auto !important;
   flex-shrink: 1 !important;
   align-self: auto !important;
 }
 
 /* Extra-hard for the Log tab */
-#ng-output-tabs > #ng-tab-log{
+
   flex: 0 1 auto !important;
   flex-shrink: 1 !important;
   align-self: auto !important;
 }
 
 /* If .btn has any special layout rules, neutralize inside ng-output-tabs */
-#ng-output-tabs > button.btn{
+
   flex: 0 1 auto !important;
   flex-shrink: 1 !important;
   align-self: auto !important;
@@ -1003,26 +999,25 @@ input[type="text"], input[type="search"], textarea, select{
 
 /* NG_APP_LOOK_V2_TUNE11_END */
 /* NG_APP_LOOK_V2_TUNE12_START (2026-02-16) */
-/* Fix: #ng-tab-log inherits .btn background — force transparent inside #ng-output-tabs */
+
 
 /* Any .btn inside output tabs must NOT have its own filled background */
-#ng-output-tabs > button.btn{
+
   background: transparent !important;
   background-color: transparent !important;
   border-color: transparent !important;
 }
 
 /* Hard override specifically for log tab */
-#ng-output-tabs > #ng-tab-log.btn{
+
   background: transparent !important;
   background-color: transparent !important;
   border-color: transparent !important;
 }
 
 /* Active state will still work via TUNE9/TUNE6 rules */
-#ng-output-tabs > button.btn.active,
-#ng-output-tabs > button.btn.is-active,
-#ng-output-tabs > button.btn[aria-selected="true"]{
+
+
   background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
   border-color: rgba(79,70,229,0.30) !important;
 }
@@ -1031,31 +1026,28 @@ input[type="text"], input[type="search"], textarea, select{
 /* NG_APP_LOOK_V2_TUNE13_START (2026-02-16) */
 /* Beat high-specificity button:not(...) rule inside output tabs */
 
-/* This matches the same not-chain but scoped to #ng-output-tabs, so specificity becomes higher */
-#ng-output-tabs button:not(.primary):not(.btn-primary):not(#btnGenerate):not(#ng-generate):not(#ng-btn-generate):not(#ng-generate-btn){
+
   background: transparent !important;
   background-color: transparent !important;
   border-color: transparent !important;
 }
 
 /* Keep hover/active visible */
-#ng-output-tabs > button:hover{
+
   background: rgba(79,70,229,0.10) !important;
 }
 
-#ng-output-tabs > button.active,
-#ng-output-tabs > button.is-active,
-#ng-output-tabs > button[aria-selected="true"]{
+
   background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
   border-color: rgba(79,70,229,0.30) !important;
 }
 
 /* NG_APP_LOOK_V2_TUNE13_END */
 /* NG_APP_LOOK_V2_TUNE14_START (2026-02-16) */
-/* Fix illusion: #ng-output-tabs container looks like a separate pill/card */
+
 
 /* Make tabs container flat (no own card). Outer panel already provides the card. */
-#ng-output-tabs{
+
   background: transparent !important;
   background-color: transparent !important;
   border: 0 !important;
@@ -1075,17 +1067,17 @@ input[type="text"], input[type="search"], textarea, select{
 /* NG_APP_LOOK_V2_TUNE15_START (2026-02-16) */
 /* Fix: tabs wrap makes last tab look like separate pill (mobile). Force single-row tabs. */
 
-#ng-output-tabs{
+
   flex-wrap: nowrap !important;   /* override inline flex-wrap:wrap */
   gap: 6px !important;           /* tighter */
   overflow-x: auto !important;   /* allow scroll if needed */
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;         /* Firefox hide scrollbar */
 }
-#ng-output-tabs::-webkit-scrollbar{ height: 0; } /* WebKit hide scrollbar */
+
 
 /* Ensure buttons don't grow weird */
-#ng-output-tabs > button{
+
   flex: 0 0 auto !important;
   white-space: nowrap !important;
 }
@@ -1117,7 +1109,7 @@ input[type="text"], input[type="search"], textarea, select{
 }
 
 /* Tabs: right side, single row, no wrap */
-#ng-output-tabs{
+
   justify-self: end !important;
   display: flex !important;
   flex-wrap: nowrap !important;     /* override inline wrap */
@@ -1133,7 +1125,7 @@ input[type="text"], input[type="search"], textarea, select{
 }
 
 /* Buttons: consistent size */
-#ng-output-tabs > button{
+
   flex: 0 0 auto !important;
   white-space: nowrap !important;
 }
@@ -1161,14 +1153,14 @@ input[type="text"], input[type="search"], textarea, select{
 }
 
 /* Keep tabs single row + scroll instead of wrapping */
-#ng-output-tabs{
+
   flex-wrap: nowrap !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
-#ng-output-tabs::-webkit-scrollbar{ height: 0; }
+
 
 /* NG_APP_LOOK_V2_TUNE17_END */
 </style>
@@ -1625,15 +1617,9 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   <!-- NG_LEGACY_TOOLBAR_ROOTS_V1_END -->
 
 
-
-
-
 <h2>NewsGenie Digital Producer</h2>
 
   <form id="digi-pack-form" onsubmit="return false;">
-
-
-
 
 
     <div class="row">
@@ -1646,7 +1632,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
       </div>
 
 
-
       <div>
         <label>Platform</label>
         <select name="platform" id="platform">
@@ -1655,7 +1640,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
           <option value="TV">TV</option>
         </select>
       </div>
-
 
 
       <div>
@@ -1677,7 +1661,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     </div>
 
 
-
     <div style="margin-top:10px;">
       <label>What Happened (mandatory)</label>
       <textarea name="whatHappened" id="whatHappened" rows="3" placeholder="2–4 lines में क्या हुआ?" required></textarea>
@@ -1685,12 +1668,10 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     </div>
 
 
-
     <div style="margin-top:10px;">
       <label>Sources / References (mandatory)</label>
       <textarea name="sources" id="sources" rows="3" placeholder="Links / documents / official statements" required></textarea>
     </div>
-
 
 
     <div style="margin-top:10px;">
@@ -1720,7 +1701,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     </div>
 
 
-
     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <span style="font-size:12px;opacity:.7;">Status:</span>
       <span id="ng-latest-transcript-status" style="font-size:12px;opacity:.85;">(not loaded)</span>
@@ -1733,7 +1713,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     <summary style="cursor:pointer; user-select:none; font-size:13px; opacity:.85;">Transcript Inbox</summary>
 
 
-
     <div style="margin-top:10px;">
 
 
@@ -1743,11 +1722,9 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
         placeholder="Paste JSON here..."></textarea>
 
 
-
       <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
         <button type="button" id="btn-clear-transcript-json">Clear Saved</button>
       </div>
-
 
 
       <div id="ng-latest-transcript-preview"
@@ -1798,7 +1775,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <!-- NG_SUPERLIGHT_TRANSCRIPT_TO_BYTES_V1_END -->
 
 
-
     <div id="ng-adv-only" style="margin-top:10px;">
 
    <!-- BYTES -->
@@ -1806,7 +1782,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
 <div class="panel" id="bytesWrap" data-ng-sec="bytes">
   <b>Bytes</b>
-
 
 
   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
@@ -1944,7 +1919,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
       }, 300);
     }catch(e){}
   })();
-
 
 
   
@@ -2094,7 +2068,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <div id="ng-byte-draft-area" style="margin-top:10px; ">
 
 
-
   <div id="ng-byte-draft-box" style="margin-top:10px;padding:10px;border:1px dashed #cbd5e1;border-radius:12px;">
 
 
@@ -2106,7 +2079,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
       style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;"
       placeholder="Selected lines will appear here... (or paste/type)"
     ></textarea>
-
 
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
@@ -2123,7 +2095,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
         style="padding:8px 10px; border:1px solid #ccc; border-radius:10px; min-width:260px;"
       >
     </div>
-
 
 
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
@@ -2151,7 +2122,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <!-- NG_DRAFT_LIBRARY_PANEL_V1_END -->
 
 
-
       <!-- hidden JSON sink for Final Bytes module -->
       <textarea id="bytesJSONOut" style="display:none;"></textarea>
 
@@ -2170,16 +2140,13 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
       <summary style="cursor:pointer; font-weight:700;">Visuals</summary>
 
 
-
       <div style="margin-top:10px;">
 
 
         <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
 
-
         <div id="visuals-wrap"></div>
-
 
 
         <div style="margin-top:8px;">
@@ -2190,9 +2157,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   </div>
 </div>
 <!-- NG_STD_VISUALS_WRAP_V1_END -->
-
-
-
 
 
     <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
@@ -2209,8 +2173,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     </div>
   </form>
 <!-- Editorial Extraction : Suggestions ONLY -->
-
-
 
 
 <div id="ng-advanced-panels">
@@ -2233,8 +2195,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 </div>
 
 
-
-
   <details id="ng-log-details">
     <summary style="cursor:pointer; font-weight:700;">Log</summary>
     <pre id="ngLog" style="margin-top:10px; max-height:160px; overflow:auto;"></pre>
@@ -2242,7 +2202,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 </div>
 
   </div>
-
 
 
   <div class="panel" id="ng-quick-panel-wrap">
@@ -2262,7 +2221,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   </div>
 
 
-
  <div class="panel" id="ng-response-panel-wrap">
 
 
@@ -2280,7 +2238,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <div id="ng-storyview" class="panel" style="display:none;">
   <b>Story View</b>
 <button type="button" class="btn" id="ngCopyStoryView">Copy Story</button>
-
 
 
   <div style="font-size:12px;opacity:.75;margin-top:6px;">
@@ -2312,7 +2269,6 @@ border-radius:12px;"></pre>
 
 
 <div class="panel" id="ng-preview-prompt-panel">
-
 
 
   <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -3255,7 +3211,6 @@ window.NG_fillStoryView = function(){
 <!-- NG_DRAFT_TO_ADD_FINAL_BRIDGE_V2_END -->
 
 
-
   <!-- NG_ADD_TRANSCRIPT_INBOX_SCRIPT_V1_START (2026-02-12) -->
   <script defer src="js/ng_transcript_inbox_v1.js?v=20260212_4"></script>
   <!-- NG_ADD_TRANSCRIPT_INBOX_SCRIPT_V1_END -->
@@ -3840,121 +3795,7 @@ function renderJsonTab() {
 <!-- /* === NG_STORYVIEW_WIRE_V1_END === */ -->
 
 
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
