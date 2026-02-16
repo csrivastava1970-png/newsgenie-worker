@@ -1427,6 +1427,23 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   background: rgba(0,0,0,0.06);
 }
 /* === NG_MINI_MODE_BTN_CSS_V1_END === */
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
+#ng-output-tabs{
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  padding: 4px !important;
+  min-height: 34px !important;
+  height: auto !important;
+
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#ng-output-tabs::-webkit-scrollbar{ height: 0; }
+/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -2098,10 +2115,10 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 </div>
 
 
-  <details id="ng-log-details">
-    <summary style="cursor:pointer; font-weight:700;">Log</summary>
-    <pre id="ngLog" style="margin-top:10px; max-height:160px; overflow:auto;"></pre>
-  </details>
+   <div id="ng-log-panel-wrap" class="panel" style="display:none;">
+    <pre id="ngLog" style="margin:0; max-height:55vh; overflow:auto; white-space:pre-wrap;"></pre>
+  </div>
+
 </div>
 
   </div>
@@ -3699,7 +3716,6 @@ function renderJsonTab() {
 
 
 </html>
-
 
 
 
