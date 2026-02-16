@@ -1182,6 +1182,99 @@ input[type="text"], input[type="search"], textarea, select{
 #ng-output-tabs::-webkit-scrollbar{ height: 0; }
 
 /* NG_APP_LOOK_V2_TUNE17_END */
+/* === NG_OUTPUT_TABS_SEG_LOCK_V1_START (2026-02-16) === */
+/* FINAL LOCK: make Story/Quick/Log/JSON a true segmented control.
+   This block intentionally resets tab buttons inside #ng-output-tabs
+   so global .btn / button rules can never break it again. */
+
+#ng-output-tabs{
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0 !important;                 /* segmented = no gaps */
+  flex-wrap: nowrap !important;      /* NEVER wrap */
+  overflow-x: auto !important;       /* if narrow screen, scroll instead of wrap */
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;             /* Firefox hide */
+  padding: 3px !important;
+  margin: 0 !important;
+
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  background: rgba(255,255,255,0.75) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+#ng-output-tabs::-webkit-scrollbar{ height: 0; } /* WebKit hide */
+
+/* HARD RESET ONLY INSIDE OUTPUT TABS */
+#ng-output-tabs > button{
+  all: unset !important;             /* kills .btn / global button styles completely */
+  box-sizing: border-box !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 6px 12px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+
+  border-radius: 999px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+
+  color: rgba(15,23,42,0.86) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+
+  margin: 0 !important;              /* kill any auto margins */
+  float: none !important;
+  position: static !important;
+}
+
+/* Hover / active feel */
+#ng-output-tabs > button:hover{
+  background: rgba(79,70,229,0.10) !important;
+}
+#ng-output-tabs > button:active{
+  background: rgba(79,70,229,0.14) !important;
+}
+
+/* Selected tab support (any of these patterns) */
+#ng-output-tabs > button.active,
+#ng-output-tabs > button.is-active,
+#ng-output-tabs > button[aria-selected="true"]{
+  background: rgba(79,70,229,0.16) !important;
+  border-color: rgba(79,70,229,0.28) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+/* Keyboard focus */
+#ng-output-tabs > button:focus-visible{
+  outline: 2px solid rgba(79,70,229,0.35) !important;
+  outline-offset: 2px !important;
+}
+
+/* Optional: make the group look truly segmented by adding a tiny divider effect */
+#ng-output-tabs > button + button{
+  margin-left: 2px !important;
+}
+/* === NG_OUTPUT_TABS_SEG_LOCK_V1_END === */
+/* === NG_OUTPUT_TABS_DATA_ACTIVE_CSS_V1_START (2026-02-16) === */
+/* Persistent active styling via container attribute (survives re-render) */
+#ng-output-tabs[data-ng-active-tab="ng-tab-story"] #ng-tab-story,
+#ng-output-tabs[data-ng-active-tab="ng-tab-quick"] #ng-tab-quick,
+#ng-output-tabs[data-ng-active-tab="ng-tab-log"]   #ng-tab-log,
+#ng-output-tabs[data-ng-active-tab="ng-tab-raw"]   #ng-tab-raw{
+  background: rgba(79,70,229,0.18) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+  color: rgba(15,23,42,0.95) !important;
+}
+/* === NG_OUTPUT_TABS_DATA_ACTIVE_CSS_V1_END === */
+
+
 
 
 
@@ -1653,6 +1746,71 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <style>
   /* Hard lock: Add Byte must never reappear after any re-render */
   #addByteBtn { display: none !important; }
+/* === NG_OUTPUT_TABS_SEG_LOCK_FINAL_V1_START (2026-02-16) === */
+/* Single source of truth: stable segmented control for Output tabs only. */
+#ng-output-headwrap #ng-output-tabs{
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;          /* kill wrap (prevents detached pill) */
+  gap: 4px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  background: rgba(255,255,255,0.85) !important;
+  box-shadow: none !important;
+  overflow-x: auto !important;           /* scroll if tight */
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+}
+#ng-output-headwrap #ng-output-tabs::-webkit-scrollbar{ height: 0 !important; }
+
+/* Normalize ALL tab buttons (even if global .btn changes) */
+#ng-output-headwrap #ng-output-tabs > button,
+#ng-output-headwrap #ng-output-tabs > button.btn{
+  appearance: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+
+  margin: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  padding: 6px 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  min-height: 30px !important;
+  min-width: 44px !important;            /* so Log never looks “different” */
+}
+
+/* Hover */
+#ng-output-headwrap #ng-output-tabs > button:hover{
+  background: rgba(79,70,229,0.10) !important;
+}
+
+/* Active via data attribute (works with your existing logic) */
+#ng-output-tabs[data-ng-active-tab="ng-tab-story"] #ng-tab-story,
+#ng-output-tabs[data-ng-active-tab="ng-tab-quick"] #ng-tab-quick,
+#ng-output-tabs[data-ng-active-tab="ng-tab-log"]   #ng-tab-log,
+#ng-output-tabs[data-ng-active-tab="ng-tab-raw"]   #ng-tab-raw{
+  background: rgba(79,70,229,0.18) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+  color: rgba(15,23,42,0.95) !important;
+}
+
+/* Disabled look (matches app behavior pre-Generate) */
+#ng-output-headwrap #ng-output-tabs > button:disabled{
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+}
+/* === NG_OUTPUT_TABS_SEG_LOCK_FINAL_V1_END (2026-02-16) === */
+
 </style>
 <!-- NG_HIDE_ADDBYTEBTN_LOCK_V3_END -->
 </head>
@@ -2260,7 +2418,8 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   <div class="status" style="margin:0;"><b>Status:</b> <span id="ngStatus">Idle</span></div>
 
 
-  <div id="ng-output-tabs" style="display:flex; gap:8px; flex-wrap:wrap; margin:0;">
+  <div id="ng-output-tabs" style="margin:0;">
+
     <button type="button" class="btn" id="ng-tab-story">Story</button>
     <button type="button" class="btn" id="ng-tab-quick">Quick</button>
     <button type="button" class="btn" id="ng-tab-log">Log</button>
@@ -3299,6 +3458,90 @@ window.NG_fillStoryView = function(){
 <!-- NG_BYTE_ROW_AUTOCOLLAPSE_V1_START (20260212) -->
 <style>
   .ng-byte-row.ng-empty-collapsed{ display:none !important; }
+/* === NG_OUTPUT_TABS_FINAL_OVERRIDE_V1_START (2026-02-16) === */
+/* LAST WINS: override any later/duplicate tab rules */
+#ng-output-headwrap #ng-output-tabs{
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+  gap: 0 !important;
+}
+#ng-output-headwrap #ng-output-tabs > button{
+  margin: 0 !important;
+}
+/* === NG_OUTPUT_TABS_FINAL_OVERRIDE_V1_END === */
+/* === NG_OUTPUT_TABS_SEG_STYLE_V1_START (2026-02-16) === */
+#ng-output-headwrap #ng-output-tabs{
+  padding: 3px !important;
+  border: 1px solid rgba(15,23,42,0.14) !important;
+  background: rgba(255,255,255,0.70) !important;
+  border-radius: 999px !important;
+}
+
+#ng-output-headwrap #ng-output-tabs > button{
+  height: 28px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  line-height: 28px !important;          /* equal vertical centering */
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+/* Visual separators (subtle) */
+#ng-output-headwrap #ng-output-tabs > button + button{
+  position: relative !important;
+}
+#ng-output-headwrap #ng-output-tabs > button + button::before{
+  content: "" !important;
+  position: absolute !important;
+  left: -2px !important;
+  top: 6px !important;
+  bottom: 6px !important;
+  width: 1px !important;
+  background: rgba(15,23,42,0.10) !important;
+}
+
+/* Hover + selected */
+#ng-output-headwrap #ng-output-tabs > button:hover{
+  background: rgba(79,70,229,0.10) !important;
+}
+#ng-output-headwrap #ng-output-tabs > button.active,
+#ng-output-headwrap #ng-output-tabs > button.is-active,
+#ng-output-headwrap #ng-output-tabs > button[aria-selected="true"]{
+  background: rgba(79,70,229,0.16) !important;
+  border-color: rgba(79,70,229,0.26) !important;
+}
+/* === NG_OUTPUT_TABS_SEG_STYLE_V1_END === */
+/* === NG_OUTPUT_TABS_SELECTED_FORCE_V1_START (2026-02-16) === */
+/* Force visible selected segment even if global button/.btn rules fight us */
+#ng-output-headwrap #ng-output-tabs > button.active,
+#ng-output-headwrap #ng-output-tabs > button.is-active,
+#ng-output-headwrap #ng-output-tabs > button[aria-selected="true"]{
+  background: rgba(79,70,229,0.18) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+  color: rgba(15,23,42,0.95) !important;
+}
+#ng-output-headwrap #ng-output-tabs > button.active:hover,
+#ng-output-headwrap #ng-output-tabs > button[aria-selected="true"]:hover{
+  background: rgba(79,70,229,0.22) !important;
+}
+/* === NG_OUTPUT_TABS_SELECTED_FORCE_V1_END === */
+/* === NG_OUTPUT_TABS_VISIBILITY_FIX_V1_START (2026-02-16) === */
+#ng-output-headwrap #ng-output-tabs{
+  overflow: visible !important;   /* stop clipping */
+  gap: 6px !important;            /* give breathing room so labels are visible */
+}
+#ng-output-headwrap #ng-output-tabs > button{
+  min-width: 44px !important;     /* ensure Log doesn't get squeezed away */
+}
+/* === NG_OUTPUT_TABS_VISIBILITY_FIX_V1_END === */
+
+
+
+
+
 </style>
 
 <script>
@@ -3336,6 +3579,62 @@ window.NG_fillStoryView = function(){
 })();
 </script>
 <!-- NG_BYTE_ROW_AUTOCOLLAPSE_V1_END -->
+<script>
+/* === NG_OUTPUT_TABS_ACTIVE_STATE_V4_START (2026-02-16) === */
+(function(){
+  var TAB_IDS = {
+    "ng-tab-story": 1,
+    "ng-tab-quick": 1,
+    "ng-tab-log":   1,
+    "ng-tab-raw":   1
+  };
+
+  function ensureDefault(){
+    var wrap = document.getElementById("ng-output-tabs");
+    if (!wrap) return;
+    if (!wrap.getAttribute("data-ng-active-tab")) {
+      wrap.setAttribute("data-ng-active-tab", "ng-tab-story");
+    }
+  }
+
+  function install(){
+    ensureDefault();
+
+    // HARD-STABLE: capture clicks at document level (survives wrap/button re-render)
+    document.addEventListener("click", function(e){
+      var t = e.target;
+      if (!t) return;
+
+      // climb to button
+      while (t && t !== document.body && t.tagName !== "BUTTON") t = t.parentNode;
+      if (!t || t === document.body || t.tagName !== "BUTTON") return;
+
+      if (!t.id || !TAB_IDS[t.id]) return;
+
+      var wrap = document.getElementById("ng-output-tabs");
+      if (wrap) {
+        wrap.setAttribute("data-ng-active-tab", t.id);
+      }
+    }, true);
+
+    // If some script replaces #ng-output-tabs node later, keep default alive
+    try{
+      var mo = new MutationObserver(function(){
+        ensureDefault();
+      });
+      mo.observe(document.documentElement, { childList:true, subtree:true });
+    }catch(e){}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", install, { once:true });
+  } else {
+    install();
+  }
+})();
+ /* === NG_OUTPUT_TABS_ACTIVE_STATE_V4_END === */
+</script>
+
 </body>
 <script id="ng-runtime-flags">
 /* NG_EE_AUTOINIT_DISABLED_V1_START (20260205)
