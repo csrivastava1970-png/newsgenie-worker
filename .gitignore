@@ -69,3 +69,6 @@ _ng_find_*.txt
 public/index_zero_before_restore_*.html
 *BROKEN_BACKUP*.js
 
+
+# Local scratch dumps (do not commit)
+public/_dump_*.txt
