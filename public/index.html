@@ -286,6 +286,921 @@ body[data-ng-outtab="json"] #ng-json-panel-wrap,
 #ng-storyview-formatted { display:none !important; }
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_END === */
 #ng-storyview-out{display:none!important;}
+/* NG_APP_LOOK_V2_START (2026-02-16) */
+/* Indigo minimal "app" polish — CSS only, UI-safe. */
+
+:root{
+  --ng-bg: #f6f7fb;
+  --ng-surface: #ffffff;
+  --ng-surface-2: #fbfbff;
+  --ng-border: rgba(15,23,42,0.12);
+  --ng-border-2: rgba(15,23,42,0.18);
+
+  --ng-text: #0f172a;
+  --ng-text-2: rgba(15,23,42,0.72);
+  --ng-muted: rgba(15,23,42,0.55);
+
+  --ng-accent: #4f46e5;       /* indigo */
+  --ng-accent-2: #4338ca;
+  --ng-accent-soft: rgba(79,70,229,0.12);
+
+  --ng-shadow: 0 10px 30px rgba(15,23,42,0.10);
+  --ng-shadow-2: 0 6px 18px rgba(15,23,42,0.08);
+  --ng-radius: 14px;
+  --ng-radius-2: 18px;
+}
+
+html, body{
+  background: var(--ng-bg) !important;
+  color: var(--ng-text) !important;
+}
+
+body{
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji" !important;
+  line-height: 1.35;
+}
+
+/* Make page feel like an app container */
+#ng-app, #app, #root, .container, .wrap, .page{
+  /* Only applies if such wrappers exist; harmless if not */
+}
+
+/* Generic panels/cards */
+.panel, .card, .box, .section{
+  background: var(--ng-surface) !important;
+  border: 1px solid var(--ng-border) !important;
+  border-radius: var(--ng-radius) !important;
+  box-shadow: var(--ng-shadow-2);
+}
+
+/* If your layout uses obvious big wrappers, give them breathing space */
+main, .main, #main, #content, .content{
+  /* harmless if not found */
+}
+
+h1,h2,h3{
+  letter-spacing: -0.01em;
+}
+
+/* Buttons: more "app" feel */
+button, .btn, input[type="button"], input[type="submit"]{
+  border-radius: 12px !important;
+  border: 1px solid var(--ng-border-2) !important;
+  background: var(--ng-surface) !important;
+  color: var(--ng-text) !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 1px 0 rgba(15,23,42,0.03);
+  transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+}
+
+button:hover, .btn:hover, input[type="button"]:hover, input[type="submit"]:hover{
+  border-color: rgba(79,70,229,0.35) !important;
+  box-shadow: 0 8px 18px rgba(15,23,42,0.10);
+  transform: translateY(-1px);
+}
+
+button:active, .btn:active{
+  transform: translateY(0px);
+  box-shadow: 0 4px 10px rgba(15,23,42,0.08);
+}
+
+button:disabled, .btn:disabled{
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Primary-ish buttons: try to catch common "generate" styles */
+button.primary, .btn-primary, #btnGenerate, #ng-generate, #ng-btn-generate, #ng-generate-btn{
+  background: linear-gradient(180deg, var(--ng-accent), var(--ng-accent-2)) !important;
+  color: #fff !important;
+  border-color: rgba(67,56,202,0.55) !important;
+}
+
+button.primary:hover, .btn-primary:hover, #btnGenerate:hover, #ng-generate:hover, #ng-btn-generate:hover, #ng-generate-btn:hover{
+  box-shadow: 0 14px 28px rgba(79,70,229,0.22);
+}
+
+/* Inputs */
+input[type="text"], input[type="search"], textarea, select{
+  background: var(--ng-surface) !important;
+  color: var(--ng-text) !important;
+  border: 1px solid var(--ng-border) !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  outline: none !important;
+  box-shadow: inset 0 1px 0 rgba(15,23,42,0.03);
+}
+
+input[type="text"]:focus, input[type="search"]:focus, textarea:focus, select:focus{
+  border-color: rgba(79,70,229,0.55) !important;
+  box-shadow: 0 0 0 4px var(--ng-accent-soft);
+}
+
+textarea{
+  min-height: 84px;
+}
+
+/* Chips / badges / small labels */
+.badge, .chip, .pill, #ng-ui-mode-pill, #ng-mode-pill{
+  border-radius: 999px !important;
+  border: 1px solid rgba(79,70,229,0.25) !important;
+  background: rgba(79,70,229,0.10) !important;
+  color: rgba(15,23,42,0.85) !important;
+  padding: 4px 10px !important;
+}
+
+/* Pre/Code blocks: make output areas look clean */
+pre, code, .mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+pre{
+  background: var(--ng-surface-2) !important;
+  border: 1px solid var(--ng-border) !important;
+  border-radius: var(--ng-radius) !important;
+  padding: 12px 14px !important;
+  box-shadow: inset 0 1px 0 rgba(15,23,42,0.03);
+}
+
+/* Make toolbars look like app header strips if present */
+#ng-toolbar, #ng-toolbar-root, #ng-dp-actions, .toolbar, .topbar{
+  border-radius: var(--ng-radius-2) !important;
+  border: 1px solid var(--ng-border) !important;
+  background: rgba(255,255,255,0.72) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--ng-shadow);
+}
+
+/* Light separators */
+hr, .divider{
+  border: none;
+  border-top: 1px solid rgba(15,23,42,0.10);
+}
+
+/* Small helper text */
+small, .muted, .hint{
+  color: var(--ng-muted) !important;
+}
+
+/* Slightly nicer scrollbars (Chromium) */
+*::-webkit-scrollbar{ width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb{
+  background: rgba(15,23,42,0.18);
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.65);
+}
+*::-webkit-scrollbar-thumb:hover{ background: rgba(15,23,42,0.28); }
+
+/* Keep focus visible for keyboard users */
+:focus-visible{
+  outline: 3px solid rgba(79,70,229,0.30) !important;
+  outline-offset: 2px;
+}
+
+/* NG_APP_LOOK_V2_END */
+/* NG_APP_LOOK_V2_TUNE1_START (2026-02-16) */
+/* Reduce "form" vibe; strengthen dashboard sections — CSS only */
+
+body{
+  padding: 18px 14px !important;
+}
+
+/* Center the app and avoid super-narrow feel */
+#ng-app, #app, #root, #main, main, .page, .wrap, .container{
+  max-width: 980px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Section titles: make them look like dashboard headers */
+.panel > b,
+.card > b,
+.section > b{
+  display: block;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  margin: 2px 0 10px 0;
+  padding-left: 10px;
+  border-left: 4px solid rgba(79,70,229,0.55);
+}
+
+/* Panels: give consistent padding */
+.panel, .card, .section{
+  padding: 14px 14px !important;
+}
+
+/* Labels: smaller + muted so it feels less like a form */
+label{
+  font-size: 12px !important;
+  color: var(--ng-muted) !important;
+  font-weight: 600 !important;
+}
+
+/* Inputs: slightly tighter height/spacing */
+input[type="text"], input[type="search"], select{
+  padding: 9px 12px !important;
+}
+
+/* Textareas: reduce default height so it doesn’t scream “form” */
+textarea{
+  min-height: 64px !important;
+}
+
+/* Make big button row feel like app actions */
+#ng-dp-actions, #ng-toolbar-root, .toolbar, .topbar{
+  padding: 10px 10px !important;
+}
+
+/* Give primary action area a little separation if it exists */
+#ng-generate-area, #ng-generate-root, #ng-actions, #ng-actions-row{
+  border: 1px solid rgba(15,23,42,0.10);
+  border-radius: var(--ng-radius-2);
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 12px 12px;
+}
+
+/* NG_APP_LOOK_V2_TUNE1_END */
+/* NG_APP_LOOK_V2_TUNE2_START (2026-02-16) */
+/* Accordion + spacing polish — CSS only */
+
+/* Better vertical rhythm */
+.panel, .card, .section{
+  margin: 0 0 14px 0 !important;
+}
+
+/* Buttons: slightly smaller and consistent */
+button, .btn, input[type="button"], input[type="submit"]{
+  padding: 7px 11px !important;
+  font-size: 13px !important;
+}
+
+/* Secondary buttons look like soft pills */
+button:not(.primary):not(.btn-primary):not(#btnGenerate):not(#ng-generate):not(#ng-btn-generate):not(#ng-generate-btn){
+  background: var(--ng-surface-2) !important;
+}
+
+/* Status line: make it look like subtle system text */
+#ng-load-status, #ng-status, .status, .ng-status{
+  font-size: 12px !important;
+  color: var(--ng-muted) !important;
+}
+
+/* --- Accordion / collapsible sections (details/summary) --- */
+details{
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  border-radius: var(--ng-radius) !important;
+  background: var(--ng-surface) !important;
+  box-shadow: var(--ng-shadow-2);
+  margin: 10px 0 !important;
+  overflow: hidden;
+}
+
+details > summary{
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 14px !important;
+  font-weight: 700;
+  color: var(--ng-text) !important;
+  background: linear-gradient(180deg, rgba(79,70,229,0.08), rgba(79,70,229,0.02)) !important;
+  border-bottom: 1px solid rgba(15,23,42,0.10) !important;
+}
+
+details > summary::-webkit-details-marker{ display:none; }
+
+/* Add a clean chevron */
+details > summary:before{
+  content: "▸";
+  display: inline-block;
+  margin-right: 10px;
+  color: rgba(79,70,229,0.85);
+  transform: translateY(-1px);
+}
+
+details[open] > summary:before{
+  content: "▾";
+}
+
+details > summary:hover{
+  background: linear-gradient(180deg, rgba(79,70,229,0.12), rgba(79,70,229,0.03)) !important;
+}
+
+/* Inside accordion: padding */
+details > *:not(summary){
+  padding: 12px 14px !important;
+}
+
+/* Make accordion content not look cramped */
+details pre{
+  margin-top: 10px !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE2_END */
+/* NG_APP_LOOK_V2_TUNE3_START (2026-02-16) */
+/* Story Brief: reduce form feel, increase app feel — CSS only */
+
+/* Make labels look like captions */
+label{
+  text-transform: none !important;
+  letter-spacing: 0.00em !important;
+  margin: 10px 0 6px 0 !important;
+}
+
+/* Tighten overall field spacing */
+input[type="text"], input[type="search"], select, textarea{
+  margin-top: 0 !important;
+}
+
+/* Smaller textarea heights for brief-style inputs */
+textarea{
+  min-height: 58px !important;
+}
+
+/* Give the very top area a premium card look (best-effort selectors) */
+#ng-story, #ng-story-form, #ng-brief, #ng-brief-form, #ng-inputs, #ng-inputs-panel{
+  border-radius: var(--ng-radius-2);
+}
+
+/* Optional: if there is any grid wrapper, add gap without breaking layout */
+.form-row, .row, .field, .field-row, .ng-row{
+  /* harmless if not present */
+}
+
+/* Subtle focus lift */
+input[type="text"]:focus, input[type="search"]:focus, textarea:focus, select:focus{
+  transform: translateY(-1px);
+}
+
+/* Prevent focus lift from jittering inside tight containers */
+input[type="text"], input[type="search"], textarea, select{
+  transform: translateY(0);
+}
+
+/* Make placeholders slightly calmer */
+::placeholder{
+  color: rgba(15,23,42,0.45) !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE3_END */
+/* NG_APP_LOOK_V2_TUNE4_START (2026-02-16) */
+/* Segmented control for bottom tabs — CSS only */
+
+/* Best-effort: style any inline group of buttons that looks like tabs */
+#ng-tabs, #ng-tabbar, .tabs, .tabbar, .segmented, .seg{
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.75);
+  border-radius: 999px;
+  padding: 6px;
+  display: inline-flex;
+  gap: 6px;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+}
+
+/* If those buttons are plain buttons, make them pill tabs */
+#ng-tabs button, #ng-tabbar button, .tabs button, .tabbar button, .segmented button, .seg button{
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 7px 12px !important;
+  font-weight: 700;
+  color: rgba(15,23,42,0.70) !important;
+}
+
+/* Hover */
+#ng-tabs button:hover, #ng-tabbar button:hover, .tabs button:hover, .tabbar button:hover, .segmented button:hover, .seg button:hover{
+  background: rgba(79,70,229,0.10) !important;
+  color: rgba(15,23,42,0.88) !important;
+}
+
+/* Active/current tab (best-effort via common classes/attrs) */
+#ng-tabs .active, #ng-tabbar .active, .tabs .active, .tabbar .active, .segmented .active, .seg .active,
+#ng-tabs button[aria-selected="true"], #ng-tabbar button[aria-selected="true"], .tabs button[aria-selected="true"], .tabbar button[aria-selected="true"]{
+  background: linear-gradient(180deg, rgba(79,70,229,0.18), rgba(79,70,229,0.10)) !important;
+  border-color: rgba(79,70,229,0.28) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+/* If your tab row is just a group of buttons inside a small area, try to catch it */
+#ngQuick, #ngResponse{
+  border-radius: var(--ng-radius) !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE4_END */
+/* NG_APP_LOOK_V2_TUNE5_START (2026-02-16) */
+/* Targeted: segmented tabs inside #ng-advanced-panels — CSS only */
+
+/* Find the row that contains Story/Quick/Log/JSON and style it */
+#ng-advanced-panels button{
+  /* keep existing from previous blocks */
+}
+
+/* Style the COMMON PARENT of the 4 tab buttons.
+   We use :has() to locate a container that contains all four buttons by text. */
+#ng-advanced-panels :is(div, nav, section, header, footer):has(> button):has(> button):has(> button):has(> button){
+  /* no-op baseline; real match below */
+}
+
+/* Main match: container that has the 4 buttons */
+#ng-advanced-panels :is(div, nav, section, header, footer)
+  :has(> button:nth-of-type(1))
+{
+  /* We will only apply segmented look if those 4 labels exist inside */
+}
+
+/* Apply segmented look to the nearest container that includes all 4 labels */
+#ng-advanced-panels :is(div, nav, section, header, footer)
+  :has(> button:where(:nth-of-type(1)))
+  :has(> button:where(:nth-of-type(2)))
+  :has(> button:where(:nth-of-type(3)))
+  :has(> button:where(:nth-of-type(4))){
+  border: 1px solid rgba(15,23,42,0.12) !important;
+  background: rgba(255,255,255,0.75) !important;
+  border-radius: 999px !important;
+  padding: 6px !important;
+  display: inline-flex !important;
+  gap: 6px !important;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.08) !important;
+}
+
+/* Tab buttons inside that row */
+#ng-advanced-panels :is(div, nav, section, header, footer)
+  :has(> button:nth-of-type(4)) > button{
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 7px 12px !important;
+  font-weight: 700 !important;
+  color: rgba(15,23,42,0.70) !important;
+}
+
+#ng-advanced-panels :is(div, nav, section, header, footer)
+  :has(> button:nth-of-type(4)) > button:hover{
+  background: rgba(79,70,229,0.10) !important;
+  color: rgba(15,23,42,0.88) !important;
+}
+
+/* Active tab best-effort */
+#ng-advanced-panels :is(div, nav, section, header, footer)
+  :has(> button:nth-of-type(4)) > button.active,
+#ng-advanced-panels :is(div, nav, section, header, footer)
+  :has(> button:nth-of-type(4)) > button[aria-selected="true"]{
+  background: linear-gradient(180deg, rgba(79,70,229,0.18), rgba(79,70,229,0.10)) !important;
+  border-color: rgba(79,70,229,0.28) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE5_END */
+/* NG_APP_LOOK_V2_TUNE6_START (2026-02-16) */
+/* Guaranteed segmented control: #ng-output-tabs — CSS only */
+
+#ng-output-tabs{
+  border: 1px solid rgba(15,23,42,0.12) !important;
+  background: rgba(255,255,255,0.75) !important;
+  border-radius: 999px !important;
+  padding: 6px !important;
+  display: inline-flex !important;
+  gap: 6px !important;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.08) !important;
+  align-items: center !important;
+}
+
+#ng-output-tabs > button{
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 7px 12px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  color: rgba(15,23,42,0.70) !important;
+  transform: none !important;
+}
+
+#ng-output-tabs > button:hover{
+  background: rgba(79,70,229,0.10) !important;
+  color: rgba(15,23,42,0.88) !important;
+}
+
+#ng-output-tabs > button:active{
+  background: rgba(79,70,229,0.14) !important;
+}
+
+/* Active tab (best-effort: many UIs add .active or aria-selected) */
+#ng-output-tabs > button.active,
+#ng-output-tabs > button[aria-selected="true"]{
+  background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+/* If no active class is used, at least make keyboard focus look selected */
+#ng-output-tabs > button:focus-visible{
+  background: linear-gradient(180deg, rgba(79,70,229,0.18), rgba(79,70,229,0.08)) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE6_END */
+/* NG_APP_LOOK_V2_TUNE7_START (2026-02-16) */
+/* Compact + align output tabs — CSS only */
+
+/* Make the segmented bar less "bubble" and more "app tabs" */
+#ng-output-tabs{
+  padding: 4px !important;
+  gap: 4px !important;
+  box-shadow: 0 6px 14px rgba(15,23,42,0.08) !important;
+  background: rgba(255,255,255,0.85) !important;
+}
+
+#ng-output-tabs > button{
+  padding: 6px 10px !important;
+  font-size: 12.5px !important;
+}
+
+/* Try to align Status + tabs in one row (best-effort) */
+#ng-output-tabs{
+  vertical-align: middle;
+}
+
+#ng-output-tabs{
+  margin-left: auto !important;
+}
+
+/* If there is a wrapper around status+tabs, make it a flex row */
+#ng-output-tabs:where(*) {
+  /* no-op marker */
+}
+#ng-output-tabs{
+  /* keep as inline-flex; wrapper flex does alignment */
+}
+
+#ng-output-tabs{
+  /* allow it to sit nicely without taking full width */
+  max-width: 100% !important;
+}
+
+/* Wrapper guesses: if tabs sit inside a row container, flex it */
+#ng-advanced-panels .panel:has(#ng-output-tabs),
+#ng-advanced-panels .card:has(#ng-output-tabs),
+#ng-advanced-panels div:has(#ng-output-tabs){
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* Keep status block from stretching weirdly */
+#ng-advanced-panels .panel:has(#ng-output-tabs) .status,
+#ng-advanced-panels .card:has(#ng-output-tabs) .status{
+  white-space: nowrap;
+}
+
+/* NG_APP_LOOK_V2_TUNE7_END */
+/* NG_APP_LOOK_V2_TUNE8_START (2026-02-16) */
+/* Fix output headrow: status left + tabs right; undo broad flex side-effects */
+
+/* Hard override: ensure output headrow is the ONLY flex controller */
+#ng-output-headrow{
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  justify-content: space-between !important;
+}
+
+/* Keep status compact on one line */
+#ng-output-headrow .status,
+#ng-output-headrow #ng-status,
+#ng-output-headrow #ng-load-status{
+  white-space: nowrap !important;
+}
+
+/* Put tabs on the right without weird stretching */
+#ng-output-tabs{
+  margin-left: 0 !important;
+  display: inline-flex !important;
+}
+
+/* IMPORTANT: undo the earlier broad rule that made random divs flex */
+#ng-advanced-panels div:has(#ng-output-tabs){
+  display: block !important;
+  align-items: initial !important;
+  justify-content: initial !important;
+  gap: initial !important;
+}
+
+/* But keep OUR intended flex on the real headrow */
+#ng-advanced-panels #ng-output-headrow{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE8_END */
+/* NG_APP_LOOK_V2_TUNE9_START (2026-02-16) */
+/* Fix: ng-tab-log looking like separate pill — CSS only */
+
+/* Make sure all tab buttons inside ng-output-tabs share identical baseline */
+#ng-output-tabs > button,
+#ng-output-tabs > button.btn,
+#ng-output-tabs > button#ng-tab-log{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  padding: 6px 10px !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  color: rgba(15,23,42,0.70) !important;
+
+  min-width: 0 !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+/* Kill any special "btn" effects that might be applied to only one tab */
+#ng-output-tabs > button.btn{
+  box-shadow: none !important;
+}
+
+/* Hover */
+#ng-output-tabs > button:hover{
+  background: rgba(79,70,229,0.10) !important;
+  color: rgba(15,23,42,0.88) !important;
+}
+
+/* Active handling: support BOTH .active and .is-active and aria-selected */
+#ng-output-tabs > button.active,
+#ng-output-tabs > button.is-active,
+#ng-output-tabs > button[aria-selected="true"]{
+  background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE9_END */
+/* NG_APP_LOOK_V2_TUNE10_START (2026-02-16) */
+/* Fix: #ng-tab-log gets pushed out — reset positioning/auto-margins/floats */
+
+/* Ensure tabs container is a single inline-flex group */
+#ng-output-tabs{
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+/* HARD reset for the Log tab */
+#ng-output-tabs > #ng-tab-log{
+  margin-left: 0 !important;      /* kills push-to-right */
+  float: none !important;         /* kills float-right */
+  position: static !important;     /* kills absolute/fixed */
+  inset: auto !important;
+  right: auto !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+
+  order: 0 !important;            /* kills reordering */
+  flex: 0 0 auto !important;
+
+  width: auto !important;
+  min-width: 0 !important;
+  align-self: center !important;
+
+  transform: none !important;
+}
+
+/* Also prevent any child icon wrapper from forcing layout */
+#ng-output-tabs > #ng-tab-log *{
+  float: none !important;
+  position: static !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE10_END */
+
+/* NG_APP_LOOK_V2_TUNE11_START (2026-02-16) */
+/* Fix: ng-tab-log has different flex rules (btn) — normalize to tabs */
+
+/* Normalize ALL tab buttons to same flex behavior */
+#ng-output-tabs > button{
+  flex: 0 1 auto !important;
+  flex-shrink: 1 !important;
+  align-self: auto !important;
+}
+
+/* Extra-hard for the Log tab */
+#ng-output-tabs > #ng-tab-log{
+  flex: 0 1 auto !important;
+  flex-shrink: 1 !important;
+  align-self: auto !important;
+}
+
+/* If .btn has any special layout rules, neutralize inside ng-output-tabs */
+#ng-output-tabs > button.btn{
+  flex: 0 1 auto !important;
+  flex-shrink: 1 !important;
+  align-self: auto !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE11_END */
+/* NG_APP_LOOK_V2_TUNE12_START (2026-02-16) */
+/* Fix: #ng-tab-log inherits .btn background — force transparent inside #ng-output-tabs */
+
+/* Any .btn inside output tabs must NOT have its own filled background */
+#ng-output-tabs > button.btn{
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Hard override specifically for log tab */
+#ng-output-tabs > #ng-tab-log.btn{
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Active state will still work via TUNE9/TUNE6 rules */
+#ng-output-tabs > button.btn.active,
+#ng-output-tabs > button.btn.is-active,
+#ng-output-tabs > button.btn[aria-selected="true"]{
+  background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE12_END */
+/* NG_APP_LOOK_V2_TUNE13_START (2026-02-16) */
+/* Beat high-specificity button:not(...) rule inside output tabs */
+
+/* This matches the same not-chain but scoped to #ng-output-tabs, so specificity becomes higher */
+#ng-output-tabs button:not(.primary):not(.btn-primary):not(#btnGenerate):not(#ng-generate):not(#ng-btn-generate):not(#ng-generate-btn){
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Keep hover/active visible */
+#ng-output-tabs > button:hover{
+  background: rgba(79,70,229,0.10) !important;
+}
+
+#ng-output-tabs > button.active,
+#ng-output-tabs > button.is-active,
+#ng-output-tabs > button[aria-selected="true"]{
+  background: linear-gradient(180deg, rgba(79,70,229,0.20), rgba(79,70,229,0.10)) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE13_END */
+/* NG_APP_LOOK_V2_TUNE14_START (2026-02-16) */
+/* Fix illusion: #ng-output-tabs container looks like a separate pill/card */
+
+/* Make tabs container flat (no own card). Outer panel already provides the card. */
+#ng-output-tabs{
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Optional: add subtle divider line under tabs instead of pill background */
+#ng-output-headwrap.panel{
+  /* keep as card; just ensure tabs don't create a nested card */
+}
+
+/* NG_APP_LOOK_V2_TUNE14_END */
+/* NG_APP_LOOK_V2_TUNE15_START (2026-02-16) */
+/* Fix: tabs wrap makes last tab look like separate pill (mobile). Force single-row tabs. */
+
+#ng-output-tabs{
+  flex-wrap: nowrap !important;   /* override inline flex-wrap:wrap */
+  gap: 6px !important;           /* tighter */
+  overflow-x: auto !important;   /* allow scroll if needed */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;         /* Firefox hide scrollbar */
+}
+#ng-output-tabs::-webkit-scrollbar{ height: 0; } /* WebKit hide scrollbar */
+
+/* Ensure buttons don't grow weird */
+#ng-output-tabs > button{
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+/* Optional: keep headrow aligned */
+#ng-output-headrow{
+  align-items: center !important;
+  gap: 10px !important;
+}
+/* NG_APP_LOOK_V2_TUNE15_END */
+/* NG_APP_LOOK_V2_TUNE16_START (2026-02-16) */
+/* FINAL: lock output head row into 2-column layout; keep tabs in one line */
+
+/* Make headrow a 2-col grid: Status left, Tabs right */
+#ng-output-headrow{
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 10px !important;
+}
+
+/* Ensure status stays left */
+#ng-output-headrow .status,
+#ng-output-headrow #ngStatus,
+#ng-output-headrow [id*="status"]{
+  justify-self: start !important;
+  white-space: nowrap !important;
+}
+
+/* Tabs: right side, single row, no wrap */
+#ng-output-tabs{
+  justify-self: end !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;     /* override inline wrap */
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+
+  overflow: hidden !important;      /* no second row */
+}
+
+/* Buttons: consistent size */
+#ng-output-tabs > button{
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+/* Hide any accidental "floating log chip" created by layout quirks */
+#ng-output-headwrap .btn#ng-tab-log{
+  transform: none !important;
+}
+
+/* NG_APP_LOOK_V2_TUNE16_END */
+/* NG_APP_LOOK_V2_TUNE17_START (2026-02-16) */
+/* Remove duplicate "▶ Log" accordion chip near tabs (keep Log as a tab) */
+
+#ng-output-headwrap #ng-log-details > summary{
+  display: none !important;
+}
+
+/* Safety: ensure details container doesn't reserve extra space */
+#ng-output-headwrap #ng-log-details{
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Keep tabs single row + scroll instead of wrapping */
+#ng-output-tabs{
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#ng-output-tabs::-webkit-scrollbar{ height: 0; }
+
+/* NG_APP_LOOK_V2_TUNE17_END */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </style>

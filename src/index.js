@@ -152,9 +152,40 @@ export default {
     // Always RETURN a Response for static assets (prevents "Promise did not resolve to Response")
     if (env && env.ASSETS) {
       // Devtools sometimes probes this path; never crash
-      if (path.startsWith("/.well-known/")) {
+            if (path.startsWith("/.well-known/")) {
         return new Response("{}", { status: 200, headers: { "content-type": "application/json; charset=utf-8" } });
       }
+
+      // Common browser probes — always return a Response
+      if (path === "/favicon.ico" || path === "/robots.txt" || path === "/manifest.json") {
+        try {
+          const rrP = await env.ASSETS.fetch(request);
+          return rrP; // serve if present
+        } catch (e) {
+          const ct = path.endsWith(".json") ? "application/json" : "text/plain";
+          return new Response(path.endsWith(".json") ? "{}" : "", {
+            status: 200,
+            headers: { "content-type": ct + "; charset=utf-8" }
+          });
+        }
+      }
+
+      // --- NEW: map /public/* -> /* for Assets binding (prevents 500 on /public/js/...) ---
+      if (path.startsWith("/public/")) {
+        try {
+          const u3 = new URL(request.url);
+          u3.pathname = path.replace(/^\/public/, ""); // /public/js/x.js -> /js/x.js
+          const req3 = new Request(u3.toString(), request);
+          const rr3 = await env.ASSETS.fetch(req3);
+          return rr3; // always Response
+        } catch (e) {
+          return new Response("ASSETS_PUBLIC_MAP_ERR: " + String(e && e.message ? e.message : e), {
+            status: 500,
+            headers: { "content-type": "text/plain; charset=utf-8" }
+          });
+        }
+      }
+
 
       // Serve static files from /public via Assets binding
       if (
