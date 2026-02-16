@@ -200,17 +200,6 @@ h2{
 html[data-ng-std-ui="simple"] #ngResponse { display:none !important; }
 html[data-ng-std-ui="simple"] #ng-response-panel { display:none !important; }
 
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1182,120 +1171,6 @@ input[type="text"], input[type="search"], textarea, select{
 #ng-output-tabs::-webkit-scrollbar{ height: 0; }
 
 /* NG_APP_LOOK_V2_TUNE17_END */
-/* === NG_OUTPUT_TABS_SEG_LOCK_V1_START (2026-02-16) === */
-/* FINAL LOCK: make Story/Quick/Log/JSON a true segmented control.
-   This block intentionally resets tab buttons inside #ng-output-tabs
-   so global .btn / button rules can never break it again. */
-
-#ng-output-tabs{
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0 !important;                 /* segmented = no gaps */
-  flex-wrap: nowrap !important;      /* NEVER wrap */
-  overflow-x: auto !important;       /* if narrow screen, scroll instead of wrap */
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;             /* Firefox hide */
-  padding: 3px !important;
-  margin: 0 !important;
-
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  background: rgba(255,255,255,0.75) !important;
-  border-radius: 999px !important;
-  box-shadow: none !important;
-}
-#ng-output-tabs::-webkit-scrollbar{ height: 0; } /* WebKit hide */
-
-/* HARD RESET ONLY INSIDE OUTPUT TABS */
-#ng-output-tabs > button{
-  all: unset !important;             /* kills .btn / global button styles completely */
-  box-sizing: border-box !important;
-
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  padding: 6px 12px !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
-  line-height: 1 !important;
-  white-space: nowrap !important;
-
-  border-radius: 999px !important;
-  cursor: pointer !important;
-  user-select: none !important;
-
-  color: rgba(15,23,42,0.86) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-
-  margin: 0 !important;              /* kill any auto margins */
-  float: none !important;
-  position: static !important;
-}
-
-/* Hover / active feel */
-#ng-output-tabs > button:hover{
-  background: rgba(79,70,229,0.10) !important;
-}
-#ng-output-tabs > button:active{
-  background: rgba(79,70,229,0.14) !important;
-}
-
-/* Selected tab support (any of these patterns) */
-#ng-output-tabs > button.active,
-#ng-output-tabs > button.is-active,
-#ng-output-tabs > button[aria-selected="true"]{
-  background: rgba(79,70,229,0.16) !important;
-  border-color: rgba(79,70,229,0.28) !important;
-  color: rgba(15,23,42,0.92) !important;
-}
-
-/* Keyboard focus */
-#ng-output-tabs > button:focus-visible{
-  outline: 2px solid rgba(79,70,229,0.35) !important;
-  outline-offset: 2px !important;
-}
-
-/* Optional: make the group look truly segmented by adding a tiny divider effect */
-#ng-output-tabs > button + button{
-  margin-left: 2px !important;
-}
-/* === NG_OUTPUT_TABS_SEG_LOCK_V1_END === */
-/* === NG_OUTPUT_TABS_DATA_ACTIVE_CSS_V1_START (2026-02-16) === */
-/* Persistent active styling via container attribute (survives re-render) */
-#ng-output-tabs[data-ng-active-tab="ng-tab-story"] #ng-tab-story,
-#ng-output-tabs[data-ng-active-tab="ng-tab-quick"] #ng-tab-quick,
-#ng-output-tabs[data-ng-active-tab="ng-tab-log"]   #ng-tab-log,
-#ng-output-tabs[data-ng-active-tab="ng-tab-raw"]   #ng-tab-raw{
-  background: rgba(79,70,229,0.18) !important;
-  border-color: rgba(79,70,229,0.30) !important;
-  color: rgba(15,23,42,0.95) !important;
-}
-/* === NG_OUTPUT_TABS_DATA_ACTIVE_CSS_V1_END === */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </style>
 <style>
 #ngQuick{ white-space:pre-wrap; overflow:auto; max-height:220px; }
@@ -1324,17 +1199,6 @@ body:has(#ng-std-ui-toggle-root [data-ng-mode="advanced"].active) #bytesWrap {
     align-items:center;
   }
 }
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1394,17 +1258,6 @@ html[data-ng-outtab="raw"] #ng-quick-panel-wrap{ display:none !important; }
 html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 /* === NG_OUTPUT_TABS_CSS_V1_END (20260206) === */
 
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1460,17 +1313,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     align-items:center;
   }
 }
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1501,17 +1343,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     align-items:center;
   }
 }
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1562,17 +1393,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     align-items:center;
   }
 }
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1607,17 +1427,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     align-items:center;
   }
 }
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1653,17 +1462,6 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     align-items:center;
   }
 }
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
-#ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
-  min-height: 34px !important;
-  height: auto !important;
-  flex-wrap: wrap !important;
-}
-/* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
   display:flex !important;
@@ -1719,14 +1517,20 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 /* === NG_MINI_MODE_BTN_CSS_V1_END === */
 /* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-tabs{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding: 6px 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  padding: 4px !important;
   min-height: 34px !important;
   height: auto !important;
-  flex-wrap: wrap !important;
+
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+#ng-output-tabs::-webkit-scrollbar{ height: 0; }
 /* === NG_OUTPUT_TABS_HEIGHT_FIX_V1_END === */
 /* === NG_OUTPUT_HEADROW_HEIGHT_FIX_V1_START (20260206) === */
 #ng-output-headrow{
@@ -3458,90 +3262,6 @@ window.NG_fillStoryView = function(){
 <!-- NG_BYTE_ROW_AUTOCOLLAPSE_V1_START (20260212) -->
 <style>
   .ng-byte-row.ng-empty-collapsed{ display:none !important; }
-/* === NG_OUTPUT_TABS_FINAL_OVERRIDE_V1_START (2026-02-16) === */
-/* LAST WINS: override any later/duplicate tab rules */
-#ng-output-headwrap #ng-output-tabs{
-  display: inline-flex !important;
-  flex-wrap: nowrap !important;
-  gap: 0 !important;
-}
-#ng-output-headwrap #ng-output-tabs > button{
-  margin: 0 !important;
-}
-/* === NG_OUTPUT_TABS_FINAL_OVERRIDE_V1_END === */
-/* === NG_OUTPUT_TABS_SEG_STYLE_V1_START (2026-02-16) === */
-#ng-output-headwrap #ng-output-tabs{
-  padding: 3px !important;
-  border: 1px solid rgba(15,23,42,0.14) !important;
-  background: rgba(255,255,255,0.70) !important;
-  border-radius: 999px !important;
-}
-
-#ng-output-headwrap #ng-output-tabs > button{
-  height: 28px !important;
-  padding: 0 12px !important;
-  border-radius: 999px !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
-  line-height: 28px !important;          /* equal vertical centering */
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  box-shadow: none !important;
-}
-
-/* Visual separators (subtle) */
-#ng-output-headwrap #ng-output-tabs > button + button{
-  position: relative !important;
-}
-#ng-output-headwrap #ng-output-tabs > button + button::before{
-  content: "" !important;
-  position: absolute !important;
-  left: -2px !important;
-  top: 6px !important;
-  bottom: 6px !important;
-  width: 1px !important;
-  background: rgba(15,23,42,0.10) !important;
-}
-
-/* Hover + selected */
-#ng-output-headwrap #ng-output-tabs > button:hover{
-  background: rgba(79,70,229,0.10) !important;
-}
-#ng-output-headwrap #ng-output-tabs > button.active,
-#ng-output-headwrap #ng-output-tabs > button.is-active,
-#ng-output-headwrap #ng-output-tabs > button[aria-selected="true"]{
-  background: rgba(79,70,229,0.16) !important;
-  border-color: rgba(79,70,229,0.26) !important;
-}
-/* === NG_OUTPUT_TABS_SEG_STYLE_V1_END === */
-/* === NG_OUTPUT_TABS_SELECTED_FORCE_V1_START (2026-02-16) === */
-/* Force visible selected segment even if global button/.btn rules fight us */
-#ng-output-headwrap #ng-output-tabs > button.active,
-#ng-output-headwrap #ng-output-tabs > button.is-active,
-#ng-output-headwrap #ng-output-tabs > button[aria-selected="true"]{
-  background: rgba(79,70,229,0.18) !important;
-  border-color: rgba(79,70,229,0.30) !important;
-  color: rgba(15,23,42,0.95) !important;
-}
-#ng-output-headwrap #ng-output-tabs > button.active:hover,
-#ng-output-headwrap #ng-output-tabs > button[aria-selected="true"]:hover{
-  background: rgba(79,70,229,0.22) !important;
-}
-/* === NG_OUTPUT_TABS_SELECTED_FORCE_V1_END === */
-/* === NG_OUTPUT_TABS_VISIBILITY_FIX_V1_START (2026-02-16) === */
-#ng-output-headwrap #ng-output-tabs{
-  overflow: visible !important;   /* stop clipping */
-  gap: 6px !important;            /* give breathing room so labels are visible */
-}
-#ng-output-headwrap #ng-output-tabs > button{
-  min-width: 44px !important;     /* ensure Log doesn't get squeezed away */
-}
-/* === NG_OUTPUT_TABS_VISIBILITY_FIX_V1_END === */
-
-
-
-
-
 </style>
 
 <script>
@@ -4122,6 +3842,9 @@ function renderJsonTab() {
 
 
 </html>
+
+
+
 
 
 
