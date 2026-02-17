@@ -3838,6 +3838,154 @@ function renderJsonTab() {
   }, true);
 })();
 </script>
+
+<style>
+/* === NG_THEME_POLISH_ACCENT_ONLY_V1_START (20260217) === */
+:root{
+  /* Accent (existing purple family) */
+  --ng-accent: rgba(79,70,229,1);
+  --ng-accent-10: rgba(79,70,229,0.10);
+  --ng-accent-14: rgba(79,70,229,0.14);
+  --ng-accent-22: rgba(79,70,229,0.22);
+  --ng-ink: rgba(15,23,42,0.96);
+  --ng-muted: rgba(15,23,42,0.62);
+  --ng-border: rgba(15,23,42,0.10);
+}
+
+/* 1) Symmetry: consistent section title style (no random purple, just subtle) */
+.panel b{
+  color: var(--ng-ink) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.15px !important;
+}
+.panel b::before{
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--ng-accent-22);
+  margin-right: 10px;
+  transform: translateY(2px);
+}
+
+/* Remove any accidental heavy purple inside panels (keep neutral) */
+.panel, .panel *{
+  accent-color: var(--ng-accent);
+}
+
+/* 2) Inputs: professional focus ring (brings branded consistency) */
+input:focus, select:focus, textarea:focus{
+  outline: none !important;
+  border-color: rgba(79,70,229,0.35) !important;
+  box-shadow: 0 0 0 4px var(--ng-accent-10) !important;
+}
+
+/* 3) Buttons: clean hierarchy — only primary is purple, rest neutral */
+button{
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  background: rgba(255,255,255,0.92) !important;
+  color: rgba(15,23,42,0.88) !important;
+}
+button:hover{
+  background: rgba(79,70,229,0.06) !important;
+  border-color: rgba(79,70,229,0.18) !important;
+}
+
+/* Heuristic: your known primary CTAs (tweak ids if you have them) */
+#btnGenerate, #btnGenerateDigiPack, #btnLoad, #btnLoadTranscript,
+button.primary{
+  background: linear-gradient(180deg, rgba(79,70,229,0.96), rgba(79,70,229,0.84)) !important;
+  border-color: rgba(79,70,229,0.45) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 20px rgba(79,70,229,0.18) !important;
+}
+#btnGenerate:hover, #btnGenerateDigiPack:hover, #btnLoad:hover, #btnLoadTranscript:hover, button.primary:hover{
+  filter: brightness(1.02);
+}
+
+/* 4) Output tabs: symmetric + clear active/disabled states */
+#ng-output-headwrap{
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  background: rgba(255,255,255,0.86) !important;
+  border-radius: 999px !important;
+}
+
+/* Baseline tabs */
+#ng-output-headwrap button{
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: rgba(15,23,42,0.70) !important;
+  box-shadow: none !important;
+}
+
+/* Disabled before generate (uses existing disabled attr if present) */
+#ng-output-headwrap button:disabled,
+#ng-output-headwrap button[aria-disabled="true"]{
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
+/* Active tab (works with .active OR aria-selected) */
+#ng-output-headwrap button.active,
+#ng-output-headwrap button[aria-selected="true"]{
+  background: var(--ng-accent-14) !important;
+  border-color: rgba(79,70,229,0.30) !important;
+  color: rgba(15,23,42,0.90) !important;
+}
+
+/* 5) Header controls: keep them neutral + active subtle (avoid “half purple” feel) */
+#ng-std-ui-toggle-root,
+#ngRealModeWrap{
+  background: rgba(255,255,255,0.86) !important;
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  box-shadow: 0 6px 14px rgba(15,23,42,0.06) !important;
+}
+#ng-std-ui-toggle-root .active,
+#ngRealModeWrap .ng-mode-active{
+  background: var(--ng-accent-14) !important;
+  border-color: rgba(79,70,229,0.28) !important;
+}
+/* === NG_MICRO_POLISH_V1_START (20260217) === */
+
+/* 1) Header card shadow: थोड़ा subtle (premium look) */
+body:has(#ng-std-ui-toggle-root) #ng-std-ui-toggle-root{
+  box-shadow: 0 4px 10px rgba(15,23,42,0.06) !important;
+}
+
+/* 2) Load button: purple glow कम करें ताकि UI calm लगे */
+#btn-load-transcript-json{
+  box-shadow: 0 8px 16px rgba(79,70,229,0.14) !important;
+}
+#btn-load-transcript-json:hover{
+  box-shadow: 0 10px 18px rgba(79,70,229,0.16) !important;
+}
+
+/* 3) Section accent bars: थोड़ा हल्का (symmetry + less “half purple” feel) */
+.panel b::before{
+  background: rgba(79,70,229,0.18) !important;
+}
+
+/* 4) Labels: थोड़ा अधिक readable (professional + accessibility) */
+label{
+  color: rgba(15,23,42,0.72) !important;
+}
+
+/* 5) Bottom status: छोटा + muted ताकि tabs dominate करें */
+#ng-output-headwrap .status,
+#ng-output-headwrap b{
+  font-size: 12px !important;
+  color: rgba(15,23,42,0.58) !important;
+}
+
+/* === NG_MICRO_POLISH_V1_END (20260217) === */
+
+
+/* === NG_THEME_POLISH_ACCENT_ONLY_V1_END (20260217) === */
+
+</style>
+
 <!-- === NG_COPY_STORYVIEW_V1_END === -->
 
 
