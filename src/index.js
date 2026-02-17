@@ -344,6 +344,43 @@ ANGLE: ${promptObj.angle || ""}
 WHAT_HAPPENED: ${promptObj.what_happened || ""}
 SOURCES: ${promptObj.sources || ""}
 BACKGROUND: ${promptObj.background || ""}
+VISUALS_NOTES: ${promptObj.visuals_notes || ""}
+
+VIDEO_DEMO_RULES (MANDATORY if VISUALS_NOTES present):
+- If VISUALS_NOTES is non-empty, the "video_script.text" MUST be a CAPCUT-FRIENDLY VIDEO_ROUGH_CUT_PLAN.
+- Use ONLY the shot codes listed in VISUALS_NOTES inventory (e.g., A1..A8). Do NOT invent new shots.
+- Each beat MUST reference exactly one SHOT_CODE (A1..A8).
+- Across the full plan, you MUST include ALL listed codes at least once (A1..A8 mandatory).
+- If any listed shot is effectively missing/unclear, use fallback A2 or A6 (as per EDIT_RULES).
+- Target total duration: 00:45 to 01:00.
+- First 00:15 must be fast cuts (2–4 sec beats), then slightly longer beats.
+- Prefer visual flow wide -> medium -> close-up when possible (within meeting sequence).
+- Do NOT add facts beyond TOPIC/WHAT_HAPPENED/SOURCES/BACKGROUND. If unsure, keep VO neutral.
+
+CAPCUT OUTPUT TEMPLATE (put EXACTLY inside video_script.text):
+VIDEO_ROUGH_CUT_PLAN (CAPCUT)
+TOTAL: mm:ss
+FORMAT: 16:9
+AUDIO: VO + NAT (optional low)
+
+BEATS:
+1) TIME: 00:00-00:03 | SHOT: A? | ON_SCREEN: (max 2 lines) | VO: (1-2 lines) | EDIT: (cut/style)
+2) TIME: 00:03-00:06 | SHOT: A? | ON_SCREEN: ... | VO: ... | EDIT: ...
+...
+N) TIME: ...         | SHOT: A? | ON_SCREEN: ... | VO: ... | EDIT: ...
+
+RULE_CHECK (must include):
+- Used shots: A1,A2,A3,A4,A5,A6,A7,A8 (tick/cross)
+- Any fallback used: (A2/A6)
+- First 15s fast-cut satisfied: Yes/No
+
+CAPCUT_IMPORT_NOTES:
+- Import clips A1..A8
+- Place beats in order, trim per TIME ranges
+- Add on-screen text per beat
+- Record VO per beat (or TTS), align to beats
+- Export 1080p
+
 
 OUTPUT REQUIREMENTS:
 - Language: ${lang} (default hi)
@@ -429,22 +466,31 @@ OUTPUT REQUIREMENTS:
         };
 
         const r = await ngFetchWithRetry("https://api.openai.com/v1/responses", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "authorization": `Bearer ${env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify(openaiReq)
-        });
+  method: "POST",
+  headers: {
+    "content-type": "application/json",
+    "Authorization": `Bearer ${env.OPENAI_API_KEY}`
+  },
+  body: JSON.stringify(openaiReq)
+});
 
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) {
-          return json(
-            { ok:false, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, error:"OPENAI_API_ERROR", status:r.status, retry_meta: (r && r.__ngRetryMeta) ? r.__ngRetryMeta : null, details:data },
-            502,
-            corsHeaders(request)
-          );
-        }
+// --- DIAG: capture raw body for non-OK + easier debugging ---
+const raw = await r.text().catch(() => "");
+let data = {};
+try { data = raw ? JSON.parse(raw) : {}; } catch(e) { data = {}; }
+
+if (!r.ok) {
+  try {
+    console.error("[NG_OPENAI_HTTP_ERROR]", {
+      status: r.status,
+      statusText: r.statusText,
+      body_first400: String(raw || "").slice(0, 400)
+    });
+  } catch(_) {}
+
+  // Bubble up a useful error instead of opaque OPENAI_CALL_FAILED
+  throw new Error(`OPENAI_HTTP_${r.status}: ${String(raw || "").slice(0, 600)}`);
+}
 
         let outText = (data && typeof data.output_text === "string") ? data.output_text : "";
         if (!outText && data && Array.isArray(data.output)) {
