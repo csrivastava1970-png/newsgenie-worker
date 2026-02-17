@@ -1049,9 +1049,9 @@ input[type="text"], input[type="search"], textarea, select{
 }
 
 /* Optional: add subtle divider line under tabs instead of pill background */
-#ng-output-headwrap.panel{
-  /* keep as card; just ensure tabs don't create a nested card */
-}
+
+
+
 
 /* NG_APP_LOOK_V2_TUNE14_END */
 /* NG_APP_LOOK_V2_TUNE15_START (2026-02-16) */
@@ -1461,9 +1461,12 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   box-shadow: none !important;
   overflow-x: auto !important;           /* scroll if tight */
   overflow-y: hidden !important;
-  scrollbar-width: none !important;
+  scrollbar-width: thin !important;
+
 }
-#ng-output-headwrap #ng-output-tabs::-webkit-scrollbar{ height: 0 !important; }
+#ng-output-headwrap #ng-output-tabs::-webkit-scrollbar{ height: 6px !important; }
+#ng-output-headwrap #ng-output-tabs::-webkit-scrollbar-thumb{ background: rgba(15,23,42,0.18) !important; border-radius: 999px !important; }
+
 
 /* Normalize ALL tab buttons (even if global .btn changes) */
 #ng-output-headwrap #ng-output-tabs > button,
@@ -1479,6 +1482,8 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   border-radius: 999px !important;
   border: 1px solid transparent !important;
   background: transparent !important;
+  color: rgba(15,23,42,0.92) !important;
+
   box-shadow: none !important;
 
   padding: 6px 10px !important;
@@ -1494,15 +1499,15 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   background: rgba(79,70,229,0.10) !important;
 }
 
-/* Active via data attribute (works with your existing logic) */
 #ng-output-tabs[data-ng-active-tab="ng-tab-story"] #ng-tab-story,
 #ng-output-tabs[data-ng-active-tab="ng-tab-quick"] #ng-tab-quick,
 #ng-output-tabs[data-ng-active-tab="ng-tab-log"]   #ng-tab-log,
 #ng-output-tabs[data-ng-active-tab="ng-tab-raw"]   #ng-tab-raw{
-  background: rgba(79,70,229,0.18) !important;
-  border-color: rgba(79,70,229,0.30) !important;
-  color: rgba(15,23,42,0.95) !important;
+  background: rgba(79,70,229,1) !important;
+  border-color: rgba(79,70,229,1) !important;
+  color: #fff !important;
 }
+
 
 /* Disabled look (matches app behavior pre-Generate) */
 #ng-output-headwrap #ng-output-tabs > button:disabled{
@@ -1510,6 +1515,8 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   cursor: not-allowed !important;
 }
 /* === NG_OUTPUT_TABS_SEG_LOCK_FINAL_V1_END (2026-02-16) === */
+
+
 
 </style>
 <!-- NG_HIDE_ADDBYTEBTN_LOCK_V3_END -->
@@ -3121,6 +3128,24 @@ window.NG_fillStoryView = function(){
 <!-- NG_BYTE_ROW_AUTOCOLLAPSE_V1_START (20260212) -->
 <style>
   .ng-byte-row.ng-empty-collapsed{ display:none !important; }
+/* === NG_STICKY_COMMAND_BAR_OVERRIDE_FINAL_V1_START (20260217) === */
+/* Must be LAST so it beats any 'position: static !important' locks */
+html body #ng-output-headwrap{
+  position: sticky !important;
+  bottom: 10px !important;
+  z-index: 999 !important;
+
+  background: rgba(255,255,255,0.92) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  box-shadow: 0 10px 30px rgba(15,23,42,0.10) !important;
+}
+html body #ng-output-headrow{
+  gap: 10px !important;
+  padding: 8px 10px !important;
+}
+/* === NG_STICKY_COMMAND_BAR_OVERRIDE_FINAL_V1_END (20260217) === */
+
 </style>
 
 <script>
