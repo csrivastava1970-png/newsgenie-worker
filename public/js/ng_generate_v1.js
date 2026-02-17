@@ -352,6 +352,32 @@ try {
 } catch(e) {}
 // === NG_STATUS_BASE_WORKING_V2_END ===
 
+// === NG_VISUALS_NOTES_TO_PAYLOAD_V1_START (20260217) ===
+try{
+  var __ngVis = (function(){
+    try{
+      var t = document.getElementById("ng-visuals-notes");
+      return t ? String(t.value || "").trim() : "";
+    }catch(e){ return ""; }
+  })();
+
+  // Ensure payload/received exists
+  payload = payload || {};
+  payload.received = payload.received || {};
+
+  // Keep raw notes separately (debuggable)
+  payload.received.visuals_notes = __ngVis;
+
+  // Also append to story string so model surely sees it
+  if (__ngVis) {
+    if (payload.received.story) {
+      payload.received.story += "\n\nVISUALS_NOTES:\n" + __ngVis + "\n";
+    } else if (payload.story) {
+      payload.story += "\n\nVISUALS_NOTES:\n" + __ngVis + "\n";
+    }
+  }
+}catch(_){}
+// === NG_VISUALS_NOTES_TO_PAYLOAD_V1_END ===
 
 
       fetch("/api/digi-pack", {

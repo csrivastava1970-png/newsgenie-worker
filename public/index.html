@@ -2042,32 +2042,44 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     <!-- VISUALS -->
 <!-- NG_STD_VISUALS_WRAP_V1_START -->
 
-
 <div id="visualsWrap" data-ng-sec="visuals">
-
-
   <div class="panel" id="step-visuals">
     <details id="ng-visuals-details">
       <summary style="cursor:pointer; font-weight:700;">Visuals</summary>
 
-
       <div style="margin-top:10px;">
-
-
         <div class="muted">B-roll / archive / location visuals (multiple rows)</div>
 
-
+        <!-- Existing multi-row area (kept as-is) -->
         <div id="visuals-wrap"></div>
-
 
         <div style="margin-top:8px;">
           <button type="button" id="add-visual">+ Add Visual</button>
         </div>
+
+        <!-- Fallback notes (works even if Add Visual is not wired) -->
+        <div style="margin-top:12px;">
+          <label style="font-size:12px; opacity:.75; display:block; margin-bottom:6px;">
+            Visuals / Video Notes (paste markers here)
+          </label>
+
+          <textarea id="ng-visuals-notes"
+            placeholder="Example:\nVIDEO_DEMO_MARKED_75S\n00:00–00:05 HOOK...\n00:05–00:17 WHAT HAPPENED...\n(etc)"
+            style="width:100%; min-height:110px; padding:10px; border:1px solid rgba(15,23,42,0.12); border-radius:12px; box-sizing:border-box;"></textarea>
+
+          <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+            <button type="button" id="ng-visuals-notes-copy">Copy Notes</button>
+            <span class="muted" style="margin:0;">Tip: demo के लिए markers/timecodes यहीं paste करें.</span>
+          </div>
+        </div>
+
       </div>
     </details>
   </div>
 </div>
+
 <!-- NG_STD_VISUALS_WRAP_V1_END -->
+
 
 
     <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
@@ -2747,6 +2759,8 @@ return out;
 <!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_END -->
 
 <!-- NG_GENERATE_JS_V1_INCLUDE_START (20260130) -->
+<script src="./js/ng_prompt_builder_v1.js"></script>
+
 <script src="./js/ng_generate_v1.js"></script>
 <!-- NG_GENERATE_JS_V1_INCLUDE_END -->
 

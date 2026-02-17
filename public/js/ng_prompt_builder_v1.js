@@ -16,14 +16,34 @@
 
     // Build payload for /api/digi-pack
     window.NG_buildPrompt = function(extra){
+  // === NG_VISUALS_NOTES_WIRE_V1_START (20260217) ===
+  // Pull fallback visuals/video notes and append to prompt so model can use marker plan.
+  try {
+    var __ngVisTa = document.getElementById("ng-visuals-notes");
+    var __ngVisNotes = __ngVisTa ? String(__ngVisTa.value || "").trim() : "";
+    if (__ngVisNotes) {
+      extra = extra || {};
+      // Put it in extra so downstream builder can include it cleanly
+      extra.visuals_notes = __ngVisNotes;
+    }
+  } catch(e) {}
+  // === NG_VISUALS_NOTES_WIRE_V1_END ===
+
       extra = extra || {};
       var payload = {
         topic: val("topic"),
         platform: val("platform"),
         angle: val("angle"),
         sources: val("sources"),
-        background: val("background")
-      };
+       background: val("background"),
+visuals_notes: (function(){
+  try {
+    var t = document.getElementById("ng-visuals-notes");
+    return t ? String(t.value || "").trim() : "";
+  } catch(e) { return ""; }
+})()
+};
+
 
       // Optional fields (only if present in DOM)
       var st = val("story_type");
