@@ -5,3 +5,6 @@
 *.ts   text eol=lf
 *.css  text eol=lf
 *.json text eol=lf
+* text=auto eol=lf
+*.ps1 text eol=crlf
+
