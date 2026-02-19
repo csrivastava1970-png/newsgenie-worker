@@ -2091,6 +2091,12 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
 <button id="btnCopyDigiPack" type="button" class="secondary" disabled title="Shift+Click: Copy JSON">Copy</button>
 <button id="btnViewDigiPack" type="button" class="secondary" disabled>View DIGI_PACK</button>
+<!-- NG_LOCAL_EXPORT_BTN_V1_START (20260219) -->
+<button id="btnLocalExport" type="button" class="secondary" disabled>
+  Local Export
+</button>
+<!-- NG_LOCAL_EXPORT_BTN_V1_END -->
+
 
       <span id="genStatus" style="font-size:13px; opacity:.8;"></span>
     </div>
@@ -2137,6 +2143,42 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
 
     <div id="ngQuick" style="margin-top:10px; white-space:pre-wrap; overflow:auto; max-height:180px;">(no quick view)</div>
+<!-- NG_LOCAL_EXPORT_PANEL_V1_START (20260219) -->
+<div id="ngLocalExportPanel" style="display:none; margin-top:10px; padding:10px; border:1px solid #eee; border-radius:12px;">
+  <div style="font-weight:700;">Local Export</div>
+  <div id="ngLocalExportMsg" style="margin-top:6px; white-space:pre-wrap;">(no export yet)</div>
+  <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+<!-- NG_LOCAL_EXPORT_FORM_V1_START (20260219) -->
+<div id="ngLocalExportForm" style="margin-top:8px;">
+  <div style="display:grid; grid-template-columns: 1fr; gap:8px;">
+    <input id="ngLocalSrc" type="text" placeholder="Src full path (mp4)" style="width:100%;" />
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <input id="ngLocalInMs" type="number" placeholder="InMs" style="width:140px;" />
+<input id="ngLocalOutMs" type="number" placeholder="OutMs" style="width:140px;" />
+
+<input id="ngLocalStartSec" type="number" placeholder="StartSec" style="width:140px;" />
+<input id="ngLocalDurSec" type="number" placeholder="DurSec" style="width:140px;" />
+
+<input id="ngLocalSlug" type="text" placeholder="Slug" style="width:160px;" />
+
+    </div>
+    <input id="ngLocalVO" type="text" placeholder="VO optional full path (wav/mp3) - blank = no VO" style="width:100%;" />
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button type="button" id="ngLocalExportRun" class="secondary">Export</button>
+      <button type="button" id="ngLocalExportClear" class="secondary">Clear</button>
+    </div>
+  </div>
+</div>
+<!-- NG_LOCAL_EXPORT_FORM_V1_END (20260219) -->
+
+
+    <button type="button" id="ngLocalExportCopyPath">Copy Path</button>
+    <button type="button" id="ngLocalExportOpenFolder">Open Folder</button>
+    <button type="button" id="ngLocalExportPlay">Play</button>
+  </div>
+</div>
+<!-- NG_LOCAL_EXPORT_PANEL_V1_END -->
+
   </details>
 </div>
 
@@ -2756,6 +2798,8 @@ return out;
 <!-- NG_TOOLBAR_MINI_JS_V1_INCLUDE_END -->
 
 <!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_START (20260130) -->
+<script src="./js/ng_toolbar_actions_v1.js"></script>
+
 <!-- NG_TOOLBAR_ACTIONS_JS_V1_INCLUDE_END -->
 
 <!-- NG_GENERATE_JS_V1_INCLUDE_START (20260130) -->
