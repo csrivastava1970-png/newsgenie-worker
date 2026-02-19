@@ -72,3 +72,8 @@ public/index_zero_before_restore_*.html
 
 # Local scratch dumps (do not commit)
 public/_dump_*.txt
+
+# NewsGenie local backups
+tools/*_backup_before_*.ps1
+tools/ng_export_bridge/server_backup_before_*.js
+
