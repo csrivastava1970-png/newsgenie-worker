@@ -2162,7 +2162,27 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 <input id="ngLocalSlug" type="text" placeholder="Slug" style="width:160px;" />
 
     </div>
-    <input id="ngLocalVO" type="text" placeholder="VO optional full path (wav/mp3) - blank = no VO" style="width:100%;" />
+    <div class="ng-vo-row ng-adv-only">
+  <div class="ng-vo-label">VO:</div>
+  <input id="ngLocalVO" type="text" placeholder="VO optional full path (wav/mp3) - blank = no VO" style="width:100%;" />
+  <button type="button" class="ng-vo-browse"
+    onclick="(function(){
+      var i=document.createElement('input');
+      i.type='file';
+      i.accept='.wav,.mp3,.aac,.m4a';
+      i.onchange=function(){
+        if(i.files && i.files[0]){
+          var vo=document.getElementById('ngLocalVO');
+          if(vo){
+            vo.value = (i.files[0].path || i.files[0].name);
+            vo.dispatchEvent(new Event('input',{bubbles:true}));
+            vo.dispatchEvent(new Event('change',{bubbles:true}));
+          }
+        }
+      };
+      i.click();
+    })();">Browse</button>
+</div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button type="button" id="ngLocalExportRun" class="secondary">Export</button>
       <button type="button" id="ngLocalExportClear" class="secondary">Clear</button>
@@ -4051,6 +4071,7 @@ label{
 
 
 </html>
+
 
 
 
