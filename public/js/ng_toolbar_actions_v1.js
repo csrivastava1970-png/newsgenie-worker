@@ -132,8 +132,8 @@ if (Number.isFinite(StartSec) && Number.isFinite(DurSec) && DurSec > 0) {
     var VO   = voEl ? String(voEl.value || "").trim() : "";
 
     if (!Src) return NG_showExport("ERROR: Src is required (mp4 full path).");
-    if (!Number.isFinite(InMs)) return NG_showExport("ERROR: StartSec+DurSec OR InMs is required.");
-    if (!Number.isFinite(OutMs)) return NG_showExport("ERROR: StartSec+DurSec OR OutMs is required.");
+    if (!Number.isFinite(InMs)) return NG_showExport("Please fill StartSec and Duration (DurSec).");
+if (!Number.isFinite(OutMs)) return NG_showExport("Please fill StartSec and Duration (DurSec).");
     if (OutMs <= InMs) return NG_showExport("ERROR: Duration must be > 0.");
 
     if (!Slug) Slug = "clip";
@@ -170,6 +170,7 @@ if (Number.isFinite(StartSec) && Number.isFinite(DurSec) && DurSec > 0) {
 
     // NG_LAST_EXPORT_PATH_SET_V2 (20260219): accept bridge {out,lastLine}
 window.__NG_LAST_EXPORT_PATH = String((j && (j.out || j.lastLine)) ? (j.out || j.lastLine) : "");
+try{ localStorage.setItem("NG_LAST_EXPORT_PATH", window.__NG_LAST_EXPORT_PATH); }catch(e){}
 
     var extra = (j.stderr && String(j.stderr).trim()) ? ("\n\nstderr:\n"+String(j.stderr).trim()) : "";
     NG_showExport("✅ Export OK\n\nPath:\n" + window.__NG_LAST_EXPORT_PATH + extra);
@@ -290,6 +291,12 @@ if (document.readyState === "loading"){
       if (o && !o.value) o.value = localStorage.getItem("NG_LOCAL_EXPORT_OUTMS") || "";
       if (g && !g.value) g.value = localStorage.getItem("NG_LOCAL_EXPORT_SLUG") || "";
       if (v && !v.value) v.value = localStorage.getItem("NG_LOCAL_EXPORT_VO") || "";
+
+      // NEW: restore last export path after refresh (for Copy/Open/Play)
+      try{
+        var lp = localStorage.getItem("NG_LAST_EXPORT_PATH") || "";
+        if (lp) window.__NG_LAST_EXPORT_PATH = lp;
+      }catch(e){}
     }catch(e){}
   }, { once:true });
 } else {
