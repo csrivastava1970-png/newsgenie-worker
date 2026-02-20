@@ -171,9 +171,16 @@ if (!Number.isFinite(OutMs)) return NG_showExport("Please fill StartSec and Dura
     // NG_LAST_EXPORT_PATH_SET_V2 (20260219): accept bridge {out,lastLine}
 window.__NG_LAST_EXPORT_PATH = String((j && (j.out || j.lastLine)) ? (j.out || j.lastLine) : "");
 try{ localStorage.setItem("NG_LAST_EXPORT_PATH", window.__NG_LAST_EXPORT_PATH); }catch(e){}
+// NG_LAST_EXPORT_ROW_FILL_V1 (20260220)
+try{
+  var r = NG_$("ngLastExportRow");
+  var t = NG_$("ngLastExportPath");
+  if (t) t.textContent = String(window.__NG_LAST_EXPORT_PATH || "");
+  if (r) r.style.display = (t && t.textContent) ? "block" : "none";
+}catch(e){}
 
     var extra = (j.stderr && String(j.stderr).trim()) ? ("\n\nstderr:\n"+String(j.stderr).trim()) : "";
-    NG_showExport("✅ Export OK\n\nPath:\n" + window.__NG_LAST_EXPORT_PATH + extra);
+    NG_showExport("✅ Export OK" + extra);
   };
 
 
@@ -296,6 +303,13 @@ if (document.readyState === "loading"){
       try{
         var lp = localStorage.getItem("NG_LAST_EXPORT_PATH") || "";
         if (lp) window.__NG_LAST_EXPORT_PATH = lp;
+// NG_LAST_EXPORT_ROW_RESTORE_V1 (20260220)
+try{
+  var r = NG_$("ngLastExportRow");
+  var t = NG_$("ngLastExportPath");
+  if (t) t.textContent = String(window.__NG_LAST_EXPORT_PATH || "");
+  if (r) r.style.display = (t && t.textContent) ? "block" : "none";
+}catch(e){}
       }catch(e){}
     }catch(e){}
   }, { once:true });
