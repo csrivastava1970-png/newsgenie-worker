@@ -594,6 +594,37 @@ if (!r.ok) {
         if (hk && hk.text && String(hk.text).trim()) outJson.hook = String(hk.text).trim();
       }
     }catch(e){}
+
+    // NG_HI_ONLY_SANITIZE_V1 (2026-02-22): strip accidental Urdu/Arabic script from HI outputs
+    try{
+      const L = String((outJson && outJson.language) || (promptObj && promptObj.lang) || (body && body.lang) || "").toLowerCase();
+      if (L === "hi") {
+        const stripAr = (v) => {
+          const t = String(v || "");
+          // Arabic/Urdu block: \u0600-\u06FF (keeps Devanagari intact)
+          return t.replace(/[\u0600-\u06FF]+/g, "").replace(/[ ]{2,}/g," ").trim();
+        };
+
+        // web_article fields
+        if (outJson.web_article) {
+          if (outJson.web_article.text) outJson.web_article.text = stripAr(outJson.web_article.text);
+          if (outJson.web_article.dek) outJson.web_article.dek = stripAr(outJson.web_article.dek);
+          if (outJson.web_article.subhead) outJson.web_article.subhead = stripAr(outJson.web_article.subhead);
+          if (outJson.web_article.summary) outJson.web_article.summary = stripAr(outJson.web_article.summary);
+        }
+
+        // formats text
+        if (Array.isArray(outJson.formats)) {
+          outJson.formats = outJson.formats.map(x => x && x.text ? ({...x, text: stripAr(x.text)}) : x);
+        }
+
+        // top-level hook (if present)
+        if (outJson.hook) outJson.hook = stripAr(outJson.hook);
+
+        // social pack free-text (keep x/fb/insta fields as-is; they are already HI)
+        if (outJson.social && outJson.social.text) outJson.social.text = stripAr(outJson.social.text);
+      }
+    }catch(e){}
 return json(
           { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson },
           200,
@@ -633,6 +664,7 @@ return json(
 return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
 
 
 
