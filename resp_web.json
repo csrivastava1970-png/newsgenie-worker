@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "ts": "2026-02-22T01:31:13.986Z",
+  "path": "/api/digi-pack",
+  "mode": "openai",
+  "model": "gpt-4o-mini",
+  "entry_marker": "BOOTv3-src-indexjs-openai",
+  "has_openai_key": true,
+  "error": "OPENAI_CALL_FAILED",
+  "detail": "og is not defined"
+}
