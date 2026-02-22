@@ -146,20 +146,7 @@ export default {
         assets_status = "ERR";
         assets_len = String(e && e.message ? e.message : e);
       }
-              // NG_WEB_FIRSTLINE_HARDLOCK_V2 (2026-02-22): keep web format on-topic (runs inside OpenAI success path)
-        try{
-          const topicHL = String((body && body.topic) || (promptObj && promptObj.topic) || (outJson && outJson.topic) || "").trim();
-          if (topicHL && outJson && Array.isArray(outJson.formats)) {
-            const toks = topicHL.split(/\s+/).filter(Boolean).slice(0,2);
-            const idx = outJson.formats.findIndex(x => x && x.key === "web");
-            if (idx >= 0) {
-              const t = String(outJson.formats[idx].text || "").trim();
-              const first = (t.split(/\r?\n/)[0] || "").trim();
-              const off = (!first) || (toks.length && !toks.some(k => first.includes(k)));
-              if (off) outJson.formats[idx].text = (topicHL + "\n\n" + t).trim();
-            }
-          }
-        }catch(e){}return json({ ok:true, path, assets_ok, assets_status, assets_len }, 200, corsHeaders(request));
+return json({ ok:true, path, assets_ok, assets_status, assets_len }, 200, corsHeaders(request));
     }
     // NG_DIAG_ROOT_V1_END
 
@@ -422,7 +409,7 @@ OUTPUT REQUIREMENTS:
                 subhead: { type: "string" },
                 summary: { type: "string" },
                 key_points: { type: "array", items: { type: "string" } },
-                text: { type: "string" }
+                text: { type: "string", minLength: 1500 }
               },
               required: ["headline","dek","subhead","summary","key_points","text"]
             },
@@ -430,25 +417,25 @@ OUTPUT REQUIREMENTS:
             video_script: {
               type: "object",
               additionalProperties: false,
-              properties: { text: { type: "string" } },
+              properties: { text: { type: "string", minLength: 900 } },
               required: ["text"]
             },
 
             youtube: {
               type: "object",
               additionalProperties: false,
-              properties: { text: { type: "string" } },
+              properties: { text: { type: "string", minLength: 500 } },
               required: ["text"]
             },
 
             reel: {
               type: "object",
               additionalProperties: false,
-              properties: { text: { type: "string" } },
+              properties: { text: { type: "string", minLength: 220 } },
               required: ["text"]
             },
 
-            hook: { type: "string" },
+            hook: { type: "string", minLength: 80 },
 
             social: {
               type: "object",
@@ -459,7 +446,7 @@ OUTPUT REQUIREMENTS:
                 instagram_caption: { type: "string" },
                 hashtags: { type: "array", items: { type: "string" } },
                 tags: { type: "array", items: { type: "string" } },
-                text: { type: "string" }
+                text: { type: "string", minLength: 220 }
               },
               required: ["x_post","fb_post","instagram_caption","hashtags","tags","text"]
             }
@@ -599,7 +586,15 @@ if (!r.ok) {
           outJson = { language: lang, topic: String(promptObj.topic || ""), formats: [] };
         }
 
-        return json(
+        
+    // NG_HOOK_AUTOFILL_V1 (2026-02-22): if top-level hook is blank but formats[] has hook, fill it
+    try{
+      if (outJson && (!outJson.hook || !String(outJson.hook).trim()) && Array.isArray(outJson.formats)) {
+        const hk = outJson.formats.find(x => x && x.key === "hook");
+        if (hk && hk.text && String(hk.text).trim()) outJson.hook = String(hk.text).trim();
+      }
+    }catch(e){}
+return json(
           { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson },
           200,
           corsHeaders(request)
@@ -634,10 +629,16 @@ if (!r.ok) {
           }
         }
       }
-    }catch(e){}
+}catch(e){}
 return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_MARKER, has_openai_key, error:"Not found" }, 404, corsHeaders(request));
 }
 }
+
+
+
+
+
+
 
 
 
