@@ -625,6 +625,37 @@ if (!r.ok) {
         if (outJson.social && outJson.social.text) outJson.social.text = stripAr(outJson.social.text);
       }
     }catch(e){}
+        // === NG_SOCIAL_CLEAN_APPLY_AT_DPACK_V1_START (2026-02-22) ===
+        try{
+          if (outJson && outJson.formats && Array.isArray(outJson.formats)) {
+            // find social pack by key OR legacy outJson.social.text
+            for (let i=0;i<outJson.formats.length;i++){
+              const fx = outJson.formats[i];
+              if (fx && (fx.key==="social" || fx.title==="Social Pack") && typeof fx.text==="string"){
+                outJson.formats[i] = { ...fx, text: NG_socialClean(fx.text) };
+              }
+            }
+          }
+          if (outJson && outJson.social && typeof outJson.social.text==="string"){
+            outJson.social.text = NG_socialClean(outJson.social.text);
+          }
+        }catch(e){}
+        // === NG_SOCIAL_CLEAN_APPLY_AT_DPACK_V1_END ===
+        // === NG_WEB_YT_CLEAN_APPLY_AT_DPACK_V1_START (2026-02-22) ===
+        try{
+          if (outJson && outJson.web_article && typeof outJson.web_article.text==="string"){
+            outJson.web_article.text = NG_stripWebBoiler(outJson.web_article.text);
+          }
+          if (outJson && Array.isArray(outJson.formats)) {
+            outJson.formats = outJson.formats.map(fx => {
+              if (!fx || typeof fx.text !== "string") return fx;
+              if (fx.key === "web")     return { ...fx, text: NG_stripWebBoiler(fx.text) };
+              if (String(fx.key||"").toLowerCase()==="youtube" || String(fx.key||"").toLowerCase()==="yt" || String(fx.title||"").toLowerCase().includes("youtube")) return { ...fx, text: NG_tameYouTube(fx.text) };
+              return fx;
+            });
+          }
+        }catch(e){}
+        // === NG_WEB_YT_CLEAN_APPLY_AT_DPACK_V1_END ===
 return json(
           { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson },
           200,
@@ -688,5 +719,72 @@ return json({ ok:false, ts:new Date().toISOString(), path, entry_marker: ENTRY_M
 
 
 
+
+
+
+
+// === NG_SOCIAL_CLEAN_V1_START (2026-02-22) ===
+function NG_socialClean(txt){
+  txt = String(txt || "");
+
+  // Remove obvious tool/prompt leakage lines/snippets
+  txt = txt.replace(/assistant\s+to=[^\n]*\n?/gi, "");
+  txt = txt.replace(/```[\s\S]*?```/g, ""); // fenced blocks
+  txt = txt.replace(/`+/g, "");            // stray backticks
+  txt = txt.replace(/^\s*[\}\]]+\s*/g, ""); // stray leading braces
+
+  // Keep only the structured block: from INSTAGRAM: ... through TAGS:
+  const i = txt.search(/\bINSTAGRAM\s*:/i);
+  if (i >= 0) txt = txt.slice(i);
+
+  // Cut after TAGS: line (keep that line)
+  const m = txt.match(/[\s\S]*?\bTAGS\s*:[^\n]*/i);
+  if (m && m[0]) txt = m[0];
+
+  return txt.trim();
+}
+// === NG_SOCIAL_CLEAN_V1_END ===
+
+try{
+  if (outJson && outJson.formats && outJson.formats.social && typeof outJson.formats.social.text === "string"){
+    outJson.formats.social.text = NG_socialClean(outJson.formats.social.text);
+  }
+} catch(e){}
+// === NG_SOCIAL_CLEAN_APPLY_V1_END ===
+
+
+
+
+/* === NG_WEB_YT_CLEAN_V1_START (2026-02-22) === */
+function NG_stripWebBoiler(txt){
+  txt = String(txt || "");
+  txt = txt.replace(/\bSubject to updates as the situation develops\.?\b/gi, "");
+  txt = txt.replace(/\bArchive\.[^\n]*\b/gi, "");
+  txt = txt.replace(/\bA merge solution might be necessary[^\n]*\b/gi, "");
+  txt = txt.replace(/\bSplitting for flow might be unnecessary[^\n]*\b/gi, "");
+  txt = txt.replace(/\bGovernance\.[^\n]*\b/gi, "");
+  txt = txt.replace(/\bA new directive may be forthcoming[^\n]*\b/gi, "");
+  txt = txt.replace(/\bConclusion is pending\.[^\n]*\b/gi, "");
+  txt = txt.replace(/\bThis notice will be updated[^\n]*\b/gi, "");
+  txt = txt.replace(/\bLegislation may be in order[^\n]*\b/gi, "");
+  txt = txt.replace(/\bFurther press releases will outline[^\n]*\b/gi, "");
+  txt = txt.replace(/\bContinuations thereof will transpire[^\n]*\b/gi, "");
+  txt = txt.replace(/\bEnsure legal governance[^\n]*\b/gi, "");
+  txt = txt.replace(/\bMaintain the notion of transparency[^\n]*\b/gi, "");
+  txt = txt.replace(/\n{3,}/g, "\n\n").trim();
+  return txt;
+}
+function NG_tameYouTube(txt){
+  txt = String(txt || "");
+  txt = txt.replace(/[\u2600-\u27BF]/g, "");
+  txt = txt.replace(/[\uD83C-\uDBFF][\uDC00-\uDFFF]/g, "");
+  const tags = txt.match(/#[^\s#]+/g) || [];
+  if (tags.length > 18){
+    txt = txt.replace(/(#[^\s#]+\s*)+/g, "").trim();
+    txt = (txt + "\n\n" + tags.slice(0,18).join(" ")).trim();
+  }
+  return txt.replace(/\n{3,}/g, "\n\n").trim();
+}
+/* === NG_WEB_YT_CLEAN_V1_END === */
 
 
