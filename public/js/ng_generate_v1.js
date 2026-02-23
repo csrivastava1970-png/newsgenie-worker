@@ -71,6 +71,15 @@ function setBanner(t){
     var what_happened = v("whatHappened");
     var sources = v("sources");
     var background = v("background");
+    // NG_FINAL_BYTES_TO_STORY_V1 (20260224): weave Final Bytes into story (not isolated quotes)
+var __fb=""; try{
+  var p=JSON.parse(localStorage.getItem("NG_FINAL_BYTES_V1")||"null"), items=Array.isArray(p)?p:((p&&Array.isArray(p.items))?p.items:[]);
+  var lines=items.map(function(b){ var tx=String((b&&b.text)||"").trim(); if(!tx) return "";
+    var sp=String((b&&b.speaker)||"").trim(), de=String((b&&b.designation)||"").trim(), who=(sp||de)?(sp+((sp&&de)?" — ":"")+de):"";
+    return "- "+(who?(who+": "):"")+tx;
+  }).filter(Boolean);
+  if(lines.length) __fb="FINAL_BYTES (use as attributed facts; weave into 5W1H story, not standalone quotes):\n"+lines.join("\n");
+}catch(e){}
 
     // REQUIRED by server
     var story = [
@@ -80,7 +89,8 @@ function setBanner(t){
       angle ? ("ANGLE: " + angle) : "",
       what_happened ? ("WHAT_HAPPENED:\n" + what_happened) : "",
       sources ? ("SOURCES:\n" + sources) : "",
-      background ? ("BACKGROUND:\n" + background) : ""
+            background ? ("BACKGROUND:\n" + background) : "",
+      __fb ? (__fb) : ""
     ].filter(Boolean).join("\n\n").trim();
 
     return {
