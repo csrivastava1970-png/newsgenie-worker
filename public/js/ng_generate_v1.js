@@ -1,4 +1,4 @@
-﻿/* === NG_GENERATE_PERM_SAFE_V1_START (20260201) ===
+/* === NG_GENERATE_PERM_SAFE_V1_START (20260201) ===
    - Enables #btnGenerate if disabled
    - Captures click (prevents reload/submit)
    - POST /api/digi-pack (single in-flight)
@@ -75,10 +75,10 @@ function setBanner(t){
 var __fb=""; try{
   var p=JSON.parse(localStorage.getItem("NG_FINAL_BYTES_V1")||"null"), items=Array.isArray(p)?p:((p&&Array.isArray(p.items))?p.items:[]);
   var lines=items.map(function(b){ var tx=String((b&&b.text)||"").trim(); if(!tx) return "";
-    var sp=String((b&&b.speaker)||"").trim(), de=String((b&&b.designation)||"").trim(), who=(sp||de)?(sp+((sp&&de)?" — ":"")+de):"";
+    var sp=String((b&&b.speaker)||"").trim(), de=String((b&&b.designation)||"").trim(), who=(sp||de)?(sp+((sp&&de)?" � ":"")+de):"";
     return "- "+(who?(who+": "):"")+tx;
   }).filter(Boolean);
-  if(lines.length) __fb="FINAL_BYTES (use as attributed facts; weave into 5W1H story, not standalone quotes):\n"+lines.join("\n");
+  if(lines.length) __fb="FINAL_BYTES (EDITORIAL USE: DO NOT copy-paste as transcript/quotes. Convert each byte into an attributed sentence inside the 5W1H narrative, e.g., \"X said...\", \"Y alleged...\". Keep paraphrase minimal; preserve meaning; mention who said it.):\n"+lines.join("\n");
 }catch(e){}
 
     // REQUIRED by server
@@ -173,7 +173,7 @@ function NG_setQuickSummary(text) {
     if (!q) return;
     var t = (text == null ? "" : String(text)).trim();
     // summary-only: keep it short
-    if (t.length > 320) t = t.slice(0, 320) + " …";
+    if (t.length > 320) t = t.slice(0, 320) + " �";
     q.textContent = t || "(no quick view)";
   } catch (e) {}
 }
@@ -200,7 +200,7 @@ function NG_setQuickSummary(text) {
         if (outj && outj.digi_pack && typeof outj.digi_pack === "object") outj = outj.digi_pack;
 
         function s(x){ return (x==null) ? "" : String(x); }
-        function clip(x,n){ x=s(x).trim(); return x.length>n ? (x.slice(0,n-1) + "…") : x; }
+        function clip(x,n){ x=s(x).trim(); return x.length>n ? (x.slice(0,n-1) + "�") : x; }
 
         var headline =
           outj.headline || outj.Headline || outj.title || outj.Title ||
@@ -300,7 +300,7 @@ btn.addEventListener("click", function(e){
       e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation();
 
       if (inFlight){
-        setBanner("[NG] Already running…");
+        setBanner("[NG] Already running�");
         return;
       }
       inFlight = true;
@@ -335,11 +335,11 @@ const __real = (localStorage.getItem("NG_REAL_MODE") || "0") === "1";
 if (payload && typeof payload === "object") {
   if (!__real) {
     payload.mode = "echo";
-    try { setBanner("Real Mode OFF → forced ECHO (no tokens).", "ok"); } catch(e){}
+    try { setBanner("Real Mode OFF ? forced ECHO (no tokens).", "ok"); } catch(e){}
   } else {
     // allow real mode; if mode missing, set a sensible default
     if (!payload.mode) payload.mode = "openai";
-    try { setBanner("Real Mode ON → allowed OPENAI (smoke test).", "ok"); } catch(e){}
+    try { setBanner("Real Mode ON ? allowed OPENAI (smoke test).", "ok"); } catch(e){}
   }
 }
 // === NG_REAL_MODE_GUARD_V2_END ===
@@ -543,7 +543,7 @@ try{
       const item = {
         v: 1,
         saved_at: new Date().toISOString(),
-        topic: (topic.length > 120 ? (topic.slice(0,120) + "…") : topic),
+        topic: (topic.length > 120 ? (topic.slice(0,120) + "�") : topic),
         mode: (dp.mode || parsed.mode || ""),
         received: (dp.received || parsed.received || null),
         output_json: dp
@@ -711,7 +711,7 @@ window.NG_renderDigiPackFormatted(__dp);}
         const msg = document.createElement("div");
         msg.className = "ng-card";
         msg.style.padding = "10px";
-        msg.innerHTML = "<b>mode: echo</b> मिला है — इस response में formatted outputs नहीं होंगे। REAL mode में Generate करें।";
+        msg.innerHTML = "<b>mode: echo</b> ???? ?? � ?? response ??? formatted outputs ???? ?????? REAL mode ??? Generate ?????";
         host.appendChild(msg);
         return true;
       }
@@ -719,7 +719,7 @@ window.NG_renderDigiPackFormatted(__dp);}
         const msg = document.createElement("div");
         msg.className = "ng-card";
         msg.style.padding = "10px";
-        msg.innerHTML = "<b>ECHO response</b>: अभी server ने सिर्फ आपका input (received) लौटाया है, DigiPack formats नहीं।<br>REAL mode में Generate करें ताकि web/video/youtube आदि outputs आएं।";
+        msg.innerHTML = "<b>ECHO response</b>: ??? server ?? ????? ???? input (received) ?????? ??, DigiPack formats ?????<br>REAL mode ??? Generate ???? ???? web/video/youtube ??? outputs ????";
         host.appendChild(msg);
         return true;
       }
@@ -803,6 +803,9 @@ if (String(f && f.key || "").toLowerCase() === "raw") return;
   window.__NG_RENDER_EXPORT_OK__ = true;
 })();
  /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
+
+
+
 
 
 
