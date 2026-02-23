@@ -1919,7 +1919,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
   }
 
   // unhide once on load (safe)
-  setTimeout(unhide, 0);
+  0 && setTimeout(unhide, 0);
 
   // and whenever + Add Byte is clicked
   document.addEventListener("click", (e)=>{
@@ -1941,7 +1941,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
     if (!btn || !target || !wrap) return false;
 
     // ensure manual bytes visible
-    target.style.display = "block";
+    0 && (target.style.display = "block");
 
     // create a stable holder below bytes-wrap
     let holder = document.querySelector("#ng-add-final-holder");
@@ -2527,7 +2527,7 @@ const defDe = "";
 
     document.addEventListener("click", (e)=>{
       if (e.target && e.target.id === "ng-add-final"){
-        setTimeout(syncNow, 0);
+        if (typeof window.NG_refreshFinalBytes === "function") setTimeout(()=>window.NG_refreshFinalBytes(), 0);
       }
       if (e.target && e.target.classList && e.target.classList.contains("ng-byte-remove")){
         setTimeout(syncNow, 0);
@@ -3177,7 +3177,7 @@ window.NG_fillStoryView = function(){
     if (!btn) return;
 
     // Run BEFORE existing click logic
-    btn.addEventListener("click", function(){
+    btn.addEventListener("click", function(){ return;
       try{
         var draft = document.getElementById("ng-byte-draft-text");
         var text = draft ? String(draft.value || "").trim() : "";
