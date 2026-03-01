@@ -2354,10 +2354,17 @@ border-radius:12px;"></pre>
       const r = await fetch("/api/bytes/latest", { cache: "no-store" });
       const data = await r.json().catch(()=>null);
 
-      const bytes =
+      let bytes =
         (data && Array.isArray(data.bytes) && data.bytes) ||
         (data && data.latest && Array.isArray(data.latest.bytes) && data.latest.bytes) ||
         [];
+
+      // LS fallback: Add-to-Bytes persists to NG_FINAL_BYTES_V1 (localStorage)
+      if (!bytes.length) { try {
+        const j = JSON.parse(localStorage.getItem("NG_FINAL_BYTES_V1") || "{}");
+        const it = Array.isArray(j.items) ? j.items : [];
+        bytes = it.map(x => ({ text: String(x?.text ?? x ?? "").trim() })).filter(o => o.text);
+      } catch(e){} }
 
       // Optional: also update any JSON textarea if present
       const ta =
