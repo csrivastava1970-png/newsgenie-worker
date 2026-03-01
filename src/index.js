@@ -507,11 +507,20 @@ if (!r.ok) {
           } catch (e) {}
         }
 
-        // Parse JSON if possible; otherwise keep raw output
-        let outJson = null;
-        let parsedOk = false;
-        try { outJson = JSON.parse(outText); parsedOk = true; } catch(e) { parsedOk = false; }
-
+       // Parse JSON if possible; otherwise keep raw output
+let outJson = null;
+let parsedOk = false;
+try { outJson = JSON.parse(outText); parsedOk = true; } catch(e) { parsedOk = false; }
+try{
+  // If model returned JSON as a string (double-encoded), unwrap it
+  if (parsedOk && typeof outJson === "string" && outJson.trim().startsWith("{")) { outJson = JSON.parse(outJson); }
+  // If parse failed, strip fences and extract first { ... last } anywhere
+  if (!parsedOk) {
+    const s = String(outText||"").replace(/```(?:json)?/ig,"").trim();
+    const a = s.indexOf("{"), b = s.lastIndexOf("}");
+    if (a >= 0 && b > a) { outJson = JSON.parse(s.slice(a, b+1)); parsedOk = true; }
+  }
+}catch(_){ parsedOk = false; }
         // Normalize to "old-gold" DIGI_PACK formats[] if the model returned the classic object schema
         // (web_article / video_script / youtube / reel / social / hook, etc.)
         try{
