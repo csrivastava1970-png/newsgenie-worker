@@ -656,6 +656,20 @@ if (!r.ok) {
           }
         }catch(e){}
         // === NG_WEB_YT_CLEAN_APPLY_AT_DPACK_V1_END ===
+        // NG_FLATTEN_FORMATS_TO_TOPLEVEL_V1 (2026-03-01): DP UI expects top-level fields, but model may return formats[]
+        try{
+          if (outJson && Array.isArray(outJson.formats)) for (const f of outJson.formats){
+            const k=String((f&&f.key)||"").toLowerCase(), t=(f&&typeof f.text==="string")?f.text:""; if(!t) continue;
+            if(k==="web" && !outJson.web_article) outJson.web_article={text:t};
+            else if(k==="video" && !outJson.video_script) outJson.video_script={text:t};
+            else if((k==="yt"||k==="youtube") && !outJson.youtube) outJson.youtube={text:t};
+            else if(k==="reel" && !outJson.reel) outJson.reel={text:t};
+            else if(k==="social" && !outJson.social) outJson.social={text:t};
+            else if(k==="headline" && !outJson.headline) outJson.headline=t;
+            else if(k==="summary" && !outJson.summary) outJson.summary=t;
+            else if(k==="hook" && (!outJson.hook||!String(outJson.hook).trim())) outJson.hook=t;
+          }
+        }catch(e){}
 return json(
           { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson },
           200,

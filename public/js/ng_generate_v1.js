@@ -73,11 +73,14 @@ function setBanner(t){
     var background = v("background");
 
     // REQUIRED by server
+    // NG_WEBARTICLE_GUARD_MININPUT_V1 (20260301): strengthen prompts when only TOPIC is provided
+var __thin = topic && !String(sources||"").trim() && !(what_happened || background), __guard = __thin ? "EDITORIAL_GUARD:\n- अपुष्ट दावे fact की तरह न लिखें; 'अपुष्ट रिपोर्ट/दावा; स्वतंत्र पुष्टि नहीं' लिखें (मौत/निधन/मृत्यु/देहांत सहित)।\n- न्यूज़रूम-स्टाइल; CTA/filler नहीं।\n- JSON/कोड/टोकन कभी न छापें।" : "";
     var story = [
       topic ? ("TOPIC: " + topic) : "",
       story_type ? ("STORY_TYPE: " + story_type) : "",
       platform ? ("PLATFORM: " + platform) : "",
       angle ? ("ANGLE: " + angle) : "",
+      __guard ? __guard : "",
       what_happened ? ("WHAT_HAPPENED:\n" + what_happened) : "",
       sources ? ("SOURCES:\n" + sources) : "",
       background ? ("BACKGROUND:\n" + background) : ""
@@ -378,6 +381,9 @@ try{
   }
 }catch(_){}
 // === NG_VISUALS_NOTES_TO_PAYLOAD_V1_END ===
+// === NG_FINAL_BYTES_TO_PAYLOAD_STORY_V1_START (20260301) ===
+try{ var __fj=JSON.parse(localStorage.getItem("NG_FINAL_BYTES_V1")||"{}"), __items=(__fj&&__fj.items)?__fj.items:[], __lines=(__items||[]).flatMap(x=>String((x&&x.text)||"").split(/\r?\n+/).map(s=>s.trim())).filter(Boolean); if(__lines.length){ payload=payload||{}; payload.received=payload.received||{}; var __fb="FINAL_BYTES_CONTEXT (weave into narrative; NO quotes unless verbatim in SOURCES/TRANSCRIPT; NEVER output quote-list like '\"...\": X का बयान'):\n- "+__lines.join("\n- "); payload.what_happened=(__fb+"\n\n"+String(payload.what_happened||"")).trim(); var __fb2=__fb.replace(/^FINAL_BYTES_CONTEXT/i,"FINAL_BYTES"); if(payload.received.story) payload.received.story=__fb2+"\n\n"+payload.received.story; else if(payload.story) payload.story=__fb2+"\n\n"+payload.story; } }catch(e){}
+// === NG_FINAL_BYTES_TO_PAYLOAD_STORY_V1_END ===
 
 
       fetch("/api/digi-pack", {
@@ -769,9 +775,8 @@ if (String(f && f.key || "").toLowerCase() === "raw") return;
       body.style.whiteSpace = "pre-wrap";
       body.style.margin = "10px 0 0 0";
       body.style.fontSize = "13px";
-      body.style.lineHeight = "1.35";
-      body.textContent = f.text || "";
-
+      body.style.lineHeight = "1.35";// NG_WEBARTICLE_SANITIZE_V1 (20260301): clean web_article display (no CTA/spill, hide "source not provided" lines)
+var __t=f.text||""; try{ if(/^(web|web_article|article|news_article)$/i.test(String(f&&f.key||""))){ __t=String(__t).replace(/BY SOURCE NOT PROVIDED[:\s]*/gi,"").replace(/^\s*स्रोत\s*:\s*स्रोत\s*उपलब्ध\s*नहीं\s*है[।\.\s]*$/gmi,"").replace(/^\s*`?source not provided`?\s*'?}?\s*,?\s*$/gmi,"").replace(/^\s*(हमें बताएं.*|हमारे चैनल.*|संपर्क करें.*|नई घटनाओं.*|बने रहें.*)\s*$/gmi,"").trim(); var __cut=__t.search(/}\s*,\s*"(?:video_script|youtube|reel|social|hook)"\s*:/i); if(__cut<0) __cut=__t.search(/,\s*"(?:video_script|youtube|reel|social|hook)"\s*:/i); if(__cut<0) __cut=__t.search(/["“”]?\s*video_script["“”]?\s*:/i); if(__cut>0) __t=__t.slice(0,__cut); __t=__t.replace(/\s*}}}[\s\S]*$/,""); var __s=(dp&&dp.received&&dp.received.sources)?String(dp.received.sources).trim():""; if(!__s) __t=__t.replace(/खाम(?:े|ने)ई\s*(?:की)?\s*(?:मौत|निधन|मृत्यु|देहांत)/gi,"खामनेई के निधन की अपुष्ट रिपोर्ट"); } }catch(e){} body.textContent=__t;
       card.appendChild(head);
       card.appendChild(body);
       host.appendChild(card);
