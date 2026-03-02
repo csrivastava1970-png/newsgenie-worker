@@ -1,4 +1,4 @@
-﻿/* === NG_GENERATE_PERM_SAFE_V1_START (20260201) ===
+/* === NG_GENERATE_PERM_SAFE_V1_START (20260201) ===
    - Enables #btnGenerate if disabled
    - Captures click (prevents reload/submit)
    - POST /api/digi-pack (single in-flight)
@@ -520,6 +520,18 @@ try{
     }
   }
 }catch(e){}
+  // NG_FORMATS_FALLBACK_FROM_FIELDS_V1 (2026-03-02): if model returns top-level fields but no formats, build formats for renderer
+  try{ if(__dp && typeof __dp==="object" && (!Array.isArray(__dp.formats) || !__dp.formats.length) ){
+    var __mk=function(k,t){ return { key:k, title:t, text: String(__dp[k]||"") }; };
+    var __fm=[];
+    if(__dp.web_article) __fm.push(__mk("web_article","Web Article"));
+    if(__dp.video_script) __fm.push(__mk("video_script","Video Script"));
+    if(__dp.youtube) __fm.push(__mk("youtube","YouTube"));
+    if(__dp.reel) __fm.push(__mk("reel","Reel / Shorts"));
+    if(__dp.social) __fm.push(__mk("social","Social"));
+    if(__dp.hook) __fm.push(__mk("hook","Hook"));
+    if(__fm.length) __dp.formats=__fm;
+  } }catch(e){}
 
   /* NG_DRAFT_LIBRARY_SAVE_DIGIPACK_V1_START (2026-02-14)
      Save ONLY structured DIGI_PACK outputs (output_json) into library. */
