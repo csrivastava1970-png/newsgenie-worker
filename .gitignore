@@ -77,3 +77,7 @@ public/_dump_*.txt
 tools/*_backup_before_*.ps1
 tools/ng_export_bridge/server_backup_before_*.js
 
+
+# Wrangler/Miniflare artifacts
+node_modules/.mf/
+

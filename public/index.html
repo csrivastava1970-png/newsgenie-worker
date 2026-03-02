@@ -1628,9 +1628,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
 
       <div id="ng-transcript-inbox-hint" style="margin-top:8px;font-size:12px;opacity:.75;">Paste Reverie JSON here (display_text or text). Load saves to localStorage.</div>
-      <textarea id="ta-transcript-json" rows="8"
-        style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:12px; line-height:1.35; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;"
-        placeholder="Paste JSON here..."></textarea>
+    <textarea id="ta-transcript-json" rows="8" style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:12px; line-height:1.35; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;" placeholder="Paste JSON here..."></textarea>
 
 
       <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
@@ -3644,7 +3642,7 @@ addList("Key Points", (j && j.key_points) ? j.key_points : ((j && j.web_article 
 
 add("YouTube Title", j.youtube_title || (j.youtube && j.youtube.title));
 add("YouTube Description", j.youtube_description || (j.youtube && j.youtube.description));
-add("YouTube Video Script", j.youtube_script || j.video_script || j.yt_script || (j.youtube && j.youtube.script));
+add("YouTube Video Script", j.youtube_script || j.video_script || j.yt_script || (j.youtube && (j.youtube.text || j.youtube.script)));
 add("YouTube VO (optional)", j.youtube_vo || (j.youtube && j.youtube.vo));
 // --- Reel / Shorts (short-form) ---
 try{

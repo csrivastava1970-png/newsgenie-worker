@@ -1,4 +1,4 @@
-﻿console.log("[NG_BOOT_SIG] src/index.js 20260119_162645");
+console.log("[NG_BOOT_SIG] src/index.js 20260119_162645");
 // src/index.js  (BOOT v3: echo + openai mode)
 // Root if (path === "/" && request.method === "GET") {   return new globalThis.Response("OK", { status: 200, headers: corsHeaders(request) }); } 
 // Uses OpenAI Responses API + Structured Outputs (json_schema)
@@ -264,10 +264,23 @@ if ((path === "/transcript/latest" || path === "/api/transcript/latest") && requ
       const body = await readJson(request);
       const promptObj = safeParsePrompt(body);
 
-      const mode = String(env?.GEN_MODE || "echo").toLowerCase();
+ // NG_DEFAULT_FORMATS_V1 (2026-03-03): prevent blank StoryView when UI omits formats
+try{
+  if (!promptObj.formats || !Array.isArray(promptObj.formats) || !promptObj.formats.length){
+    promptObj.formats = ["web","video","yt","reel","hook","social"];
+  }
+  if (!promptObj.language) promptObj.language = "hi";
+  const __s = String((promptObj.story || promptObj.what_happened || "")).trim();
+  if (!__s){
+    const __t = String(promptObj.topic || "").trim();
+    if (__t) promptObj.story = __t;
+  }
+}catch(e){}
+
+const mode = String(env?.GEN_MODE || "echo").toLowerCase();
       const model = String(env?.OPENAI_MODEL || "gpt-4o");
 
-      const max_output_tokens = Number(env?.MAX_OUTPUT_TOKENS || 2200);
+      const max_output_tokens = Number(env?.MAX_OUTPUT_TOKENS || 4500);
 
       // Echo mode (old behavior)
       if (mode !== "openai" && mode !== "real") {
@@ -388,8 +401,15 @@ OUTPUT REQUIREMENTS:
 - Language: ${lang} (default hi)
 - Return JSON only (schema enforced).
 - Provide multiple DigiPack formats for editorial use:
-  headline, summary, web_article, video_script, youtube_script, social_posts.`;
+  headline, summary, web_article, video_script, youtube, social_posts.
 
+YOUTUBE_SCRIPT_RULES (MANDATORY):
+- Put the full YouTube narration ONLY inside youtube.text (spoken anchor script).
+- Length target: 5 to 6 minutes (approx 650–900 Hindi words).
+- Tone: serious prime-time, factual, no slang, no overclaim.
+- Structure: Hook (0:00) -> Context -> 2–3 clear segments -> Implications -> Wrap + one viewer question.
+- Do NOT include hashtags, "LIKE/SHARE/SUBSCRIBE", "धन्यवाद", or channel promo lines inside youtube.text.
+- Do NOT include placeholder links (example.com) inside youtube.text.`;
         // Old-gold DigiPack schema (validator-safe): additionalProperties=false everywhere; nested objects minimal
         const schema = {
           type: "object",
@@ -424,7 +444,7 @@ OUTPUT REQUIREMENTS:
             youtube: {
               type: "object",
               additionalProperties: false,
-              properties: { text: { type: "string", minLength: 500 } },
+              properties: { text: { type: "string", minLength: 1500 } },
               required: ["text"]
             },
 
@@ -664,6 +684,7 @@ try{
             });
           }
         }catch(e){}
+        if (outJson && outJson.youtube && typeof outJson.youtube.text==="string" ){ outJson.youtube.text = NG_tameYouTube(outJson.youtube.text); }
         // === NG_WEB_YT_CLEAN_APPLY_AT_DPACK_V1_END ===
         // NG_FLATTEN_FORMATS_TO_TOPLEVEL_V1 (2026-03-01): DP UI expects top-level fields, but model may return formats[]
         try{
@@ -679,6 +700,8 @@ try{
             else if(k==="hook" && (!outJson.hook||!String(outJson.hook).trim())) outJson.hook=t;
           }
         }catch(e){}
+        // NG_FORCE_OUTPUT_TEXT_JSON_V1 (2026-03-03): keep UI stable; StoryView parses output_text
+        try{ if (outJson && typeof outJson === "object") outText = JSON.stringify(outJson); }catch(e){}
 return json(
           { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson },
           200,
