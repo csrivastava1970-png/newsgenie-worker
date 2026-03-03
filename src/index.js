@@ -350,6 +350,7 @@ const mode = String(env?.GEN_MODE || "echo").toLowerCase();
         // === NG_OPENAI_FETCH_RETRY_V2_END ===
       // REAL/OpenAI mode: call OpenAI Responses API and return output_json for StoryView
       try {
+        const __t0 = Date.now(); // NG_DIAG_TIMING_V1
         const lang = (promptObj && promptObj.language) ? String(promptObj.language) : "hi";
         const input =
 `TOPIC: ${promptObj.topic || ""}
@@ -482,6 +483,7 @@ YOUTUBE_SCRIPT_RULES (MANDATORY):
             format: {
               type: "json_schema",
               name: "newsgenie_digi_pack",
+               strict: true,
               schema
             }
           }
@@ -703,7 +705,7 @@ try{
         // NG_FORCE_OUTPUT_TEXT_JSON_V1 (2026-03-03): keep UI stable; StoryView parses output_text
         try{ if (outJson && typeof outJson === "object") outText = JSON.stringify(outJson); }catch(e){}
 return json(
-          { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson },
+          { ok:true, ts:new Date().toISOString(), path, mode, model, entry_marker: ENTRY_MARKER, has_openai_key, output_text: outText, output_json: outJson  },
           200,
           corsHeaders(request)
         );
@@ -832,5 +834,3 @@ function NG_tameYouTube(txt){
   return txt.replace(/\n{3,}/g, "\n\n").trim();
 }
 /* === NG_WEB_YT_CLEAN_V1_END === */
-
-
