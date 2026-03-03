@@ -80,4 +80,6 @@ tools/ng_export_bridge/server_backup_before_*.js
 
 # Wrangler/Miniflare artifacts
 node_modules/.mf/
+_resp_dpack*.json
 
+_ng_test_post*.json
