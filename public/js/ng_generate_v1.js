@@ -1,4 +1,4 @@
-/* === NG_GENERATE_PERM_SAFE_V1_START (20260201) ===
+﻿/* === NG_GENERATE_PERM_SAFE_V1_START (20260201) ===
    - Enables #btnGenerate if disabled
    - Captures click (prevents reload/submit)
    - POST /api/digi-pack (single in-flight)
@@ -74,7 +74,7 @@ function setBanner(t){
 
     // REQUIRED by server
     // NG_WEBARTICLE_GUARD_MININPUT_V1 (20260301): strengthen prompts when only TOPIC is provided
-var __thin = topic && !String(sources||"").trim() && !(what_happened || background), __guard = __thin ? "EDITORIAL_GUARD:\n- अपुष्ट दावे fact की तरह न लिखें; 'अपुष्ट रिपोर्ट/दावा; स्वतंत्र पुष्टि नहीं' लिखें (मौत/निधन/मृत्यु/देहांत सहित)।\n- न्यूज़रूम-स्टाइल; CTA/filler नहीं।\n- JSON/कोड/टोकन कभी न छापें।" : "";
+var __thin = topic && !String(sources||"").trim() && !(what_happened || background), __guard = __thin ? "EDITORIAL_GUARD:\n- à¤…à¤ªà¥à¤·à¥à¤Ÿ à¤¦à¤¾à¤µà¥‡ fact à¤•à¥€ à¤¤à¤°à¤¹ à¤¨ à¤²à¤¿à¤–à¥‡à¤‚; 'à¤…à¤ªà¥à¤·à¥à¤Ÿ à¤°à¤¿à¤ªà¥‹à¤°à¥à¤Ÿ/à¤¦à¤¾à¤µà¤¾; à¤¸à¥à¤µà¤¤à¤‚à¤¤à¥à¤° à¤ªà¥à¤·à¥à¤Ÿà¤¿ à¤¨à¤¹à¥€à¤‚' à¤²à¤¿à¤–à¥‡à¤‚ (à¤®à¥Œà¤¤/à¤¨à¤¿à¤§à¤¨/à¤®à¥ƒà¤¤à¥à¤¯à¥/à¤¦à¥‡à¤¹à¤¾à¤‚à¤¤ à¤¸à¤¹à¤¿à¤¤)à¥¤\n- à¤¨à¥à¤¯à¥‚à¤œà¤¼à¤°à¥‚à¤®-à¤¸à¥à¤Ÿà¤¾à¤‡à¤²; CTA/filler à¤¨à¤¹à¥€à¤‚à¥¤\n- JSON/à¤•à¥‹à¤¡/à¤Ÿà¥‹à¤•à¤¨ à¤•à¤­à¥€ à¤¨ à¤›à¤¾à¤ªà¥‡à¤‚à¥¤" : "";
     var story = [
       topic ? ("TOPIC: " + topic) : "",
       story_type ? ("STORY_TYPE: " + story_type) : "",
@@ -166,7 +166,7 @@ function NG_setQuickSummary(text) {
     if (!q) return;
     var t = (text == null ? "" : String(text)).trim();
     // summary-only: keep it short
-    if (t.length > 320) t = t.slice(0, 320) + " …";
+    if (t.length > 320) t = t.slice(0, 320) + " â€¦";
     q.textContent = t || "(no quick view)";
   } catch (e) {}
 }
@@ -193,7 +193,7 @@ function NG_setQuickSummary(text) {
         if (outj && outj.digi_pack && typeof outj.digi_pack === "object") outj = outj.digi_pack;
 
         function s(x){ return (x==null) ? "" : String(x); }
-        function clip(x,n){ x=s(x).trim(); return x.length>n ? (x.slice(0,n-1) + "…") : x; }
+        function clip(x,n){ x=s(x).trim(); return x.length>n ? (x.slice(0,n-1) + "â€¦") : x; }
 
         var headline =
           outj.headline || outj.Headline || outj.title || outj.Title ||
@@ -293,7 +293,7 @@ btn.addEventListener("click", function(e){
       e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation();
 
       if (inFlight){
-        setBanner("[NG] Already running…");
+        setBanner("[NG] Already runningâ€¦");
         return;
       }
       inFlight = true;
@@ -328,11 +328,11 @@ const __real = (localStorage.getItem("NG_REAL_MODE") || "0") === "1";
 if (payload && typeof payload === "object") {
   if (!__real) {
     payload.mode = "echo";
-    try { setBanner("Real Mode OFF → forced ECHO (no tokens).", "ok"); } catch(e){}
+    try { setBanner("Real Mode OFF â†’ forced ECHO (no tokens).", "ok"); } catch(e){}
   } else {
     // allow real mode; if mode missing, set a sensible default
     if (!payload.mode) payload.mode = "openai";
-    try { setBanner("Real Mode ON → allowed OPENAI (smoke test).", "ok"); } catch(e){}
+    try { setBanner("Real Mode ON â†’ allowed OPENAI (smoke test).", "ok"); } catch(e){}
   }
 }
 // === NG_REAL_MODE_GUARD_V2_END ===
@@ -382,7 +382,7 @@ try{
 }catch(_){}
 // === NG_VISUALS_NOTES_TO_PAYLOAD_V1_END ===
 // === NG_FINAL_BYTES_TO_PAYLOAD_STORY_V1_START (20260301) ===
-try{var __fj=JSON.parse(localStorage.getItem("NG_FINAL_BYTES_V1")||"{}"),__items=(__fj&&__fj.items)?__fj.items:[],__lines=(__items||[]).flatMap(x=>String((x&&x.text)||"").split(/\r?\n+/).map(s=>s.trim())).filter(Boolean).map(s=>String(s).replace(/^\s*\[([^\|\]]+)\|([^\]]+)\]\s*/,"$1 ($2): ").replace(/^\s*([^\:]{3,80})\s+(?:ने\s*)?(?:कहा|बताया|बोले)\s+कि\s+/,"$1: ").replace(/शैड/gi,"शेयर्ड").replace(/\bshad\b/gi,"shared"));if(__lines.length){payload=payload||{};payload.received=payload.received||{};var __sents=__lines.map(s=>{var m=s.match(/^\s*([^:\-–]{2,120})\s*[:\-–]\s*(.+)$/);var who=m?m[1].trim():"";var msg=m?m[2].trim():String(s||"").trim();if(!msg)return"";return who?(who+" ने कहा कि "+msg):("बैठक में कहा गया कि "+msg);}).filter(Boolean);var __fb="FINAL_BYTES_CONTEXT (USE ONLY INSIDE BODY as attributed sentences; NEVER in HEADLINE/DEK/SUBHEAD; NO quote-list; NO quotation marks unless verbatim in SOURCES/TRANSCRIPT):\n- "+__sents.join("\n- ");payload.what_happened=(__fb+"\n\n"+String(payload.what_happened||"")).trim();var __fb2=__fb.replace(/^FINAL_BYTES_CONTEXT/i,"FINAL_BYTES");if(payload.received.story)payload.received.story=__fb2+"\n\n"+payload.received.story;else if(payload.story)payload.story=__fb2+"\n\n"+payload.story;}}catch(e){}
+try{var __fj=JSON.parse(localStorage.getItem("NG_FINAL_BYTES_V1")||"{}"),__items=(__fj&&__fj.items)?__fj.items:[],__lines=(__items||[]).flatMap(x=>String((x&&x.text)||"").split(/\r?\n+/).map(s=>s.trim())).filter(Boolean).map(s=>String(s).replace(/^\s*\[([^\|\]]+)\|([^\]]+)\]\s*/,"$1 ($2): ").replace(/^\s*([^\:]{3,80})\s+(?:à¤¨à¥‡\s*)?(?:à¤•à¤¹à¤¾|à¤¬à¤¤à¤¾à¤¯à¤¾|à¤¬à¥‹à¤²à¥‡)\s+à¤•à¤¿\s+/,"$1: ").replace(/à¤¶à¥ˆà¤¡/gi,"à¤¶à¥‡à¤¯à¤°à¥à¤¡").replace(/\bshad\b/gi,"shared"));if(__lines.length){payload=payload||{};payload.received=payload.received||{};var __sents=__lines.map(s=>{var m=s.match(/^\s*([^:\-â€“]{2,120})\s*[:\-â€“]\s*(.+)$/);var who=m?m[1].trim():"";var msg=m?m[2].trim():String(s||"").trim();if(!msg)return"";return who?(who+" à¤¨à¥‡ à¤•à¤¹à¤¾ à¤•à¤¿ "+msg):("à¤¬à¥ˆà¤ à¤• à¤®à¥‡à¤‚ à¤•à¤¹à¤¾ à¤—à¤¯à¤¾ à¤•à¤¿ "+msg);}).filter(Boolean);var __fb="FINAL_BYTES_CONTEXT (USE ONLY INSIDE BODY as attributed sentences; NEVER in HEADLINE/DEK/SUBHEAD; NO quote-list; NO quotation marks unless verbatim in SOURCES/TRANSCRIPT):\n- "+__sents.join("\n- ");payload.what_happened=(__fb+"\n\n"+String(payload.what_happened||"")).trim();var __fb2=__fb.replace(/^FINAL_BYTES_CONTEXT/i,"FINAL_BYTES");if(payload.received.story)payload.received.story=__fb2+"\n\n"+payload.received.story;else if(payload.story)payload.story=__fb2+"\n\n"+payload.story;}}catch(e){}
 // === NG_FINAL_BYTES_TO_PAYLOAD_STORY_V1_END ===
 
 
@@ -504,6 +504,10 @@ try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputRead
             // Direct fill (NO toggle click)
             if (typeof window.NG_fillStoryView === "function") {
               try{ window.NG_fillStoryView(); }catch(e){}
+/* === NG_STORYVIEW_DEFERRED_FILL_V1_START (20260304) === */
+try{ setTimeout(function(){ try{ if(typeof window.NG_fillStoryView==="function") window.NG_fillStoryView(); }catch(e){} }, 60); }catch(e){}
+try{ requestAnimationFrame(function(){ try{ if(typeof window.NG_fillStoryView==="function") window.NG_fillStoryView(); }catch(e){} }); }catch(e){}
+/* === NG_STORYVIEW_DEFERRED_FILL_V1_END === */
 /* === NG_STORYVIEW_RENDER_AFTER_FILL_V1_START (20260205) === */
 try{
   // Prefer formatted cards in StoryView
@@ -551,7 +555,7 @@ try{
       const item = {
         v: 1,
         saved_at: new Date().toISOString(),
-        topic: (topic.length > 120 ? (topic.slice(0,120) + "…") : topic),
+        topic: (topic.length > 120 ? (topic.slice(0,120) + "â€¦") : topic),
         mode: (dp.mode || parsed.mode || ""),
         received: (dp.received || parsed.received || null),
         output_json: dp
@@ -719,7 +723,7 @@ window.NG_renderDigiPackFormatted(__dp);}
         const msg = document.createElement("div");
         msg.className = "ng-card";
         msg.style.padding = "10px";
-        msg.innerHTML = "<b>mode: echo</b> मिला है — इस response में formatted outputs नहीं होंगे। REAL mode में Generate करें।";
+        msg.innerHTML = "<b>mode: echo</b> à¤®à¤¿à¤²à¤¾ à¤¹à¥ˆ â€” à¤‡à¤¸ response à¤®à¥‡à¤‚ formatted outputs à¤¨à¤¹à¥€à¤‚ à¤¹à¥‹à¤‚à¤—à¥‡à¥¤ REAL mode à¤®à¥‡à¤‚ Generate à¤•à¤°à¥‡à¤‚à¥¤";
         host.appendChild(msg);
         return true;
       }
@@ -727,7 +731,7 @@ window.NG_renderDigiPackFormatted(__dp);}
         const msg = document.createElement("div");
         msg.className = "ng-card";
         msg.style.padding = "10px";
-        msg.innerHTML = "<b>ECHO response</b>: अभी server ने सिर्फ आपका input (received) लौटाया है, DigiPack formats नहीं।<br>REAL mode में Generate करें ताकि web/video/youtube आदि outputs आएं।";
+        msg.innerHTML = "<b>ECHO response</b>: à¤…à¤­à¥€ server à¤¨à¥‡ à¤¸à¤¿à¤°à¥à¤« à¤†à¤ªà¤•à¤¾ input (received) à¤²à¥Œà¤Ÿà¤¾à¤¯à¤¾ à¤¹à¥ˆ, DigiPack formats à¤¨à¤¹à¥€à¤‚à¥¤<br>REAL mode à¤®à¥‡à¤‚ Generate à¤•à¤°à¥‡à¤‚ à¤¤à¤¾à¤•à¤¿ web/video/youtube à¤†à¤¦à¤¿ outputs à¤†à¤à¤‚à¥¤";
         host.appendChild(msg);
         return true;
       }
@@ -788,7 +792,7 @@ if (String(f && f.key || "").toLowerCase() === "raw") return;
       body.style.margin = "10px 0 0 0";
       body.style.fontSize = "13px";
       body.style.lineHeight = "1.35";// NG_WEBARTICLE_SANITIZE_V1 (20260301): clean web_article display (no CTA/spill, hide "source not provided" lines)
-var __t=f.text||""; try{ if(/^(web|web_article|article|news_article)$/i.test(String(f&&f.key||""))){ __t=String(__t).replace(/BY SOURCE NOT PROVIDED[:\s]*/gi,"").replace(/^\s*स्रोत\s*:\s*स्रोत\s*उपलब्ध\s*नहीं\s*है[।\.\s]*$/gmi,"").replace(/^\s*`?source not provided`?\s*'?}?\s*,?\s*$/gmi,"").replace(/^\s*(हमें बताएं.*|हमारे चैनल.*|संपर्क करें.*|नई घटनाओं.*|बने रहें.*)\s*$/gmi,"").trim(); var __cut=__t.search(/}\s*,\s*"(?:video_script|youtube|reel|social|hook)"\s*:/i); if(__cut<0) __cut=__t.search(/,\s*"(?:video_script|youtube|reel|social|hook)"\s*:/i); if(__cut<0) __cut=__t.search(/["“”]?\s*video_script["“”]?\s*:/i); if(__cut>0) __t=__t.slice(0,__cut); __t=__t.replace(/\s*}}}[\s\S]*$/,""); var __s=(dp&&dp.received&&dp.received.sources)?String(dp.received.sources).trim():""; if(!__s) __t=__t.replace(/खाम(?:े|ने)ई\s*(?:की)?\s*(?:मौत|निधन|मृत्यु|देहांत)/gi,"खामनेई के निधन की अपुष्ट रिपोर्ट"); } }catch(e){} body.textContent=__t;
+var __t=f.text||""; try{ if(/^(web|web_article|article|news_article)$/i.test(String(f&&f.key||""))){ __t=String(__t).replace(/BY SOURCE NOT PROVIDED[:\s]*/gi,"").replace(/^\s*à¤¸à¥à¤°à¥‹à¤¤\s*:\s*à¤¸à¥à¤°à¥‹à¤¤\s*à¤‰à¤ªà¤²à¤¬à¥à¤§\s*à¤¨à¤¹à¥€à¤‚\s*à¤¹à¥ˆ[à¥¤\.\s]*$/gmi,"").replace(/^\s*`?source not provided`?\s*'?}?\s*,?\s*$/gmi,"").replace(/^\s*(à¤¹à¤®à¥‡à¤‚ à¤¬à¤¤à¤¾à¤à¤‚.*|à¤¹à¤®à¤¾à¤°à¥‡ à¤šà¥ˆà¤¨à¤².*|à¤¸à¤‚à¤ªà¤°à¥à¤• à¤•à¤°à¥‡à¤‚.*|à¤¨à¤ˆ à¤˜à¤Ÿà¤¨à¤¾à¤“à¤‚.*|à¤¬à¤¨à¥‡ à¤°à¤¹à¥‡à¤‚.*)\s*$/gmi,"").trim(); var __cut=__t.search(/}\s*,\s*"(?:video_script|youtube|reel|social|hook)"\s*:/i); if(__cut<0) __cut=__t.search(/,\s*"(?:video_script|youtube|reel|social|hook)"\s*:/i); if(__cut<0) __cut=__t.search(/["â€œâ€]?\s*video_script["â€œâ€]?\s*:/i); if(__cut>0) __t=__t.slice(0,__cut); __t=__t.replace(/\s*}}}[\s\S]*$/,""); var __s=(dp&&dp.received&&dp.received.sources)?String(dp.received.sources).trim():""; if(!__s) __t=__t.replace(/à¤–à¤¾à¤®(?:à¥‡|à¤¨à¥‡)à¤ˆ\s*(?:à¤•à¥€)?\s*(?:à¤®à¥Œà¤¤|à¤¨à¤¿à¤§à¤¨|à¤®à¥ƒà¤¤à¥à¤¯à¥|à¤¦à¥‡à¤¹à¤¾à¤‚à¤¤)/gi,"à¤–à¤¾à¤®à¤¨à¥‡à¤ˆ à¤•à¥‡ à¤¨à¤¿à¤§à¤¨ à¤•à¥€ à¤…à¤ªà¥à¤·à¥à¤Ÿ à¤°à¤¿à¤ªà¥‹à¤°à¥à¤Ÿ"); } }catch(e){} body.textContent=__t;
       card.appendChild(head);
       card.appendChild(body);
       host.appendChild(card);
@@ -810,6 +814,7 @@ var __t=f.text||""; try{ if(/^(web|web_article|article|news_article)$/i.test(Str
   window.__NG_RENDER_EXPORT_OK__ = true;
 })();
  /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
+
 
 
 

@@ -263,7 +263,9 @@ body[data-ng-outtab="json"] #ng-json-panel-wrap,
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_START (20260206) === */
 #ng-storyview-formatted { display:none !important; }
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_END === */
-#ng-storyview-out{display:none!important;}
+/* === NG_STORYVIEW_OUT_UNHIDE_V1_START (20260304) === */
+#ng-storyview-out{display:block !important;}
+/* === NG_STORYVIEW_OUT_UNHIDE_V1_END === */
 /* NG_APP_LOOK_V2_START (2026-02-16) */
 /* Indigo minimal "app" polish — CSS only, UI-safe. */
 
@@ -3051,9 +3053,49 @@ window.NG_fillStoryView = function(){
       }
 
       if (!arr && j && j.received && Array.isArray(j.received.formats)) arr = j.received.formats;
-    }catch(e){ arr = null; }
+    }catch(e){ arr = null; }    if (!arr || !arr.length){
+      // === NG_STORYVIEW_SCHEMA_FALLBACK_V1_START (20260304) ===
+// Hardened: never blank; also render key_points[]; show error/snippet on failure
+try{
+  var oj = (j && j.output_json) ? j.output_json : (j && j.received ? j.received : j);
+  if (oj && typeof oj === "object"){
+    var blocks2 = [];
+    var topic2 = oj.topic || j.topic || (j.received && j.received.topic) || "";
+    if (topic2) blocks2.push("# " + String(topic2).trim());
 
-    if (!arr || !arr.length){
+    var hl = oj.headline || ""; if (hl) blocks2.push("## Headline\n" + String(hl).trim());
+    var sm = oj.summary  || ""; if (sm) blocks2.push("## Summary\n"  + String(sm).trim());
+
+    var kp = oj.key_points || oj.keyPoints || [];
+    if (Array.isArray(kp) && kp.length){
+      var kpl = kp.map(function(x){ x=String(x||"").trim(); return x?("- "+x):""; }).filter(Boolean).join("\n");
+      if (kpl) blocks2.push("## Key Points\n" + kpl);
+    }
+
+    var wa = (oj.web_article && (oj.web_article.text || "")) || "";
+    if (wa) blocks2.push("## Web Article\n" + String(wa).trim());
+    var vs = (oj.video_script && (oj.video_script.text || "")) || "";
+    if (vs) blocks2.push("## Video Script\n" + String(vs).trim());
+    var yt = (oj.youtube && (oj.youtube.text || "")) || "";
+    if (yt) blocks2.push("## YouTube\n" + String(yt).trim());
+    var rl = (oj.reel && (oj.reel.text || "")) || "";
+    if (rl) blocks2.push("## Reel\n" + String(rl).trim());
+    var hk = oj.hook || ""; if (hk) blocks2.push("## Hook\n" + String(hk).trim());
+    var sc = (oj.social && (oj.social.text || "")) || "";
+    if (sc) blocks2.push("## Social\n" + String(sc).trim());
+
+    if (blocks2.length){
+      out.textContent = blocks2.join("\n\n");
+      return;
+    }
+  }
+}catch(e2){
+  try{
+    out.textContent = "(StoryView fallback error) " + (e2 && (e2.message||e2) ? (e2.message||String(e2)) : "unknown") + "\n\nRAW:\n" + String(txt||"").slice(0,1200);
+  }catch(_e2){}
+  return;
+}
+// === NG_STORYVIEW_SCHEMA_FALLBACK_V1_END ===
       out.textContent = "(StoryView: formats[] not found in response.)";
       return;
     }
@@ -4086,6 +4128,11 @@ label{
 
 
 </html>
+
+
+
+
+
 
 
 
