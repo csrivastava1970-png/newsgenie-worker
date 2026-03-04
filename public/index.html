@@ -3767,7 +3767,31 @@ try{
         }
       }catch(e){}
       if (out) out.textContent = text;
-      if (fmt) fmt.textContent = ""; // keep formatted empty for now (later we can build cards)
+      /* === NG_STORYVIEW_FMT_DO_NOT_CLEAR_V1_START (20260304) === */
+
+      try{
+
+        // Do NOT clear formatted cards here; it causes first-click blank due to race.
+
+        // If formatted renderer exists, prefer it and leave fmt DOM intact.
+
+        if (fmt && window.NG_renderDigiPackFormatted && window.__NG_LAST_DIGIPACK) {
+
+          var __dp = window.__NG_LAST_DIGIPACK;
+
+          try{ if (__dp && __dp.output_json && typeof __dp.output_json === "object") __dp = __dp.output_json; }catch(e){}
+
+          try{ window.NG_renderDigiPackFormatted(__dp); }catch(e){}
+
+          if (out) { out.textContent = ""; out.innerHTML = ""; }
+
+          return;
+
+        }
+
+      }catch(e){}
+
+      /* === NG_STORYVIEW_FMT_DO_NOT_CLEAR_V1_END === */
     } catch(e) {}
   }
 
