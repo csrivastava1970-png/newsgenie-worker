@@ -468,6 +468,35 @@ try {
 
 
           if (pre) pre.textContent = (parsed && parsed.output_json) ? JSON.stringify(parsed.output_json, null, 2) : JSON.stringify(parsed, null, 2);
+// === NG_STORYVIEW_POST_GENERATE_RENDER_V1_START (20260306) ===
+try {
+  var dpCanonical = (parsed && parsed.output_json && typeof parsed.output_json === "object") ? parsed.output_json : parsed;
+
+  // Prefer formatted single-surface render
+  if (typeof window.NG_renderDigiPackFormatted === "function") {
+    window.NG_renderDigiPackFormatted(dpCanonical);
+
+    // Guarantee non-blank: if no cards produced, inject fallback card into formatted host
+    var fmtHost = document.getElementById("ng-storyview-formatted");
+    if (fmtHost && !fmtHost.querySelector(".ng-card")) {
+      var fallback = document.createElement("section");
+      fallback.className = "ng-card";
+      fallback.innerHTML =
+        "<div style=\"font-weight:700;margin-bottom:8px\">Story Output</div>" +
+        "<pre style=\"white-space:pre-wrap;margin:0\"></pre>";
+      fallback.querySelector("pre").textContent =
+        JSON.stringify(dpCanonical || parsed || {}, null, 2) || "(empty output)";
+
+      // safer: wipe only if truly empty, otherwise append
+      if (!fmtHost.firstElementChild) fmtHost.replaceChildren(fallback);
+      else fmtHost.appendChild(fallback);
+    }
+  } else if (typeof window.NG_fillStoryView === "function") {
+    // last-resort legacy hook
+    window.NG_fillStoryView();
+  }
+} catch (e) {}
+// === NG_STORYVIEW_POST_GENERATE_RENDER_V1_END ===
 
           try{
   const d = document.getElementById("ng-quick-details");
