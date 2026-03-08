@@ -203,12 +203,7 @@ html[data-ng-std-ui="simple"] #ng-response-panel { display:none !important; }
 /* Make outtab selector robust: works if attribute is on <html> OR <body> OR any root wrapper */
 html[data-ng-outtab], body[data-ng-outtab], [data-ng-outtab] {}
 
-/* Ensure the response wrapper is allowed to show when any outtab is active */
-html[data-ng-outtab] #ng-response-panel-wrap,
-body[data-ng-outtab] #ng-response-panel-wrap,
-[data-ng-outtab] #ng-response-panel-wrap{
-  display: block !important;
-}
+
 
 /* Show ONLY the selected output panel (Story/Quick/Log/JSON) */
 html[data-ng-outtab="story"] #ng-storyview,
@@ -233,7 +228,9 @@ body[data-ng-outtab="json"] #ng-json-panel,
 }
 
 /* === Height fix so Story panel cannot collapse === */
-#ng-storyview{
+html[data-ng-outtab="story"] #ng-storyview,
+body[data-ng-outtab="story"] #ng-storyview,
+[data-ng-outtab="story"] #ng-storyview{
   display:flex !important;
   flex-direction:column !important;
   min-height:360px !important;
@@ -265,6 +262,7 @@ body[data-ng-outtab="json"] #ng-json-panel-wrap,
 /* === NG_HIDE_EMPTY_STORY_FORMATTED_V1_END === */
 /* === NG_STORYVIEW_OUT_UNHIDE_V1_START (20260304) === */
 #ng-storyview-out{display:block !important;}
+#ng-storyview-out:empty{display:none !important;}
 /* === NG_STORYVIEW_OUT_UNHIDE_V1_END === */
 /* NG_APP_LOOK_V2_START (2026-02-16) */
 /* Indigo minimal "app" polish — CSS only, UI-safe. */
@@ -1281,7 +1279,7 @@ html[data-ng-outtab="raw"] #ng-log-panel-wrap{ display:none !important; }
 
 <!-- NG_STORYVIEW_FORCE_SHOW_V1_START (20260130) -->
 <style>
-  body.ng-show-storyview #ng-storyview{ display:block !important; }
+  html[data-ng-outtab="story"] body.ng-show-storyview #ng-storyview{ display:block !important; }
 
 /* NG_BESTPRACTICE_BYTES_CONTROLS_V1 (20260203) */
 #ng-bytes-controls-row{
@@ -3128,7 +3126,7 @@ try{
       if (sv) sv.style.display = (t === "story") ? "block" : "none";
       if (qw) qw.style.display = (t === "quick") ? "block" : "none";
       if (lw) lw.style.display = (t === "log") ? "block" : "none";
-      if (rw) rw.style.display = (t === "raw") ? "block" : "none";
+      if (rw) rw.style.display = (t === "raw" || t === "json") ? "block" : "none";
     }catch(e){}
     // Sync Raw JSON panel with RAW tab
     try{
@@ -3154,7 +3152,7 @@ try{
     if (bStory) bStory.addEventListener("click", function(){ setTab("story"); });
     if (bQuick) bQuick.addEventListener("click", function(){ setTab("quick"); });
     if (bLog)   bLog.addEventListener("click", function(){ setTab("log"); });
-    if (bRaw)   bRaw.addEventListener("click", function(){ setTab("raw"); });
+    if (bRaw)   bRaw.addEventListener("click", function(){ setTab("json"); });
 
     // default: disable optional tabs until first output exists
     try{ NG_setOutputReady(false); }catch(e){}
@@ -3848,11 +3846,15 @@ function renderJsonTab() {
         return;
       }
 
-      var pretty = "";
-      try{
-        var j = JSON.parse(txt);
-        pretty = JSON.stringify(j, null, 2);
-      }catch(e){
+     var pretty = "";
+try{
+  var j = JSON.parse(txt);
+  var jDisplay = JSON.parse(JSON.stringify(j));
+  if (jDisplay && typeof jDisplay === "object" && Array.isArray(jDisplay.formats)) {
+    delete jDisplay.formats;
+  }
+  pretty = JSON.stringify(jDisplay, null, 2);
+}catch(e){
         var m = txt.match(/(\{[\s\S]*\}|\[[\s\S]*\])\s*$/);
         if (m){
           try{

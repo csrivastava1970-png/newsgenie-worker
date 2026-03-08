@@ -530,13 +530,7 @@ try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputRead
             var panel = document.getElementById("ng-storyview");
             if (panel) panel.style.display = "block";
 
-            // Direct fill (NO toggle click)
-            if (typeof window.NG_fillStoryView === "function") {
-              try{ window.NG_fillStoryView(); }catch(e){}
-/* === NG_STORYVIEW_DEFERRED_FILL_V1_START (20260304) === */
-try{ setTimeout(function(){ try{ if(typeof window.NG_fillStoryView==="function") window.NG_fillStoryView(); }catch(e){} }, 60); }catch(e){}
-try{ requestAnimationFrame(function(){ try{ if(typeof window.NG_fillStoryView==="function") window.NG_fillStoryView(); }catch(e){} }); }catch(e){}
-/* === NG_STORYVIEW_DEFERRED_FILL_V1_END === */
+                        // Story fill is already handled by setTab("story"); avoid duplicate direct/deferred fills here.
 /* === NG_STORYVIEW_RENDER_AFTER_FILL_V1_START (20260205) === */
 try{
   // Prefer formatted cards in StoryView
@@ -618,14 +612,7 @@ window.NG_renderDigiPackFormatted(__dp);}
 
 
 
-            } else {
-              // fallback: at least mirror ngResponse into storyview-out
-              var out = document.getElementById("ng-storyview-out");
-              var resp = document.getElementById("ngResponse");
-              if (out && resp) {
-                out.textContent = (resp.textContent || "").trim() || "(no response yet)";
-              }
-            }
+            
 
             // scroll into view
             setTimeout(function(){
