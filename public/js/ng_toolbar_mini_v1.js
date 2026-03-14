@@ -628,6 +628,22 @@ const rows = revPairs.map(([it, realIndex]) => {
 
       const ts = it.ts || it.saved_at || "";
       const topic = it.topic || (it.received && it.received.topic) || it.title || "(no topic)";
+
+      let preview = "";
+      try {
+        const oj = it && it.output_json ? it.output_json : null;
+        const wa = oj && oj.web_article;
+        preview =
+          (wa && typeof wa === "object" && (wa.text || wa.content || wa.body)) ||
+          (typeof wa === "string" ? wa : "") ||
+          (it && it.received && it.received.story) ||
+          (oj && (oj.summary || oj.dek || oj.subhead)) ||
+          "";
+      } catch(e) {}
+
+      preview = String(preview || "").replace(/\s+/g, " ").trim();
+      if (preview.length > 220) preview = preview.slice(0, 220) + "...";
+
       return `<div data-ng-lib-row="1" data-ng-lib-idx="${realIndex}" style="display:flex;align-items:flex-start;gap:10px;padding:8px 6px;border-bottom:1px solid rgba(0,0,0,.06);">
 
         <div style="display:flex;flex-direction:column;gap:6px;">
@@ -636,9 +652,10 @@ const rows = revPairs.map(([it, realIndex]) => {
 <button type="button" data-ng-lib="del" style="padding:4px 10px;border-radius:10px;opacity:.85;">Delete</button>
 
         </div>
-        <div style="flex:1;">
+        <div style="flex:1;min-width:0;">
           <div style="font-weight:800;">${esc(topic)}</div>
-          <div style="font-size:12px;opacity:.75;">${esc(ts)}</div>
+          ${preview ? `<div style="margin-top:4px;font-size:12px;line-height:1.35;opacity:.9;">${esc(preview)}</div>` : ""}
+          <div style="margin-top:4px;font-size:12px;opacity:.75;">${esc(ts)}</div>
         </div>
       </div>`;
     });
@@ -693,6 +710,10 @@ if (act && sidx != null){
           const fmt = document.getElementById("ng-storyview-formatted");
           if (fmt) fmt.style.display = "block";
           try { document.documentElement.setAttribute("data-ng-std-ui", "advanced"); } catch(e) {}
+          try {
+            const det = document.getElementById("ng-draft-lib-details");
+            if (det) det.open = false;
+          } catch(e) {}
         } catch(e) {}
 
         try {
