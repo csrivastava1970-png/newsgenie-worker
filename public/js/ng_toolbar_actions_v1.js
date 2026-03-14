@@ -64,6 +64,15 @@ try{ NG_wireLocalExportUI(); }catch(e){}
     return false;
   }
 
+  function NG_toggleExportPanel(){
+    var p = NG_$("ngLocalExportPanel");
+    if (!p) return false;
+    var open = p.style.display !== 'none';
+    p.style.display = open ? 'none' : 'block';
+    if (!open) { try{ p.scrollIntoView({ behavior:'smooth', block:'start' }); }catch(e){} }
+    return !open;
+  }
+
   function NG_showExport(msg){
     var p = NG_$("ngLocalExportPanel");
     var m = NG_$("ngLocalExportMsg");
@@ -223,7 +232,7 @@ try{
 
     if (b && !b.__ngWired){
       b.__ngWired = true;
-      b.addEventListener("click", function(ev){ try{ev.preventDefault();}catch(e){} window.NG_localExport(); });
+      b.addEventListener("click", function(ev){ try{ev.preventDefault();}catch(e){} NG_toggleExportPanel(); });
     }
 
     var c = NG_$("ngLocalExportCopyPath");
@@ -322,6 +331,4 @@ try{
 })();
 
 /* === NG_LOCAL_EXPORT_WIRE_V1_END (20260219) === */
-
-
 
