@@ -533,13 +533,13 @@ try{ if (typeof window.NG_setOutputReady === "function") window.NG_setOutputRead
                         // Story fill is already handled by setTab("story"); avoid duplicate direct/deferred fills here.
 /* === NG_STORYVIEW_RENDER_AFTER_FILL_V1_START (20260205) === */
 try{
-  // Prefer formatted cards in StoryView
-  if (window.NG_renderDigiPackFormatted && typeof window.NG_renderDigiPackFormatted === "function") {
+  // Story tab is already rendered above via dpCanonical + observer path.
+  // Keep only downstream side-effects here; avoid duplicate formatted render/fallback injection.
+  if (true) {
     var __dp = parsed;
 try{
   if (parsed && parsed.output_json && typeof parsed.output_json === "object") __dp = parsed.output_json;
   else if (parsed && typeof parsed.output_text === "string") {
-    // if output_text contains JSON, parse it
     var __t = parsed.output_text.trim();
     if (__t && (__t[0] === "{" || __t[0] === "[")) {
       var __p = NG_tryParseJsonWithFixes(__t);
@@ -547,18 +547,6 @@ try{
     }
   }
 }catch(e){}
-  // NG_FORMATS_FALLBACK_FROM_FIELDS_V1 (2026-03-02): if model returns top-level fields but no formats, build formats for renderer
-  try{ if(__dp && typeof __dp==="object" && (!Array.isArray(__dp.formats) || !__dp.formats.length) ){
-    var __mk=function(k,t){ return { key:k, title:t, text: String(__dp[k]||"") }; };
-    var __fm=[];
-    if(__dp.web_article) __fm.push(__mk("web_article","Web Article"));
-    if(__dp.video_script) __fm.push(__mk("video_script","Video Script"));
-    if(__dp.youtube) __fm.push(__mk("youtube","YouTube"));
-    if(__dp.reel) __fm.push(__mk("reel","Reel / Shorts"));
-    if(__dp.social) __fm.push(__mk("social","Social"));
-    if(__dp.hook) __fm.push(__mk("hook","Hook"));
-    if(__fm.length) __dp.formats=__fm;
-  } }catch(e){}
 
   /* NG_DRAFT_LIBRARY_SAVE_DIGIPACK_V1_START (2026-02-14)
      Save ONLY structured DIGI_PACK outputs (output_json) into library. */
@@ -606,7 +594,7 @@ try{
   } catch(e) {}
   /* NG_DRAFT_LIBRARY_SAVE_DIGIPACK_V1_END */
 
-window.NG_renderDigiPackFormatted(__dp);}
+/* duplicate formatted render disabled to prevent intermittent spillover */ }
 }catch(e){}
 /* === NG_STORYVIEW_RENDER_AFTER_FILL_V1_END (20260205) === */
 
@@ -830,6 +818,7 @@ var __t=f.text||""; try{ if(/^(web|web_article|article|news_article)$/i.test(Str
   window.__NG_RENDER_EXPORT_OK__ = true;
 })();
  /* === NG_STORYVIEW_FORMATTED_RENDER_TOPLEVEL_V1_END (20260205) === */
+
 
 
 
