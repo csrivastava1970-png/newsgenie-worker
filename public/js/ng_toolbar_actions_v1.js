@@ -293,6 +293,39 @@ if (pl && !pl.__ngWired){
     }
   });
 }
+var del = NG_$("ngLocalExportDelete");
+if (del && !del.__ngWired){
+  del.__ngWired = true;
+  del.addEventListener("click", async function(){
+    try{
+      var p = String(window.__NG_LAST_EXPORT_PATH || "");
+      if (!p) return NG_showExport("No export file yet.");
+
+      var r = await fetch("http://127.0.0.1:32145/delete-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: p })
+      });
+
+      var j = await r.json().catch(function(){ return {}; });
+      if (!(j && j.ok)) return NG_showExport("Delete failed:\n" + (j.message || r.status));
+
+      window.__NG_LAST_EXPORT_PATH = "";
+      try{ localStorage.removeItem("NG_LAST_EXPORT_PATH"); }catch(e){}
+
+      try{
+        var row = NG_$("ngLastExportRow");
+        var txt = NG_$("ngLastExportPath");
+        if (txt) txt.textContent = "";
+        if (row) row.style.display = "none";
+      }catch(e){}
+
+      NG_showExport("Deleted file:\n" + (j.path || p));
+    }catch(e){
+      NG_showExport("Delete error:\n" + String(e && (e.message||e) || e));
+    }
+  });
+}
 
 
   // Run once DOM ready

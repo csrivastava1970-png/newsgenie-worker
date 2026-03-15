@@ -325,6 +325,36 @@ if (isMp4 && fs.existsSync(vlc)) {
   }
 }
 // === NG_OPEN_FILE_V1_END ===
+// === NG_DELETE_FILE_V1_START (20260315) ===
+if (req.url === "/delete-file" && req.method === "POST"){
+  if (!requireToken(req)) return send(res, 401, { ok:false, error:"unauthorized" });
+
+  try{
+    const body = await readJson(req);
+    const p0 = body && body.path;
+
+    if (!isNonEmptyString(p0)) return send(res, 400, { ok:false, error:"bad_request", message:"Missing/invalid path" });
+
+    const abs = path.resolve(p0);
+    if (!fs.existsSync(abs)) return send(res, 400, { ok:false, error:"not_found", message:"File not found", path: abs });
+
+    const stat = fs.statSync(abs);
+    if (!stat.isFile()) return send(res, 400, { ok:false, error:"bad_request", message:"Path is not a file", path: abs });
+
+    const exportRoot = path.resolve(process.env.NG_EXPORT_OUTDIR || "C:\\Cnewsgenie_demo\\exports");
+    const rel = path.relative(exportRoot, abs);
+    if (rel.startsWith("..") || path.isAbsolute(rel)) {
+      return send(res, 400, { ok:false, error:"bad_request", message:"Delete allowed only inside export folder", path: abs });
+    }
+
+    fs.unlinkSync(abs);
+    return send(res, 200, { ok:true, path: abs });
+  }catch(e){
+    const msg = String(e && e.message ? e.message : e);
+    return send(res, 500, { ok:false, error:"delete_file_failed", message: msg });
+  }
+}
+// === NG_DELETE_FILE_V1_END ===
 
 return send(res, 404, { ok:false, error:"not_found" });
 
